@@ -42,17 +42,18 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
     }
 
     setIsTesting(true);
-    const isConnected = await testApiConnection(apiKey.trim());
-    setIsValid(isConnected);
+    const result = await testApiConnection(apiKey.trim());
     setIsTesting(false);
 
-    if (isConnected) {
+    if (result.ok) {
+      setIsValid(true);
       localStorage.setItem("gemini_api_key", apiKey.trim());
       onApiKeyChange?.(apiKey.trim());
       toast.success("API Key tersimpan!");
       onOpenChange(false);
     } else {
-      toast.error("API Key tidak valid");
+      setIsValid(false);
+      toast.error(result.message);
     }
   };
 
