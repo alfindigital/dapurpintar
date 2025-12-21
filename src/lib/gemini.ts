@@ -112,8 +112,25 @@ export async function generateRecipes(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || "Gagal mendapatkan resep dari AI");
+    let message = "Gagal mendapatkan resep dari AI";
+    try {
+      const error = await response.json();
+      message = error?.error?.message || message;
+    } catch {
+      // ignore
+    }
+
+    if (response.status === 429) {
+      throw new Error(
+        "Kuota Gemini API habis / billing belum aktif. Cek AI Studio > Usage & Billing, atau coba lagi nanti."
+      );
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("API key ditolak. Pastikan key benar dan Gemini API aktif.");
+    }
+
+    throw new Error(message);
   }
 
   const data = await response.json();
@@ -131,7 +148,16 @@ export async function generateRecipes(
   }
 }
 
-export async function testApiConnection(apiKey: string): Promise<boolean> {
+export type ApiConnectionTestResult =
+  | { ok: true; message?: string }
+  | {
+      ok: false;
+      status?: number;
+      message: string;
+      reason: "quota" | "auth" | "network" | "other";
+    };
+
+export async function testApiConnection(apiKey: string): Promise<ApiConnectionTestResult> {
   try {
     const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: "POST",
@@ -141,8 +167,47 @@ export async function testApiConnection(apiKey: string): Promise<boolean> {
         generationConfig: { maxOutputTokens: 10 },
       }),
     });
-    return response.ok;
+
+    if (response.ok) return { ok: true };
+
+    let apiMessage = "";
+    try {
+      const error = await response.json();
+      apiMessage = error?.error?.message || "";
+    } catch {
+      // ignore
+    }
+
+    if (response.status === 429) {
+      return {
+        ok: false,
+        status: 429,
+        reason: "quota",
+        message:
+          "API key terdeteksi, tapi kuota/billing Gemini API tidak tersedia (429). Buka AI Studio > Usage & Billing, atau tunggu dan coba lagi.",
+      };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        ok: false,
+        status: response.status,
+        reason: "auth",
+        message: "API key ditolak. Pastikan key benar dan Gemini API aktif di project Anda.",
+      };
+    }
+
+    return {
+      ok: false,
+      status: response.status,
+      reason: "other",
+      message: apiMessage || "Gagal menguji koneksi ke Gemini API.",
+    };
   } catch {
-    return false;
+    return {
+      ok: false,
+      reason: "network",
+      message: "Tidak bisa terhubung ke Gemini API. Cek koneksi internet dan coba lagi.",
+    };
   }
 }
