@@ -16,39 +16,35 @@ export function Header({ onSettingsClick }: HeaderProps) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b glass-effect">
-      <div className="container flex h-16 items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground shadow-lg">
-            <ChefHat className="h-6 w-6" />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+      <div className="container flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+            <ChefHat className="h-5 w-5" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold gradient-text">Dapur AI</h1>
-            <p className="text-xs text-muted-foreground">Asisten Masak Cerdas</p>
-          </div>
+          <h1 className="text-lg font-bold text-foreground">DapurPintar</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => mounted && setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
+            className="h-9 w-9"
           >
             {mounted && theme === "dark" ? (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-4 w-4" />
             ) : (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-4 w-4" />
             )}
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon"
             onClick={onSettingsClick}
-            className="gap-2"
+            className="h-9 w-9"
           >
             <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Pengaturan</span>
           </Button>
         </div>
       </div>
