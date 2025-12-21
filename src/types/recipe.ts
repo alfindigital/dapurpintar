@@ -1,3 +1,10 @@
+export interface Nutrition {
+  kalori: number;
+  protein: number;
+  karbohidrat: number;
+  lemak: number;
+}
+
 export interface Recipe {
   id: string;
   nama: string;
@@ -10,6 +17,7 @@ export interface Recipe {
   tips?: string;
   masakan?: string;
   tags?: string[];
+  nutrisi?: Nutrition;
 }
 
 export interface Ingredient {

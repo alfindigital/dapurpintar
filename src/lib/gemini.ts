@@ -48,7 +48,13 @@ Format respons HARUS dalam JSON valid dengan struktur:
       ],
       "langkah": ["Langkah 1 dengan detail", "Langkah 2"],
       "tips": "Tips memasak yang berguna",
-      "tags": ["tag1", "tag2"]
+      "tags": ["tag1", "tag2"],
+      "nutrisi": {
+        "kalori": 350,
+        "protein": 25,
+        "karbohidrat": 30,
+        "lemak": 12
+      }
     }
   ],
   "tips": ["tips umum memasak 1", "tips 2"],
@@ -59,6 +65,7 @@ PENTING:
 - Gunakan Bahasa Indonesia yang mudah dipahami
 - Berikan takaran yang jelas (sdm, sdt, gram, ml)
 - Langkah harus detail dan mudah diikuti
+- WAJIB sertakan estimasi nutrisi per porsi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
 - Berikan HANYA JSON tanpa markdown atau teks tambahan`;
 };
 
