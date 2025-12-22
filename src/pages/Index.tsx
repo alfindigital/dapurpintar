@@ -6,21 +6,27 @@ import { PreferencesSection } from "@/components/PreferencesSection";
 import { RecipeCards } from "@/components/RecipeCards";
 import { InfoAccordion } from "@/components/InfoAccordion";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { HistoryDialog } from "@/components/HistoryDialog";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences } from "@/types/recipe";
+import { useRecipeHistory } from "@/hooks/useRecipeHistory";
 import { toast } from "sonner";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [recipeData, setRecipeData] = useState<RecipeResponse | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [lastQuery, setLastQuery] = useState("");
   const [preferences, setPreferences] = useState<Preferences>({
     dietary: [],
     cuisine: [],
     difficulty: "mudah",
     time: "30",
   });
+
+  const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openrouter_api_key");
@@ -47,10 +53,12 @@ const Index = () => {
 
     setIsLoading(true);
     setRecipeData(null);
+    setLastQuery(data.text || "");
 
     try {
       const result = await generateRecipes(data, apiKey, preferences);
       setRecipeData(result);
+      saveToHistory(result, data.text);
       toast.success(`${result.recipes?.length || 0} resep ditemukan`);
     } catch (error) {
       console.error("Error:", error);
@@ -60,9 +68,17 @@ const Index = () => {
     }
   };
 
+  const handleSelectHistory = (data: RecipeResponse) => {
+    setRecipeData(data);
+    toast.success("Resep dari riwayat ditampilkan");
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header onSettingsClick={() => setSettingsOpen(true)} />
+      <Header 
+        onSettingsClick={() => setSettingsOpen(true)} 
+        onHistoryClick={() => setHistoryOpen(true)}
+      />
 
       <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
         <HeroSection />
@@ -87,6 +103,15 @@ const Index = () => {
         open={settingsOpen} 
         onOpenChange={setSettingsOpen}
         onApiKeyChange={handleApiKeyChange}
+      />
+
+      <HistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        history={history}
+        onSelect={handleSelectHistory}
+        onRemove={removeFromHistory}
+        onClear={clearHistory}
       />
     </div>
   );
