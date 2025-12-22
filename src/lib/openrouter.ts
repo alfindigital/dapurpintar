@@ -4,23 +4,31 @@ const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const createSystemPrompt = (preferences: Preferences) => {
   let dietaryText = "";
-  if (preferences.dietary.length > 0) {
-    dietaryText = `\nPERHATIAN DIET: Resep HARUS mematuhi: ${preferences.dietary.join(", ")}`;
+  if (preferences.dietary.length > 0 && preferences.dietary[0]) {
+    dietaryText = `\nPANTANGAN MAKANAN: Resep TIDAK BOLEH mengandung: ${preferences.dietary[0]}`;
   }
 
   let cuisineText = "";
   if (preferences.cuisine.length > 0) {
-    cuisineText = `\nPREFERENSI MASAKAN: Prioritaskan masakan ${preferences.cuisine.join(", ")}`;
-  }
-
-  let difficultyText = "";
-  if (preferences.difficulty) {
-    difficultyText = `\nTINGKAT KESULITAN: ${preferences.difficulty}`;
+    const cuisineMap: Record<string, string> = {
+      indonesia: "Indonesia",
+      western: "Western/Barat",
+      chinese: "Chinese/Tionghoa",
+      "middle-eastern": "Timur Tengah",
+      others: "bebas jenis masakan",
+    };
+    const cuisineLabels = preferences.cuisine.map((c) => cuisineMap[c] || c);
+    cuisineText = `\nPREFERENSI MASAKAN: Prioritaskan masakan ${cuisineLabels.join(", ")}`;
   }
 
   let timeText = "";
-  if (preferences.time && preferences.time !== "unlimited") {
-    timeText = `\nBATAS WAKTU: Maksimal ${preferences.time} menit`;
+  if (preferences.time) {
+    const timeMap: Record<string, string> = {
+      cepat: "kurang dari 30 menit",
+      sedang: "30-60 menit",
+      lama: "lebih dari 60 menit (boleh resep kompleks)",
+    };
+    timeText = `\nWAKTU MEMASAK: ${timeMap[preferences.time] || preferences.time}`;
   }
 
   return `Kamu adalah chef profesional Indonesia dengan pengalaman 20+ tahun. Spesialisasimu adalah masakan rumahan yang praktis dan lezat.
@@ -30,7 +38,7 @@ Tugasmu:
 2. Buat 1-3 resep unik dan praktis
 3. Prioritaskan penggunaan bahan yang tersedia
 4. Berikan instruksi jelas yang bisa diikuti ibu rumah tangga
-${dietaryText}${cuisineText}${difficultyText}${timeText}
+${dietaryText}${cuisineText}${timeText}
 
 Format respons HARUS dalam JSON valid dengan struktur:
 {

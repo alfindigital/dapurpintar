@@ -22,8 +22,8 @@ const Index = () => {
   const [preferences, setPreferences] = useState<Preferences>({
     dietary: [],
     cuisine: [],
-    difficulty: "mudah",
-    time: "30",
+    difficulty: "",
+    time: "cepat",
   });
 
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
