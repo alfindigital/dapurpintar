@@ -1,6 +1,6 @@
 import { Recipe, RecipeResponse, Preferences } from "@/types/recipe";
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const createSystemPrompt = (preferences: Preferences) => {
   let dietaryText = "";
@@ -74,40 +74,47 @@ export async function generateRecipes(
   apiKey: string,
   preferences: Preferences
 ): Promise<RecipeResponse> {
-  const parts: Array<{ text: string } | { inline_data: { mime_type: string; data: string } }> = [];
-
-  // Add system prompt
   const systemPrompt = createSystemPrompt(preferences);
-  let userPrompt = systemPrompt + "\n\nBerikan ide resep dari bahan berikut:";
+  let userContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }> = "";
 
-  if (input.text) {
-    userPrompt += `\n\nBahan (teks): ${input.text}`;
-  }
-
-  parts.push({ text: userPrompt });
-
-  // Add images if any
+  // Build user message content
   if (input.images && input.images.length > 0) {
+    // Multimodal: text + images
+    const contentParts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
+    
+    let textPart = "Berikan ide resep dari bahan berikut:";
+    if (input.text) {
+      textPart += `\n\nBahan (teks): ${input.text}`;
+    }
+    contentParts.push({ type: "text", text: textPart });
+
     for (const image of input.images) {
-      const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-      parts.push({
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: base64Data,
-        },
+      contentParts.push({
+        type: "image_url",
+        image_url: { url: image },
       });
     }
+    userContent = contentParts;
+  } else {
+    // Text only
+    userContent = `Berikan ide resep dari bahan berikut:\n\nBahan (teks): ${input.text || ""}`;
   }
 
-  const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const response = await fetch(OPENROUTER_API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": window.location.origin,
+    },
     body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      },
+      model: "google/gemini-2.0-flash-001",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent },
+      ],
+      temperature: 0.7,
+      max_tokens: 4096,
     }),
   });
 
@@ -122,19 +129,23 @@ export async function generateRecipes(
 
     if (response.status === 429) {
       throw new Error(
-        "Kuota Gemini API habis / billing belum aktif. Cek AI Studio > Usage & Billing, atau coba lagi nanti."
+        "Rate limit tercapai. Tunggu beberapa saat dan coba lagi."
       );
     }
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error("API key ditolak. Pastikan key benar dan Gemini API aktif.");
+      throw new Error("API key ditolak. Pastikan key OpenRouter benar dan memiliki kredit.");
+    }
+
+    if (response.status === 402) {
+      throw new Error("Kredit OpenRouter habis. Silakan top up di dashboard OpenRouter.");
     }
 
     throw new Error(message);
   }
 
   const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const text = data.choices?.[0]?.message?.content;
 
   if (!text) {
     throw new Error("Tidak ada respons dari AI");
@@ -159,12 +170,17 @@ export type ApiConnectionTestResult =
 
 export async function testApiConnection(apiKey: string): Promise<ApiConnectionTestResult> {
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+    const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.origin,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: "Hello, respond with just 'OK'" }] }],
-        generationConfig: { maxOutputTokens: 10 },
+        model: "google/gemini-2.0-flash-001",
+        messages: [{ role: "user", content: "Hello, respond with just 'OK'" }],
+        max_tokens: 10,
       }),
     });
 
@@ -183,8 +199,7 @@ export async function testApiConnection(apiKey: string): Promise<ApiConnectionTe
         ok: false,
         status: 429,
         reason: "quota",
-        message:
-          "API key terdeteksi, tapi kuota/billing Gemini API tidak tersedia (429). Buka AI Studio > Usage & Billing, atau tunggu dan coba lagi.",
+        message: "Rate limit tercapai. Tunggu beberapa saat dan coba lagi.",
       };
     }
 
@@ -193,7 +208,16 @@ export async function testApiConnection(apiKey: string): Promise<ApiConnectionTe
         ok: false,
         status: response.status,
         reason: "auth",
-        message: "API key ditolak. Pastikan key benar dan Gemini API aktif di project Anda.",
+        message: "API key ditolak. Pastikan key OpenRouter benar.",
+      };
+    }
+
+    if (response.status === 402) {
+      return {
+        ok: false,
+        status: 402,
+        reason: "quota",
+        message: "Kredit OpenRouter habis. Silakan top up di openrouter.ai",
       };
     }
 
@@ -201,13 +225,13 @@ export async function testApiConnection(apiKey: string): Promise<ApiConnectionTe
       ok: false,
       status: response.status,
       reason: "other",
-      message: apiMessage || "Gagal menguji koneksi ke Gemini API.",
+      message: apiMessage || "Gagal menguji koneksi ke OpenRouter.",
     };
   } catch {
     return {
       ok: false,
       reason: "network",
-      message: "Tidak bisa terhubung ke Gemini API. Cek koneksi internet dan coba lagi.",
+      message: "Tidak bisa terhubung ke OpenRouter. Cek koneksi internet.",
     };
   }
 }
