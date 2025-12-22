@@ -1,4 +1,4 @@
-import { ChefHat, Moon, Sun, Settings, History } from "lucide-react";
+import { ChefHat, Moon, Sun, Settings, History, Heart } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 interface HeaderProps {
   onSettingsClick: () => void;
   onHistoryClick: () => void;
+  onFavoritesClick: () => void;
 }
 
-export function Header({ onSettingsClick, onHistoryClick }: HeaderProps) {
+export function Header({ onSettingsClick, onHistoryClick, onFavoritesClick }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -38,6 +39,14 @@ export function Header({ onSettingsClick, onHistoryClick }: HeaderProps) {
             ) : (
               <Sun className="h-4 w-4" />
             )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onFavoritesClick}
+            className="h-9 w-9"
+          >
+            <Heart className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
