@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { HelpTooltip } from "./HelpTooltip";
-import { testApiConnection } from "@/lib/gemini";
+import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
 
 interface SettingsDialogProps {
@@ -27,7 +27,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
 
   useEffect(() => {
     if (open) {
-      const savedKey = localStorage.getItem("gemini_api_key");
+      const savedKey = localStorage.getItem("openrouter_api_key");
       if (savedKey) {
         setApiKey(savedKey);
         setIsValid(true);
@@ -47,7 +47,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
 
     if (result.ok) {
       setIsValid(true);
-      localStorage.setItem("gemini_api_key", apiKey.trim());
+      localStorage.setItem("openrouter_api_key", apiKey.trim());
       onApiKeyChange?.(apiKey.trim());
       toast.success("API Key tersimpan!");
       onOpenChange(false);
@@ -66,15 +66,15 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             Pengaturan
           </DialogTitle>
           <DialogDescription>
-            Masukkan Gemini API Key untuk menggunakan fitur AI.
+            Masukkan OpenRouter API Key untuk menggunakan fitur AI.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="apiKey">Gemini API Key</Label>
-              <HelpTooltip content="API Key disimpan di browser Anda." />
+              <Label htmlFor="apiKey">OpenRouter API Key</Label>
+              <HelpTooltip content="API Key disimpan di browser Anda. Gratis $1 credit untuk pengguna baru." />
               {isValid === true && (
                 <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
               )}
@@ -82,7 +82,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             <Input
               id="apiKey"
               type="password"
-              placeholder="AIzaSy..."
+              placeholder="sk-or-v1-..."
               value={apiKey}
               onChange={(e) => {
                 setApiKey(e.target.value);
@@ -92,13 +92,13 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
           </div>
 
           <a
-            href="https://aistudio.google.com/app/apikey"
+            href="https://openrouter.ai/keys"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ExternalLink className="h-4 w-4" />
-            Dapatkan API Key gratis
+            Dapatkan API Key (gratis $1 credit)
           </a>
         </div>
 

@@ -6,7 +6,7 @@ import { PreferencesSection } from "@/components/PreferencesSection";
 import { RecipeCards } from "@/components/RecipeCards";
 import { InfoAccordion } from "@/components/InfoAccordion";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { generateRecipes } from "@/lib/gemini";
+import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences } from "@/types/recipe";
 import { toast } from "sonner";
 
@@ -23,7 +23,7 @@ const Index = () => {
   });
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("gemini_api_key");
+    const savedKey = localStorage.getItem("openrouter_api_key");
     if (savedKey) {
       setApiKey(savedKey);
     }
@@ -79,7 +79,7 @@ const Index = () => {
         <InfoAccordion />
 
         <footer className="text-center text-xs text-muted-foreground py-4">
-          <p>DapurPintar • Powered by Gemini AI</p>
+          <p>DapurPintar • Powered by OpenRouter AI</p>
         </footer>
       </main>
 
