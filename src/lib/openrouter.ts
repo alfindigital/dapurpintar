@@ -48,15 +48,12 @@ Format respons HARUS dalam JSON valid dengan struktur:
       "nama": "Nama Masakan",
       "deskripsi": "Deskripsi singkat 1-2 kalimat yang menggugah selera",
       "waktu": "30 menit",
-      "porsi": "4 porsi",
-      "tingkatKesulitan": "Mudah|Sedang|Sulit",
-      "masakan": "Indonesia/Jawa/dll",
+      "masakan": "Indonesia/Western/Chinese/dll",
       "bahan": [
         {"item": "nama bahan", "jumlah": "takaran", "catatan": "opsional"}
       ],
       "langkah": ["Langkah 1 dengan detail", "Langkah 2"],
-      "tips": "Tips memasak yang berguna",
-      "tags": ["tag1", "tag2"],
+      "tips": "Tips memasak yang berguna untuk resep ini",
       "nutrisi": {
         "kalori": 350,
         "protein": 25,
@@ -65,7 +62,6 @@ Format respons HARUS dalam JSON valid dengan struktur:
       }
     }
   ],
-  "tips": ["tips umum memasak 1", "tips 2"],
   "substitusi": ["saran pengganti bahan 1"]
 }
 
@@ -73,7 +69,7 @@ PENTING:
 - Gunakan Bahasa Indonesia yang mudah dipahami
 - Berikan takaran yang jelas (sdm, sdt, gram, ml)
 - Langkah harus detail dan mudah diikuti
-- WAJIB sertakan estimasi nutrisi per porsi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
+- WAJIB sertakan estimasi nutrisi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
 - Berikan HANYA JSON tanpa markdown atau teks tambahan`;
 };
 

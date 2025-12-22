@@ -1,4 +1,4 @@
-import { Clock, Users, ChefHat, Heart, Share2, Printer, Utensils, Flame, Beef, Wheat, Droplets } from "lucide-react";
+import { Clock, ChefHat, Heart, Share2, Printer, Flame, Beef, Wheat, Droplets } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,32 +6,15 @@ import { Separator } from "@/components/ui/separator";
 import { HelpTooltip } from "./HelpTooltip";
 import { Recipe, RecipeResponse } from "@/types/recipe";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 
 interface RecipeCardsProps {
   data: RecipeResponse | null;
   isLoading: boolean;
+  onToggleFavorite?: (recipe: Recipe) => void;
+  isFavorite?: (recipeName: string) => boolean;
 }
 
-export function RecipeCards({ data, isLoading }: RecipeCardsProps) {
-  const [favorites, setFavorites] = useState<string[]>([]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("favorite_recipes");
-    if (saved) {
-      setFavorites(JSON.parse(saved));
-    }
-  }, []);
-
-  const toggleFavorite = (id: string) => {
-    const newFavorites = favorites.includes(id)
-      ? favorites.filter((f) => f !== id)
-      : [...favorites, id];
-    setFavorites(newFavorites);
-    localStorage.setItem("favorite_recipes", JSON.stringify(newFavorites));
-    toast.success(favorites.includes(id) ? "Dihapus dari favorit" : "Ditambahkan ke favorit");
-  };
-
+export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite }: RecipeCardsProps) {
   const shareRecipe = async (recipe: Recipe) => {
     const text = `${recipe.nama}\n\n${recipe.deskripsi}\n\nBahan:\n${recipe.bahan.map((b) => `• ${b.jumlah} ${b.item}`).join("\n")}\n\nLangkah:\n${recipe.langkah.map((l, i) => `${i + 1}. ${l}`).join("\n")}`;
 
@@ -61,7 +44,7 @@ export function RecipeCards({ data, isLoading }: RecipeCardsProps) {
           <body style="font-family: sans-serif; padding: 20px;">
             <h1>${recipe.nama}</h1>
             <p><em>${recipe.deskripsi}</em></p>
-            <p><strong>Waktu:</strong> ${recipe.waktu} | <strong>Porsi:</strong> ${recipe.porsi}</p>
+            <p><strong>Waktu:</strong> ${recipe.waktu}</p>
             <h2>Bahan:</h2>
             <ul>${recipe.bahan.map((b) => `<li>${b.jumlah} ${b.item}${b.catatan ? ` (${b.catatan})` : ""}</li>`).join("")}</ul>
             <h2>Langkah:</h2>
@@ -123,11 +106,11 @@ export function RecipeCards({ data, isLoading }: RecipeCardsProps) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() => toggleFavorite(recipe.id || String(index))}
+                  onClick={() => onToggleFavorite?.(recipe)}
                 >
                   <Heart
                     className={`h-4 w-4 ${
-                      favorites.includes(recipe.id || String(index))
+                      isFavorite?.(recipe.nama)
                         ? "fill-destructive text-destructive"
                         : ""
                     }`}
@@ -156,14 +139,6 @@ export function RecipeCards({ data, isLoading }: RecipeCardsProps) {
               <Badge variant="secondary" className="gap-1">
                 <Clock className="h-3 w-3" />
                 {recipe.waktu}
-              </Badge>
-              <Badge variant="secondary" className="gap-1">
-                <Users className="h-3 w-3" />
-                {recipe.porsi}
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Utensils className="h-3 w-3" />
-                {recipe.tingkatKesulitan}
               </Badge>
             </div>
 
@@ -247,35 +222,9 @@ export function RecipeCards({ data, isLoading }: RecipeCardsProps) {
                 <p className="text-sm">{recipe.tips}</p>
               </div>
             )}
-
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {recipe.tags.map((tag, idx) => (
-                  <Badge key={idx} variant="secondary" className="text-xs">
-                    #{tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </CardContent>
         </Card>
       ))}
-
-      {data.tips && data.tips.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="font-semibold mb-3">💡 Tips Umum</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {data.tips.map((tip, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span>•</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       {data.substitusi && data.substitusi.length > 0 && (
         <Card>

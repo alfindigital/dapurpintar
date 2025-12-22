@@ -7,9 +7,11 @@ import { RecipeCards } from "@/components/RecipeCards";
 import { InfoAccordion } from "@/components/InfoAccordion";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { HistoryDialog } from "@/components/HistoryDialog";
+import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { generateRecipes } from "@/lib/openrouter";
-import { RecipeResponse, Preferences } from "@/types/recipe";
+import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
+import { useFavorites } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -17,8 +19,8 @@ const Index = () => {
   const [recipeData, setRecipeData] = useState<RecipeResponse | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [lastQuery, setLastQuery] = useState("");
   const [preferences, setPreferences] = useState<Preferences>({
     dietary: [],
     cuisine: [],
@@ -27,6 +29,7 @@ const Index = () => {
   });
 
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
+  const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openrouter_api_key");
@@ -53,7 +56,6 @@ const Index = () => {
 
     setIsLoading(true);
     setRecipeData(null);
-    setLastQuery(data.text || "");
 
     try {
       const result = await generateRecipes(data, apiKey, preferences);
@@ -73,11 +75,30 @@ const Index = () => {
     toast.success("Resep dari riwayat ditampilkan");
   };
 
+  const handleSelectFavorite = (recipe: Recipe) => {
+    setRecipeData({ recipes: [recipe] });
+    toast.success("Resep favorit ditampilkan");
+  };
+
+  const handleToggleFavorite = (recipe: Recipe) => {
+    if (isFavorite(recipe.nama)) {
+      const fav = favorites.find((f) => f.recipe.nama === recipe.nama);
+      if (fav) {
+        removeFavorite(fav.id);
+        toast.success("Dihapus dari favorit");
+      }
+    } else {
+      addFavorite(recipe);
+      toast.success("Ditambahkan ke favorit");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
         onSettingsClick={() => setSettingsOpen(true)} 
         onHistoryClick={() => setHistoryOpen(true)}
+        onFavoritesClick={() => setFavoritesOpen(true)}
       />
 
       <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
@@ -90,7 +111,12 @@ const Index = () => {
           onPreferencesChange={setPreferences}
         />
 
-        <RecipeCards data={recipeData} isLoading={isLoading} />
+        <RecipeCards 
+          data={recipeData} 
+          isLoading={isLoading}
+          onToggleFavorite={handleToggleFavorite}
+          isFavorite={isFavorite}
+        />
 
         <InfoAccordion />
 
@@ -112,6 +138,15 @@ const Index = () => {
         onSelect={handleSelectHistory}
         onRemove={removeFromHistory}
         onClear={clearHistory}
+      />
+
+      <FavoritesDialog
+        open={favoritesOpen}
+        onOpenChange={setFavoritesOpen}
+        favorites={favorites}
+        onSelect={handleSelectFavorite}
+        onRemove={removeFavorite}
+        onClear={clearFavorites}
       />
     </div>
   );
