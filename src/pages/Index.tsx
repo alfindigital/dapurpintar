@@ -27,7 +27,10 @@ const Index = () => {
     difficulty: "",
     time: "cepat",
   });
-  const [isAutoMode, setIsAutoMode] = useState(true);
+  const [isAutoMode, setIsAutoMode] = useState(() => {
+    const saved = localStorage.getItem("preferences_auto_mode");
+    return saved !== null ? saved === "true" : true;
+  });
   const [inputData, setInputData] = useState<{ images: string[]; text: string }>({
     images: [],
     text: "",
@@ -35,6 +38,11 @@ const Index = () => {
 
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
   const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
+
+  // Save auto mode preference
+  useEffect(() => {
+    localStorage.setItem("preferences_auto_mode", String(isAutoMode));
+  }, [isAutoMode]);
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openrouter_api_key");
