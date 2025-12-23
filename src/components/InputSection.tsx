@@ -1,5 +1,5 @@
 import { useState, useRef, ChangeEvent, DragEvent, useEffect } from "react";
-import { Camera, Image, FileText, Upload, X, Mic, MicOff, Plus } from "lucide-react";
+import { Camera, Image, FileText, Upload, X, Mic, MicOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,13 +20,22 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const { isListening, transcript, isSupported, startListening, stopListening } = useVoiceInput();
+  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } = useVoiceInput();
+
+  // Check if there's any input
+  const hasAnyInput = images.length > 0 || textInput.trim().length > 0 || (transcript && transcript.trim().length > 0);
 
   // Notify parent of input changes
   useEffect(() => {
     const combinedText = transcript ? `${textInput} ${transcript}`.trim() : textInput.trim();
     onInputChange({ images, text: combinedText });
   }, [images, textInput, transcript, onInputChange]);
+
+  const handleClearAll = () => {
+    setImages([]);
+    setTextInput("");
+    resetTranscript();
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -90,9 +99,23 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
   return (
     <Card>
       <CardContent className="p-4 sm:p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-base font-semibold">Masukkan Bahan</h2>
-          <HelpTooltip content="Pilih salah satu cara: foto langsung, pilih dari galeri, atau ketik nama bahan. AI akan menganalisis dan memberikan ide resep." />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold">Masukkan Bahan</h2>
+            <HelpTooltip content="Pilih salah satu cara: foto langsung, pilih dari galeri, atau ketik nama bahan. AI akan menganalisis dan memberikan ide resep." />
+          </div>
+          {hasAnyInput && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAll}
+              disabled={isLoading}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Hapus
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
