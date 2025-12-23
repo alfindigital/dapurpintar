@@ -83,25 +83,38 @@ export async function generateRecipes(
 
   // Build user message content
   if (input.images && input.images.length > 0) {
-    // Multimodal: text + images
+    // Multimodal: text + images - analyze each image separately
     const contentParts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
     
-    let textPart = "Berikan ide resep dari bahan berikut:";
+    let textPart = `Analisis setiap gambar secara terpisah dan berikan ide resep.
+
+INSTRUKSI PENTING:
+1. Identifikasi SEMUA bahan makanan di SETIAP gambar
+2. Kategorikan bahan (sayuran, protein, karbohidrat, bumbu, buah, dairy, dll)
+3. Sebutkan dari gambar mana bahan tersebut terdeteksi
+
+Total ${input.images.length} gambar untuk dianalisis.`;
+    
     if (input.text) {
-      textPart += `\n\nBahan (teks): ${input.text}`;
+      textPart += `\n\nBahan tambahan (teks): ${input.text}`;
     }
     contentParts.push({ type: "text", text: textPart });
 
-    for (const image of input.images) {
+    // Add each image with label
+    for (let i = 0; i < input.images.length; i++) {
+      contentParts.push({
+        type: "text",
+        text: `\n--- Gambar ${i + 1} ---`
+      });
       contentParts.push({
         type: "image_url",
-        image_url: { url: image },
+        image_url: { url: input.images[i] },
       });
     }
     userContent = contentParts;
   } else {
-    // Text only
-    userContent = `Berikan ide resep dari bahan berikut:\n\nBahan (teks): ${input.text || ""}`;
+    // Text only - AI will auto-detect any format
+    userContent = `Berikan ide resep dari bahan berikut (format bebas, AI akan mendeteksi bahan secara otomatis):\n\n${input.text || ""}`;
   }
 
   const response = await fetch(OPENROUTER_API_URL, {

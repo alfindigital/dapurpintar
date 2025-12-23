@@ -30,7 +30,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
   };
 
   const processFiles = (files: File[]) => {
-    const maxImages = 10;
+    const maxImages = 5;
     const maxSize = 20 * 1024 * 1024; // 20MB total
 
     let totalSize = 0;
@@ -138,7 +138,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                       </button>
                     </div>
                   ))}
-                  {images.length < 10 && (
+                  {images.length < 5 && (
                     <button
                       onClick={() => cameraInputRef.current?.click()}
                       className="aspect-square border-2 border-dashed border-border rounded-lg flex items-center justify-center hover:border-primary transition-colors"
@@ -203,7 +203,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                         </button>
                       </div>
                     ))}
-                    {images.length < 10 && (
+                    {images.length < 5 && (
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         className="aspect-square border-2 border-dashed border-border rounded-lg flex items-center justify-center hover:border-primary transition-colors"
@@ -213,7 +213,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground text-center">
-                    {images.length}/10 foto • Maks 20MB total
+                    {images.length}/5 foto • Maks 20MB total
                   </p>
                 </div>
               ) : (
@@ -273,12 +273,11 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                   </Button>
                 )}
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Pisahkan bahan dengan koma</span>
-                {isListening && (
-                  <span className="text-destructive animate-pulse">● Mendengarkan...</span>
-                )}
-              </div>
+              {isListening && (
+                <div className="text-xs text-destructive animate-pulse">
+                  ● Mendengarkan...
+                </div>
+              )}
             </div>
             <Button
               onClick={handleSubmitText}
