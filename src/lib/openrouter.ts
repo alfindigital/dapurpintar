@@ -2,7 +2,57 @@ import { Recipe, RecipeResponse, Preferences } from "@/types/recipe";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-const createSystemPrompt = (preferences: Preferences) => {
+const createSystemPrompt = (preferences: Preferences, isAutoMode: boolean) => {
+  // Auto mode: AI determines everything automatically
+  if (isAutoMode) {
+    return `Kamu adalah chef profesional Indonesia dengan pengalaman 20+ tahun. Spesialisasimu adalah masakan rumahan yang praktis dan lezat.
+
+MODE AUTO AKTIF - Tentukan sendiri:
+- Jenis masakan yang paling cocok berdasarkan bahan yang tersedia
+- Estimasi waktu memasak yang realistis
+- Tingkat kesulitan yang sesuai
+- Pertimbangkan bahan yang ada untuk memilih resep yang paling praktis
+
+Tugasmu:
+1. Analisis SEMUA bahan yang diberikan (teks dan/atau gambar)
+2. Buat 1-3 resep unik dan praktis
+3. Prioritaskan penggunaan bahan yang tersedia
+4. Berikan instruksi jelas yang bisa diikuti ibu rumah tangga
+
+Format respons HARUS dalam JSON valid dengan struktur:
+{
+  "recipes": [
+    {
+      "id": "unique_id",
+      "nama": "Nama Masakan",
+      "deskripsi": "Deskripsi singkat 1-2 kalimat yang menggugah selera",
+      "waktu": "30 menit",
+      "masakan": "Indonesia/Western/Chinese/dll",
+      "bahan": [
+        {"item": "nama bahan", "jumlah": "takaran", "catatan": "opsional"}
+      ],
+      "langkah": ["Langkah 1 dengan detail", "Langkah 2"],
+      "tips": "Tips memasak yang berguna untuk resep ini",
+      "nutrisi": {
+        "kalori": 350,
+        "protein": 25,
+        "karbohidrat": 30,
+        "lemak": 12
+      }
+    }
+  ],
+  "substitusi": ["saran pengganti bahan 1"]
+}
+
+PENTING:
+- Gunakan Bahasa Indonesia yang mudah dipahami
+- Berikan takaran yang jelas (sdm, sdt, gram, ml)
+- Langkah harus detail dan mudah diikuti
+- WAJIB sertakan estimasi nutrisi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
+- Berikan HANYA JSON tanpa markdown atau teks tambahan`;
+  }
+
+  // Manual mode: use user preferences
   let dietaryText = "";
   if (preferences.dietary.length > 0 && preferences.dietary[0]) {
     dietaryText = `\nPANTANGAN MAKANAN: Resep TIDAK BOLEH mengandung: ${preferences.dietary[0]}`;
@@ -76,9 +126,10 @@ PENTING:
 export async function generateRecipes(
   input: { text?: string; images?: string[] },
   apiKey: string,
-  preferences: Preferences
+  preferences: Preferences,
+  isAutoMode: boolean = false
 ): Promise<RecipeResponse> {
-  const systemPrompt = createSystemPrompt(preferences);
+  const systemPrompt = createSystemPrompt(preferences, isAutoMode);
   let userContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }> = "";
 
   // Build user message content
