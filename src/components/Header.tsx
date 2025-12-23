@@ -18,13 +18,16 @@ export function Header({ onSettingsClick, onHistoryClick, onFavoritesClick }: He
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex h-14 items-center justify-between px-4">
+<header className="sticky top-0 z-50 w-full border-b bg-primary/10 backdrop-blur dark:bg-primary/20">
+      <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
             <ChefHat className="h-5 w-5" />
           </div>
-          <h1 className="text-lg font-bold text-foreground">DapurPintar</h1>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold text-foreground leading-tight">DapurPintar</h1>
+            <span className="text-xs text-muted-foreground">Masak gampang, hasil mantap! 👩‍🍳</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-1">

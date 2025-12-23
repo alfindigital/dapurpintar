@@ -1,10 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { Header } from "@/components/Header";
-import { HeroSection } from "@/components/HeroSection";
 import { InputSection } from "@/components/InputSection";
 import { PreferencesSection } from "@/components/PreferencesSection";
 import { RecipeCards } from "@/components/RecipeCards";
-import { InfoAccordion } from "@/components/InfoAccordion";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { HistoryDialog } from "@/components/HistoryDialog";
 import { FavoritesDialog } from "@/components/FavoritesDialog";
@@ -102,8 +100,6 @@ const Index = () => {
       />
 
       <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
-        <HeroSection />
-
         <InputSection onSubmit={handleSubmit} isLoading={isLoading} />
 
         <PreferencesSection
@@ -118,10 +114,18 @@ const Index = () => {
           isFavorite={isFavorite}
         />
 
-        <InfoAccordion />
-
         <footer className="text-center text-xs text-muted-foreground py-4">
-          <p>DapurPintar • Powered by OpenRouter AI</p>
+          <p>
+            made by{" "}
+            <a 
+              href="https://alfindigital.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="font-medium hover:underline text-primary"
+            >
+              alfindigital
+            </a>
+          </p>
         </footer>
       </main>
 
