@@ -1,4 +1,4 @@
-import { useState, useRef, ChangeEvent, DragEvent } from "react";
+import { useState, useRef, ChangeEvent, DragEvent, useEffect } from "react";
 import { Camera, Image, FileText, Upload, X, Mic, MicOff, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,18 +9,24 @@ import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { cn } from "@/lib/utils";
 
 interface InputSectionProps {
-  onSubmit: (data: { text?: string; images?: string[] }) => void;
+  onInputChange: (data: { images: string[]; text: string }) => void;
   isLoading: boolean;
 }
 
-export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
+export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
   const [images, setImages] = useState<string[]>([]);
   const [textInput, setTextInput] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } = useVoiceInput();
+  const { isListening, transcript, isSupported, startListening, stopListening } = useVoiceInput();
+
+  // Notify parent of input changes
+  useEffect(() => {
+    const combinedText = transcript ? `${textInput} ${transcript}`.trim() : textInput.trim();
+    onInputChange({ images, text: combinedText });
+  }, [images, textInput, transcript, onInputChange]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -71,20 +77,6 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmitImages = () => {
-    if (images.length > 0) {
-      onSubmit({ images });
-    }
-  };
-
-  const handleSubmitText = () => {
-    const combinedText = transcript ? `${textInput} ${transcript}`.trim() : textInput.trim();
-    if (combinedText) {
-      onSubmit({ text: combinedText });
-      resetTranscript();
-    }
   };
 
   const handleVoiceToggle = () => {
@@ -147,9 +139,9 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                     </button>
                   )}
                 </div>
-                <Button onClick={handleSubmitImages} disabled={isLoading} className="w-full">
-                  {isLoading ? "Mencari resep..." : `Cari Resep (${images.length} foto)`}
-                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  {images.length}/5 foto • Maks 20MB total
+                </p>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
@@ -166,7 +158,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                <Button onClick={() => cameraInputRef.current?.click()}>
+                <Button onClick={() => cameraInputRef.current?.click()} disabled={isLoading}>
                   <Camera className="h-4 w-4 mr-2" />
                   Buka Kamera
                 </Button>
@@ -231,18 +223,13 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                  <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+                  <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
                     <Upload className="h-4 w-4 mr-2" />
                     Pilih dari Galeri
                   </Button>
                 </div>
               )}
             </div>
-            {images.length > 0 && (
-              <Button onClick={handleSubmitImages} disabled={isLoading} className="w-full">
-                {isLoading ? "Mencari resep..." : `Cari Resep (${images.length} foto)`}
-              </Button>
-            )}
           </TabsContent>
 
           <TabsContent value="text" className="space-y-4">
@@ -254,6 +241,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                   onChange={(e) => setTextInput(e.target.value)}
                   rows={4}
                   className="resize-none pr-12"
+                  disabled={isLoading}
                 />
                 {isSupported && (
                   <Button
@@ -264,6 +252,7 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                       isListening && "animate-recording"
                     )}
                     onClick={handleVoiceToggle}
+                    disabled={isLoading}
                   >
                     {isListening ? (
                       <MicOff className="h-4 w-4" />
@@ -279,13 +268,6 @@ export function InputSection({ onSubmit, isLoading }: InputSectionProps) {
                 </div>
               )}
             </div>
-            <Button
-              onClick={handleSubmitText}
-              disabled={isLoading || (!textInput.trim() && !transcript)}
-              className="w-full"
-            >
-              {isLoading ? "Mencari resep..." : "Cari Ide Resep"}
-            </Button>
           </TabsContent>
         </Tabs>
       </CardContent>
