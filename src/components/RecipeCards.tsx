@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { HelpTooltip } from "./HelpTooltip";
 import { VoiceCookingPlayer } from "./VoiceCookingPlayer";
+import { CookingTimerPlayer, FloatingTimerSummary } from "./CookingTimerPlayer";
 import { useVoiceCooking } from "@/hooks/useVoiceCooking";
+import { useCookingTimer } from "@/hooks/useCookingTimer";
 import { Recipe, RecipeResponse } from "@/types/recipe";
 import { toast } from "sonner";
 
@@ -38,6 +40,8 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
       });
     },
   });
+
+  const cookingTimer = useCookingTimer();
 
   // Reset highlight when voice stops
   useEffect(() => {
@@ -243,10 +247,35 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
                 >
                   {idx + 1}
                 </span>
-                <span className="pt-1">{step}</span>
+                <div className="flex-1">
+                  <span className="pt-1 block">{step}</span>
+                  <div className="mt-1">
+                    <CookingTimerPlayer
+                      timers={cookingTimer.timers}
+                      stepIndex={idx}
+                      stepLabel={step}
+                      notificationPermission={cookingTimer.notificationPermission}
+                      onAddTimer={cookingTimer.addTimer}
+                      onRemoveTimer={cookingTimer.removeTimer}
+                      onStartTimer={cookingTimer.startTimer}
+                      onPauseTimer={cookingTimer.pauseTimer}
+                      onResumeTimer={cookingTimer.resumeTimer}
+                      onResetTimer={cookingTimer.resetTimer}
+                      onRequestPermission={cookingTimer.requestNotificationPermission}
+                    />
+                  </div>
+                </div>
               </li>
             ))}
           </ol>
+
+          {/* Floating timer summary */}
+          <FloatingTimerSummary
+            timers={cookingTimer.timers}
+            onPauseTimer={cookingTimer.pauseTimer}
+            onResumeTimer={cookingTimer.resumeTimer}
+            onStartTimer={cookingTimer.startTimer}
+          />
         </div>
 
         {recipe.tips && (
