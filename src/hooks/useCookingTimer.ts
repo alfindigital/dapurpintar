@@ -12,13 +12,13 @@ interface Timer {
 
 interface UseCookingTimerReturn {
   timers: Timer[];
-  addTimer: (stepIndex: number, label: string, minutes: number) => void;
+  setTimer: (stepIndex: number, label: string, minutes: number) => void;
   removeTimer: (id: string) => void;
-  startTimer: (id: string) => void;
   pauseTimer: (id: string) => void;
   resumeTimer: (id: string) => void;
   resetTimer: (id: string) => void;
   clearAllTimers: () => void;
+  getTimerForStep: (stepIndex: number) => Timer | null;
   notificationPermission: NotificationPermission | "unsupported";
   requestNotificationPermission: () => Promise<void>;
 }
@@ -54,72 +54,52 @@ export function useCookingTimer(): UseCookingTimerReturn {
       });
     }
     
-    // Play standard alarm/ringtone sound
+    // Play ringing alarm sound
     try {
-      // Create a more standard ringtone-like sound using oscillator
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const playTone = (frequency: number, startTime: number, duration: number) => {
-        const oscillator = audioContext.createOscillator();
+      
+      // Create a "kriiingg" ringing sound pattern
+      const playRing = (startTime: number) => {
+        // High frequency ring
+        const osc1 = audioContext.createOscillator();
+        const osc2 = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
+        
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'sine';
+        
+        // Two oscillators for richer ring sound
+        osc1.frequency.value = 1200;
+        osc2.frequency.value = 1500;
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        
+        // Tremolo effect for ringing
         gainNode.gain.setValueAtTime(0.3, startTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
+        for (let i = 0; i < 10; i++) {
+          gainNode.gain.setValueAtTime(0.3, startTime + i * 0.05);
+          gainNode.gain.setValueAtTime(0.1, startTime + i * 0.05 + 0.025);
+        }
+        gainNode.gain.setValueAtTime(0, startTime + 0.5);
+        
+        osc1.start(startTime);
+        osc2.start(startTime);
+        osc1.stop(startTime + 0.5);
+        osc2.stop(startTime + 0.5);
       };
       
-      // Play a simple ringtone pattern (3 beeps)
+      // Play 3 rings
       const now = audioContext.currentTime;
-      playTone(880, now, 0.15);
-      playTone(880, now + 0.2, 0.15);
-      playTone(880, now + 0.4, 0.15);
+      playRing(now);
+      playRing(now + 0.6);
+      playRing(now + 1.2);
     } catch {
       // Audio not available
     }
   }, []);
 
-  const addTimer = useCallback((stepIndex: number, label: string, minutes: number) => {
-    const id = `timer-${Date.now()}-${stepIndex}`;
-    const duration = minutes * 60;
-    
-    setTimers((prev) => [
-      ...prev,
-      {
-        id,
-        stepIndex,
-        label,
-        duration,
-        remaining: duration,
-        isRunning: false,
-        isPaused: false,
-      },
-    ]);
-
-    // Request notification permission when first timer is added
-    if (notificationPermission === "default") {
-      requestNotificationPermission();
-    }
-  }, [notificationPermission, requestNotificationPermission]);
-
-  const removeTimer = useCallback((id: string) => {
-    const interval = intervalsRef.current.get(id);
-    if (interval) {
-      clearInterval(interval);
-      intervalsRef.current.delete(id);
-    }
-    setTimers((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const startTimer = useCallback((id: string) => {
-    setTimers((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, isRunning: true, isPaused: false } : t
-      )
-    );
-
+  const startTimerInterval = useCallback((id: string) => {
     const interval = setInterval(() => {
       setTimers((prev) => {
         const timer = prev.find((t) => t.id === id);
@@ -133,9 +113,8 @@ export function useCookingTimer(): UseCookingTimerReturn {
             "⏰ Timer Selesai!",
             `Langkah ${timer.stepIndex + 1}: ${timer.label}`
           );
-          return prev.map((t) =>
-            t.id === id ? { ...t, remaining: 0, isRunning: false } : t
-          );
+          // Remove the timer when it completes
+          return prev.filter((t) => t.id !== id);
         }
 
         return prev.map((t) =>
@@ -146,6 +125,56 @@ export function useCookingTimer(): UseCookingTimerReturn {
 
     intervalsRef.current.set(id, interval);
   }, [showNotification]);
+
+  // Set timer for a step (replaces any existing timer for that step) and starts immediately
+  const setTimer = useCallback((stepIndex: number, label: string, minutes: number) => {
+    // Remove any existing timer for this step
+    setTimers((prev) => {
+      const existing = prev.find((t) => t.stepIndex === stepIndex);
+      if (existing) {
+        const interval = intervalsRef.current.get(existing.id);
+        if (interval) {
+          clearInterval(interval);
+          intervalsRef.current.delete(existing.id);
+        }
+      }
+      return prev.filter((t) => t.stepIndex !== stepIndex);
+    });
+
+    const id = `timer-${Date.now()}-${stepIndex}`;
+    const duration = minutes * 60;
+    
+    // Add new timer and start it immediately
+    setTimers((prev) => [
+      ...prev,
+      {
+        id,
+        stepIndex,
+        label,
+        duration,
+        remaining: duration,
+        isRunning: true,
+        isPaused: false,
+      },
+    ]);
+
+    // Start the interval
+    setTimeout(() => startTimerInterval(id), 0);
+
+    // Request notification permission when first timer is added
+    if (notificationPermission === "default") {
+      requestNotificationPermission();
+    }
+  }, [notificationPermission, requestNotificationPermission, startTimerInterval]);
+
+  const removeTimer = useCallback((id: string) => {
+    const interval = intervalsRef.current.get(id);
+    if (interval) {
+      clearInterval(interval);
+      intervalsRef.current.delete(id);
+    }
+    setTimers((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const pauseTimer = useCallback((id: string) => {
     const interval = intervalsRef.current.get(id);
@@ -161,8 +190,13 @@ export function useCookingTimer(): UseCookingTimerReturn {
   }, []);
 
   const resumeTimer = useCallback((id: string) => {
-    startTimer(id);
-  }, [startTimer]);
+    setTimers((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, isRunning: true, isPaused: false } : t
+      )
+    );
+    startTimerInterval(id);
+  }, [startTimerInterval]);
 
   const resetTimer = useCallback((id: string) => {
     const interval = intervalsRef.current.get(id);
@@ -185,6 +219,10 @@ export function useCookingTimer(): UseCookingTimerReturn {
     setTimers([]);
   }, []);
 
+  const getTimerForStep = useCallback((stepIndex: number): Timer | null => {
+    return timers.find((t) => t.stepIndex === stepIndex) || null;
+  }, [timers]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -194,13 +232,13 @@ export function useCookingTimer(): UseCookingTimerReturn {
 
   return {
     timers,
-    addTimer,
+    setTimer,
     removeTimer,
-    startTimer,
     pauseTimer,
     resumeTimer,
     resetTimer,
     clearAllTimers,
+    getTimerForStep,
     notificationPermission,
     requestNotificationPermission,
   };

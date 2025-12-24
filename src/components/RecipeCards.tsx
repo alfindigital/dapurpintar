@@ -27,6 +27,7 @@ interface RecipeCardProps {
 
 function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
+  const [showTimerSummary, setShowTimerSummary] = useState(true);
   const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const voiceCooking = useVoiceCooking({
@@ -228,54 +229,57 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
           />
 
           <ol className="space-y-3 mt-4">
-            {recipe.langkah.map((step, idx) => (
-              <li
-                key={idx}
-                ref={(el) => (stepRefs.current[idx] = el)}
-                className={`flex gap-3 text-sm transition-all duration-300 p-2 -mx-2 rounded-lg ${
-                  highlightedStep === idx
-                    ? "bg-primary/10 ring-2 ring-primary/30"
-                    : ""
-                }`}
-              >
-                <span
-                  className={`flex-shrink-0 w-7 h-7 rounded-full text-xs flex items-center justify-center font-semibold transition-colors ${
+            {recipe.langkah.map((step, idx) => {
+              const stepTimer = cookingTimer.getTimerForStep(idx);
+              return (
+                <li
+                  key={idx}
+                  ref={(el) => (stepRefs.current[idx] = el)}
+                  className={`flex gap-3 text-sm transition-all duration-300 p-2 -mx-2 rounded-lg ${
                     highlightedStep === idx
-                      ? "bg-primary text-primary-foreground scale-110"
-                      : "bg-primary text-primary-foreground"
+                      ? "bg-primary/10 ring-2 ring-primary/30"
+                      : ""
                   }`}
                 >
-                  {idx + 1}
-                </span>
-                <div className="flex-1">
-                  <span className="pt-1 block">{step}</span>
-                  <div className="mt-1">
+                  <div className="flex flex-col items-center gap-1">
+                    <span
+                      className={`flex-shrink-0 w-7 h-7 rounded-full text-xs flex items-center justify-center font-semibold transition-colors ${
+                        highlightedStep === idx
+                          ? "bg-primary text-primary-foreground scale-110"
+                          : "bg-primary text-primary-foreground"
+                      }`}
+                    >
+                      {idx + 1}
+                    </span>
                     <CookingTimerPlayer
-                      timers={cookingTimer.timers}
                       stepIndex={idx}
                       stepLabel={step}
-                      notificationPermission={cookingTimer.notificationPermission}
-                      onAddTimer={cookingTimer.addTimer}
-                      onRemoveTimer={cookingTimer.removeTimer}
-                      onStartTimer={cookingTimer.startTimer}
+                      hasTimer={!!stepTimer}
+                      timer={stepTimer}
+                      onSetTimer={cookingTimer.setTimer}
                       onPauseTimer={cookingTimer.pauseTimer}
                       onResumeTimer={cookingTimer.resumeTimer}
                       onResetTimer={cookingTimer.resetTimer}
-                      onRequestPermission={cookingTimer.requestNotificationPermission}
+                      onRemoveTimer={cookingTimer.removeTimer}
                     />
                   </div>
-                </div>
-              </li>
-            ))}
+                  <div className="flex-1">
+                    <span className="pt-1 block">{step}</span>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
 
           {/* Floating timer summary */}
-          <FloatingTimerSummary
-            timers={cookingTimer.timers}
-            onPauseTimer={cookingTimer.pauseTimer}
-            onResumeTimer={cookingTimer.resumeTimer}
-            onStartTimer={cookingTimer.startTimer}
-          />
+          {showTimerSummary && (
+            <FloatingTimerSummary
+              timers={cookingTimer.timers}
+              onPauseTimer={cookingTimer.pauseTimer}
+              onResumeTimer={cookingTimer.resumeTimer}
+              onClose={() => setShowTimerSummary(false)}
+            />
+          )}
         </div>
 
         {recipe.tips && (
