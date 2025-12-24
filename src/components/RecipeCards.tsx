@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { HelpTooltip } from "./HelpTooltip";
 import { VoiceCookingPlayer } from "./VoiceCookingPlayer";
-import { CookingTimerPlayer, FloatingTimerSummary } from "./CookingTimerPlayer";
+import { TimerSetButton, TimerDisplay, FloatingTimerSummary } from "./CookingTimerPlayer";
 import { useVoiceCooking } from "@/hooks/useVoiceCooking";
 import { useCookingTimer } from "@/hooks/useCookingTimer";
 import { Recipe, RecipeResponse } from "@/types/recipe";
@@ -241,9 +241,9 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
                       : ""
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
                     <span
-                      className={`flex-shrink-0 w-7 h-7 rounded-full text-xs flex items-center justify-center font-semibold transition-colors ${
+                      className={`w-7 h-7 rounded-full text-xs flex items-center justify-center font-semibold transition-colors ${
                         highlightedStep === idx
                           ? "bg-primary text-primary-foreground scale-110"
                           : "bg-primary text-primary-foreground"
@@ -251,20 +251,23 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
                     >
                       {idx + 1}
                     </span>
-                    <CookingTimerPlayer
+                    <TimerSetButton
                       stepIndex={idx}
                       stepLabel={step}
                       hasTimer={!!stepTimer}
-                      timer={stepTimer}
                       onSetTimer={cookingTimer.setTimer}
-                      onPauseTimer={cookingTimer.pauseTimer}
-                      onResumeTimer={cookingTimer.resumeTimer}
-                      onResetTimer={cookingTimer.resetTimer}
-                      onRemoveTimer={cookingTimer.removeTimer}
                     />
                   </div>
-                  <div className="flex-1">
-                    <span className="pt-1 block">{step}</span>
+                  <div className="flex-1 pt-1">
+                    {stepTimer && (
+                      <TimerDisplay
+                        timer={stepTimer}
+                        onPauseTimer={cookingTimer.pauseTimer}
+                        onResumeTimer={cookingTimer.resumeTimer}
+                        onRemoveTimer={cookingTimer.removeTimer}
+                      />
+                    )}
+                    <span>{step}</span>
                   </div>
                 </li>
               );

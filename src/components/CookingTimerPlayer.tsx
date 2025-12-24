@@ -3,7 +3,6 @@ import {
   Clock,
   Play,
   Pause,
-  RotateCcw,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,29 +25,29 @@ interface TimerItem {
   isPaused: boolean;
 }
 
-interface CookingTimerPlayerProps {
+// Props for the set timer button (shown below step number)
+interface TimerSetButtonProps {
   stepIndex: number;
   stepLabel: string;
   hasTimer: boolean;
-  timer: TimerItem | null;
   onSetTimer: (stepIndex: number, label: string, minutes: number) => void;
+}
+
+// Props for the inline timer display (shown with step text)
+interface TimerDisplayProps {
+  timer: TimerItem;
   onPauseTimer: (id: string) => void;
   onResumeTimer: (id: string) => void;
-  onResetTimer: (id: string) => void;
   onRemoveTimer: (id: string) => void;
 }
 
-export function CookingTimerPlayer({
+// Button to set timer - always shown below step number
+export function TimerSetButton({
   stepIndex,
   stepLabel,
   hasTimer,
-  timer,
   onSetTimer,
-  onPauseTimer,
-  onResumeTimer,
-  onResetTimer,
-  onRemoveTimer,
-}: CookingTimerPlayerProps) {
+}: TimerSetButtonProps) {
   const [minutes, setMinutes] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -68,65 +67,15 @@ export function CookingTimerPlayer({
 
   const quickTimers = [1, 5, 15, 30];
 
-  // If there's already a timer for this step, show the timer display
-  if (hasTimer && timer) {
+  // If timer already exists, show a smaller indicator
+  if (hasTimer) {
     return (
-      <div
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all ${
-          timer.remaining === 0
-            ? "bg-destructive/20 text-destructive animate-pulse"
-            : timer.isRunning
-            ? "bg-primary/20 text-primary"
-            : timer.isPaused
-            ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-            : "bg-muted text-muted-foreground"
-        }`}
-      >
-        <Clock className="h-3 w-3" />
-        <span>{formatTime(timer.remaining)}</span>
-
-        {timer.remaining === 0 ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5 p-0"
-            onClick={() => onResetTimer(timer.id)}
-          >
-            <RotateCcw className="h-3 w-3" />
-          </Button>
-        ) : timer.isRunning ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5 p-0"
-            onClick={() => onPauseTimer(timer.id)}
-          >
-            <Pause className="h-3 w-3" />
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5 p-0"
-            onClick={() => onResumeTimer(timer.id)}
-          >
-            <Play className="h-3 w-3" />
-          </Button>
-        )}
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-5 w-5 p-0 hover:text-destructive"
-          onClick={() => onRemoveTimer(timer.id)}
-        >
-          <X className="h-3 w-3" />
-        </Button>
+      <div className="h-6 w-6 flex items-center justify-center">
+        <Clock className="h-3 w-3 text-primary" />
       </div>
     );
   }
 
-  // No timer yet - show the add timer button
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -182,6 +131,52 @@ export function CookingTimerPlayer({
   );
 }
 
+// Inline timer display - shown at the start of step text
+export function TimerDisplay({
+  timer,
+  onPauseTimer,
+  onResumeTimer,
+  onRemoveTimer,
+}: TimerDisplayProps) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mr-2 ${
+        timer.isRunning
+          ? "bg-primary/20 text-primary"
+          : timer.isPaused
+          ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+          : "bg-muted text-muted-foreground"
+      }`}
+    >
+      <Clock className="h-3 w-3" />
+      <span className="font-mono">{formatTime(timer.remaining)}</span>
+
+      {timer.isRunning ? (
+        <button
+          className="hover:bg-primary/20 rounded p-0.5"
+          onClick={() => onPauseTimer(timer.id)}
+        >
+          <Pause className="h-3 w-3" />
+        </button>
+      ) : (
+        <button
+          className="hover:bg-primary/20 rounded p-0.5"
+          onClick={() => onResumeTimer(timer.id)}
+        >
+          <Play className="h-3 w-3" />
+        </button>
+      )}
+
+      <button
+        className="hover:text-destructive rounded p-0.5"
+        onClick={() => onRemoveTimer(timer.id)}
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </span>
+  );
+}
+
 // Floating timer summary component
 interface FloatingTimerSummaryProps {
   timers: TimerItem[];
@@ -196,7 +191,7 @@ export function FloatingTimerSummary({
   onResumeTimer,
   onClose,
 }: FloatingTimerSummaryProps) {
-  // Only show running or paused timers, auto-close when timer finishes (remaining === 0 are excluded)
+  // Only show running or paused timers
   const activeTimers = timers.filter((t) => t.isRunning || t.isPaused);
 
   if (activeTimers.length === 0) return null;
