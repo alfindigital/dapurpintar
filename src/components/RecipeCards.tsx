@@ -259,6 +259,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
                     />
                   </div>
                   <div className="flex-1 pt-1">
+                    <span>{step}</span>
                     {stepTimer && (
                       <TimerDisplay
                         timer={stepTimer}
@@ -267,7 +268,6 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
                         onRemoveTimer={cookingTimer.removeTimer}
                       />
                     )}
-                    <span>{step}</span>
                   </div>
                 </li>
               );
