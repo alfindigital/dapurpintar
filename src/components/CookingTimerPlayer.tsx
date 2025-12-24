@@ -1,13 +1,11 @@
 import { useState } from "react";
 import {
-  Timer,
+  Clock,
   Play,
   Pause,
   RotateCcw,
   X,
-  Plus,
-  Bell,
-  BellOff,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +69,7 @@ export function CookingTimerPlayer({
     }
   };
 
-  const quickTimers = [1, 3, 5, 10, 15, 30];
+  const quickTimers = [1, 5, 15, 30];
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -134,52 +132,30 @@ export function CookingTimerPlayer({
         </div>
       ))}
 
-      {/* Add timer button */}
+      {/* Add timer button - positioned below step number */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="h-6 w-6 rounded-full opacity-50 hover:opacity-100 transition-opacity"
+            size="sm"
+            className="h-6 px-2 text-xs opacity-60 hover:opacity-100 transition-opacity gap-1"
           >
-            <Plus className="h-3 w-3" />
+            <Clock className="h-3 w-3" />
+            <span>+ Timer</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-64 p-3" align="start">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Set Timer</span>
-              {notificationPermission === "unsupported" ? (
-                <Badge variant="outline" className="text-xs gap-1">
-                  <BellOff className="h-3 w-3" />
-                  Tidak didukung
-                </Badge>
-              ) : notificationPermission === "granted" ? (
-                <Badge variant="secondary" className="text-xs gap-1">
-                  <Bell className="h-3 w-3" />
-                  Notifikasi aktif
-                </Badge>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-6 text-xs gap-1"
-                  onClick={onRequestPermission}
-                >
-                  <Bell className="h-3 w-3" />
-                  Aktifkan
-                </Button>
-              )}
-            </div>
+        <PopoverContent className="w-auto p-3" align="start">
+          <div className="space-y-2">
+            <span className="text-sm font-medium">Set Timer</span>
 
-            {/* Quick timer buttons */}
-            <div className="flex flex-wrap gap-1">
+            {/* Quick timer buttons + custom input in 2 rows max */}
+            <div className="flex flex-wrap gap-1 items-center">
               {quickTimers.map((mins) => (
                 <Button
                   key={mins}
                   variant="outline"
                   size="sm"
-                  className="h-7 text-xs"
+                  className="h-7 text-xs px-2"
                   onClick={() => {
                     onAddTimer(stepIndex, stepLabel.substring(0, 50), mins);
                     setIsOpen(false);
@@ -188,30 +164,28 @@ export function CookingTimerPlayer({
                   {mins}m
                 </Button>
               ))}
-            </div>
-
-            {/* Custom timer input */}
-            <div className="flex gap-2">
-              <Input
-                type="number"
-                placeholder="Menit"
-                min={1}
-                max={180}
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
-                className="h-8 text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddTimer();
-                }}
-              />
-              <Button
-                size="sm"
-                className="h-8"
-                onClick={handleAddTimer}
-                disabled={!minutes || parseInt(minutes) <= 0}
-              >
-                <Timer className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-1 items-center">
+                <Input
+                  type="number"
+                  placeholder="Custom"
+                  min={1}
+                  max={180}
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  className="h-7 w-16 text-xs"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddTimer();
+                  }}
+                />
+                <Button
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={handleAddTimer}
+                  disabled={!minutes || parseInt(minutes) <= 0}
+                >
+                  <Timer className="h-3 w-3" />
+                </Button>
+              </div>
             </div>
           </div>
         </PopoverContent>
@@ -239,9 +213,9 @@ export function FloatingTimerSummary({
   if (activeTimers.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-card border shadow-lg rounded-xl p-3 max-w-xs">
+    <div className="fixed bottom-12 right-4 z-50 bg-card border shadow-lg rounded-xl p-3 max-w-xs">
       <div className="flex items-center gap-2 mb-2">
-        <Timer className="h-4 w-4 text-primary" />
+        <Clock className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium">Timer Aktif</span>
         <Badge variant="secondary" className="ml-auto text-xs">
           {activeTimers.length}

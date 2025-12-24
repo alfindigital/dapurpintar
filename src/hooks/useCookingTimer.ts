@@ -54,11 +54,28 @@ export function useCookingTimer(): UseCookingTimerReturn {
       });
     }
     
-    // Also play a sound if available
+    // Play standard alarm/ringtone sound
     try {
-      const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleRs/BK/RoWkjDACU0LSJSjQGAJXPoHhEOw+s1KmTY0cpG6fa0q17RDkXnN/bs35COB+e4d+ufl1AOhik5Ny9dEIfE5nb1bJ8Tj4knOLdyYZWPAur6OTNi1xCDajk4sqGWkQXq+fmzoVZRQCq5ebNg1lFAKrl5s2DWUUC");
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
+      // Create a more standard ringtone-like sound using oscillator
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const playTone = (frequency: number, startTime: number, duration: number) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
+      
+      // Play a simple ringtone pattern (3 beeps)
+      const now = audioContext.currentTime;
+      playTone(880, now, 0.15);
+      playTone(880, now + 0.2, 0.15);
+      playTone(880, now + 0.4, 0.15);
     } catch {
       // Audio not available
     }
