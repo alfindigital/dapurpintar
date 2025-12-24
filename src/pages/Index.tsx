@@ -178,20 +178,25 @@ const Index = () => {
           isFavorite={isFavorite}
         />
 
-        <footer className="text-center text-xs text-muted-foreground py-4">
-          <p>
-            made by{" "}
-            <a 
-              href="https://alfindigital.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="font-medium hover:underline text-primary"
-            >
-              alfindigital
-            </a>
-          </p>
-        </footer>
       </main>
+
+      {/* Sticky Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 bg-background border-t py-2 text-center text-xs text-muted-foreground z-40">
+        <p>
+          made by{" "}
+          <a 
+            href="https://alfindigital.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="font-medium hover:underline text-primary"
+          >
+            alfindigital
+          </a>
+        </p>
+      </footer>
+
+      {/* Add bottom padding to main content to account for sticky footer */}
+      <div className="h-10" />
 
       <SettingsDialog 
         open={settingsOpen} 
