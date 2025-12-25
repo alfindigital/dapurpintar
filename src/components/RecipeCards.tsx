@@ -8,6 +8,7 @@ import { HelpTooltip } from "./HelpTooltip";
 import { VoiceCookingPlayer } from "./VoiceCookingPlayer";
 import { TimerSetButton, TimerDisplay, FloatingTimerSummary } from "./CookingTimerPlayer";
 import { useVoiceCooking } from "@/hooks/useVoiceCooking";
+import { useVoiceCommand } from "@/hooks/useVoiceCommand";
 import { useCookingTimer } from "@/hooks/useCookingTimer";
 import { Recipe, RecipeResponse } from "@/types/recipe";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ interface RecipeCardProps {
 function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const [showTimerSummary, setShowTimerSummary] = useState(true);
+  const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
   const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const voiceCooking = useVoiceCooking({
@@ -43,6 +45,19 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
   });
 
   const cookingTimer = useCookingTimer();
+
+  const voiceCommand = useVoiceCommand({
+    onNext: voiceCooking.nextStep,
+    onPrev: voiceCooking.prevStep,
+    onRepeat: voiceCooking.repeatStep,
+    onPause: voiceCooking.pause,
+    onResume: voiceCooking.resume,
+    onStop: voiceCooking.stop,
+    onSlower: () => voiceCooking.setRate(Math.max(0.5, voiceCooking.rate - 0.1)),
+    onFaster: () => voiceCooking.setRate(Math.min(1.5, voiceCooking.rate + 0.1)),
+    isSpeaking: voiceCooking.isSpeaking,
+    enabled: voiceCommandEnabled,
+  });
 
   // Reset highlight when voice stops
   useEffect(() => {
@@ -226,6 +241,11 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
             onNext={voiceCooking.nextStep}
             onPrev={voiceCooking.prevStep}
             onRepeat={voiceCooking.repeatStep}
+            voiceCommandEnabled={voiceCommandEnabled}
+            onVoiceCommandToggle={setVoiceCommandEnabled}
+            isVoiceCommandSupported={voiceCommand.isSupported}
+            isVoiceListening={voiceCommand.isListening}
+            lastVoiceCommand={voiceCommand.lastCommand}
           />
 
           <ol className="space-y-3 mt-4">

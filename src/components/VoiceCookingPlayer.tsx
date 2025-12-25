@@ -1,7 +1,9 @@
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Square, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, Square, Volume2, VolumeX, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { VoiceCommandInfo } from "./VoiceCommandInfo";
 
 interface VoiceCookingPlayerProps {
   isSupported: boolean;
@@ -18,6 +20,12 @@ interface VoiceCookingPlayerProps {
   onNext: () => void;
   onPrev: () => void;
   onRepeat: () => void;
+  // Voice command props
+  voiceCommandEnabled?: boolean;
+  onVoiceCommandToggle?: (enabled: boolean) => void;
+  isVoiceCommandSupported?: boolean;
+  isVoiceListening?: boolean;
+  lastVoiceCommand?: string | null;
 }
 
 export function VoiceCookingPlayer({
@@ -35,6 +43,11 @@ export function VoiceCookingPlayer({
   onNext,
   onPrev,
   onRepeat,
+  voiceCommandEnabled = false,
+  onVoiceCommandToggle,
+  isVoiceCommandSupported = false,
+  isVoiceListening = false,
+  lastVoiceCommand = null,
 }: VoiceCookingPlayerProps) {
   if (!isSupported) {
     return (
@@ -146,6 +159,40 @@ export function VoiceCookingPlayer({
         />
         <span className="text-xs font-medium w-10 text-right">{rate.toFixed(1)}x</span>
       </div>
+
+      {/* Voice Command Section */}
+      {isVoiceCommandSupported && onVoiceCommandToggle && (
+        <div className="pt-3 border-t border-primary/10">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {voiceCommandEnabled && isVoiceListening ? (
+                <Mic className="h-4 w-4 text-primary animate-pulse flex-shrink-0" />
+              ) : (
+                <MicOff className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              )}
+              <span className="text-xs font-medium truncate">Voice Command</span>
+              {lastVoiceCommand && (
+                <Badge variant="outline" className="text-xs animate-pulse">
+                  "{lastVoiceCommand}"
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Switch
+                checked={voiceCommandEnabled}
+                onCheckedChange={onVoiceCommandToggle}
+                className="scale-90"
+              />
+              <VoiceCommandInfo />
+            </div>
+          </div>
+          {voiceCommandEnabled && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Ucapkan: Lanjut, Mundur, Ulangi, Stop
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
