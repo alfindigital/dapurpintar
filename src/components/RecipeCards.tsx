@@ -306,12 +306,12 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
         </div>
 
         {recipe.tips && (
-          <div className="p-4 bg-accent/20 rounded-xl border border-accent/30">
-            <h4 className="font-semibold mb-2 flex items-center gap-2">
-              💡 Tips
-            </h4>
-            <p className="text-sm">{recipe.tips}</p>
-          </div>
+          <Card className="border-accent/30 bg-accent/10">
+            <CardContent className="p-4">
+              <h4 className="font-semibold mb-3">💡 Tips</h4>
+              <p className="text-sm text-muted-foreground">{recipe.tips}</p>
+            </CardContent>
+          </Card>
         )}
       </CardContent>
     </Card>
