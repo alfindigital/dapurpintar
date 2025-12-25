@@ -305,14 +305,21 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
           )}
         </div>
 
-        {recipe.tips && (
-          <Card className="border-accent/30 bg-accent/10">
-            <CardContent className="p-4">
-              <h4 className="font-semibold mb-3">💡 Tips</h4>
-              <p className="text-sm text-muted-foreground">{recipe.tips}</p>
-            </CardContent>
-          </Card>
-        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface TipsCardProps {
+  tips: string;
+}
+
+function TipsCard({ tips }: TipsCardProps) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <h4 className="font-semibold mb-3">💡 Tips</h4>
+        <p className="text-sm text-muted-foreground">{tips}</p>
       </CardContent>
     </Card>
   );
@@ -348,12 +355,14 @@ export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite }: R
       </div>
 
       {data.recipes.map((recipe, index) => (
-        <RecipeCard
-          key={recipe.id || index}
-          recipe={recipe}
-          onToggleFavorite={onToggleFavorite}
-          isFavorite={isFavorite}
-        />
+        <div key={recipe.id || index} className="space-y-4">
+          <RecipeCard
+            recipe={recipe}
+            onToggleFavorite={onToggleFavorite}
+            isFavorite={isFavorite}
+          />
+          {recipe.tips && <TipsCard tips={recipe.tips} />}
+        </div>
       ))}
 
       {data.substitusi && data.substitusi.length > 0 && (
