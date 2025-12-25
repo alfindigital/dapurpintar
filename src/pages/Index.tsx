@@ -176,6 +176,7 @@ const Index = () => {
           isLoading={isLoading}
           onToggleFavorite={handleToggleFavorite}
           isFavorite={isFavorite}
+          apiKey={apiKey}
         />
 
       </main>

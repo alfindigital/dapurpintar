@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { HelpTooltip } from "./HelpTooltip";
 import { VoiceCookingPlayer } from "./VoiceCookingPlayer";
 import { TimerSetButton, TimerDisplay, FloatingTimerSummary } from "./CookingTimerPlayer";
+import { IngredientSubstitutionButton } from "./IngredientSubstitution";
 import { useVoiceCooking } from "@/hooks/useVoiceCooking";
 import { useVoiceCommand } from "@/hooks/useVoiceCommand";
 import { useCookingTimer } from "@/hooks/useCookingTimer";
@@ -18,15 +19,17 @@ interface RecipeCardsProps {
   isLoading: boolean;
   onToggleFavorite?: (recipe: Recipe) => void;
   isFavorite?: (recipeName: string) => boolean;
+  apiKey?: string;
 }
 
 interface RecipeCardProps {
   recipe: Recipe;
   onToggleFavorite?: (recipe: Recipe) => void;
   isFavorite?: (recipeName: string) => boolean;
+  apiKey?: string;
 }
 
-function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
+function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCardProps) {
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const [showTimerSummary, setShowTimerSummary] = useState(true);
   const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
@@ -206,14 +209,24 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite }: RecipeCardProps) {
           </h4>
           <ul className="space-y-2">
             {recipe.bahan.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <span>
-                  <strong>{item.jumlah}</strong> {item.item}
-                  {item.catatan && (
-                    <span className="text-muted-foreground"> ({item.catatan})</span>
-                  )}
-                </span>
+              <li key={idx} className="flex items-center justify-between gap-2 text-sm">
+                <div className="flex items-start gap-2 flex-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  <span>
+                    <strong>{item.jumlah}</strong> {item.item}
+                    {item.catatan && (
+                      <span className="text-muted-foreground"> ({item.catatan})</span>
+                    )}
+                  </span>
+                </div>
+                {apiKey && (
+                  <IngredientSubstitutionButton
+                    ingredient={item.item}
+                    jumlah={item.jumlah}
+                    recipeName={recipe.nama}
+                    apiKey={apiKey}
+                  />
+                )}
               </li>
             ))}
           </ul>
@@ -325,7 +338,7 @@ function TipsCard({ tips }: TipsCardProps) {
   );
 }
 
-export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite }: RecipeCardsProps) {
+export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, apiKey }: RecipeCardsProps) {
   if (isLoading) {
     return (
       <Card className="animate-pulse-soft">
@@ -360,6 +373,7 @@ export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite }: R
             recipe={recipe}
             onToggleFavorite={onToggleFavorite}
             isFavorite={isFavorite}
+            apiKey={apiKey}
           />
           {recipe.tips && <TipsCard tips={recipe.tips} />}
         </div>
