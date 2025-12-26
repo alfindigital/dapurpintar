@@ -224,12 +224,24 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
             <h4 className="font-semibold flex items-center gap-2">
               🥗 Bahan-bahan
             </h4>
-            {allIngredientsChecked && (
-              <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-600">
-                <Check className="h-3 w-3" />
-                Bahan Lengkap
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {checkedIngredients.size > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCheckedIngredients(new Set())}
+                  className="h-6 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Reset Semua
+                </Button>
+              )}
+              {allIngredientsChecked && (
+                <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-600">
+                  <Check className="h-3 w-3" />
+                  Bahan Lengkap
+                </Badge>
+              )}
+            </div>
           </div>
           <ul className="space-y-2">
             {recipe.bahan.map((item, idx) => (
