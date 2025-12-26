@@ -94,6 +94,87 @@
     --sidebar-border: 217 33% 20%;
     --sidebar-ring: 160 84% 45%;
   }
+
+  /* Font Size Classes */
+  html.font-small {
+    font-size: 14px;
+  }
+
+  html.font-normal {
+    font-size: 16px;
+  }
+
+  html.font-large {
+    font-size: 20px;
+  }
+
+  /* Color Theme Overrides */
+  html.theme-green {
+    --primary: 160 84% 39%;
+    --ring: 160 84% 39%;
+  }
+
+  html.theme-green.dark {
+    --primary: 160 84% 45%;
+    --ring: 160 84% 45%;
+  }
+
+  html.theme-blue {
+    --primary: 217 91% 50%;
+    --ring: 217 91% 50%;
+  }
+
+  html.theme-blue.dark {
+    --primary: 217 91% 60%;
+    --ring: 217 91% 60%;
+  }
+
+  html.theme-orange {
+    --primary: 25 95% 53%;
+    --ring: 25 95% 53%;
+  }
+
+  html.theme-orange.dark {
+    --primary: 25 95% 58%;
+    --ring: 25 95% 58%;
+  }
+
+  html.theme-purple {
+    --primary: 270 70% 55%;
+    --ring: 270 70% 55%;
+  }
+
+  html.theme-purple.dark {
+    --primary: 270 70% 60%;
+    --ring: 270 70% 60%;
+  }
+
+  /* High Contrast Mode */
+  html.high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 25%;
+    --border: 0 0% 0%;
+    --input: 0 0% 85%;
+  }
+
+  html.high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 75%;
+    --border: 0 0% 100%;
+    --input: 0 0% 20%;
+  }
 }
 
 @layer base {

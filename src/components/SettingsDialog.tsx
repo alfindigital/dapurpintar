@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2 } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { HelpTooltip } from "./HelpTooltip";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
+import { useDisplaySettings, type FontSize, type ColorTheme } from "@/hooks/useDisplaySettings";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -20,10 +25,19 @@ interface SettingsDialogProps {
   onApiKeyChange?: (key: string) => void;
 }
 
+const colorThemes: { value: ColorTheme; label: string; color: string }[] = [
+  { value: "green", label: "Hijau", color: "hsl(160 84% 39%)" },
+  { value: "blue", label: "Biru", color: "hsl(217 91% 50%)" },
+  { value: "orange", label: "Oranye", color: "hsl(25 95% 53%)" },
+  { value: "purple", label: "Ungu", color: "hsl(270 70% 55%)" },
+];
+
 export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsDialogProps) {
   const [apiKey, setApiKey] = useState("");
   const [isTesting, setIsTesting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | null>(null);
+
+  const { settings, setFontSize, setHighContrast, setColorTheme, resetToDefaults } = useDisplaySettings();
 
   useEffect(() => {
     if (open) {
@@ -57,6 +71,11 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
     }
   };
 
+  const handleResetDefaults = () => {
+    resetToDefaults();
+    toast.success("Pengaturan tampilan direset ke default");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -66,53 +85,164 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             Pengaturan
           </DialogTitle>
           <DialogDescription>
-            Masukkan OpenRouter API Key untuk menggunakan fitur AI.
+            Kelola API Key dan tampilan aplikasi.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="apiKey">OpenRouter API Key</Label>
-              <HelpTooltip content="API Key disimpan di browser Anda. Gratis $1 credit untuk pengguna baru." />
-              {isValid === true && (
-                <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
-              )}
+        <Tabs defaultValue="api" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="api" className="flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              API Key
+            </TabsTrigger>
+            <TabsTrigger value="display" className="flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Tampilan
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="api" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="apiKey">OpenRouter API Key</Label>
+                <HelpTooltip content="API Key disimpan di browser Anda. Gratis $1 credit untuk pengguna baru." />
+                {isValid === true && (
+                  <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
+                )}
+              </div>
+              <Input
+                id="apiKey"
+                type="password"
+                placeholder="sk-or-v1-..."
+                value={apiKey}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  setIsValid(null);
+                }}
+              />
             </div>
-            <Input
-              id="apiKey"
-              type="password"
-              placeholder="sk-or-v1-..."
-              value={apiKey}
-              onChange={(e) => {
-                setApiKey(e.target.value);
-                setIsValid(null);
-              }}
-            />
-          </div>
 
-          <a
-            href="https://openrouter.ai/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Dapatkan API Key (gratis $1 credit)
-          </a>
-        </div>
+            <a
+              href="https://openrouter.ai/keys"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Dapatkan API Key (gratis $1 credit)
+            </a>
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Batal
-          </Button>
-          <Button onClick={handleTestAndSave} disabled={isTesting}>
-            {isTesting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : null}
-            Simpan
-          </Button>
-        </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Batal
+              </Button>
+              <Button onClick={handleTestAndSave} disabled={isTesting}>
+                {isTesting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Simpan
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="display" className="space-y-6 mt-4">
+            {/* Font Size */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label>Ukuran Font</Label>
+                <HelpTooltip content="Sesuaikan ukuran teks untuk kenyamanan membaca" />
+              </div>
+              <ToggleGroup
+                type="single"
+                value={settings.fontSize}
+                onValueChange={(value) => value && setFontSize(value as FontSize)}
+                className="justify-start"
+              >
+                <ToggleGroupItem value="small" aria-label="Font kecil" className="text-sm">
+                  Kecil
+                </ToggleGroupItem>
+                <ToggleGroupItem value="normal" aria-label="Font normal">
+                  Normal
+                </ToggleGroupItem>
+                <ToggleGroupItem value="large" aria-label="Font besar" className="text-lg">
+                  Besar
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <p className="text-sm text-muted-foreground">
+                Contoh teks: Resep masakan lezat untuk keluarga
+              </p>
+            </div>
+
+            {/* High Contrast */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="high-contrast">Mode Kontras Tinggi</Label>
+                    <HelpTooltip content="Meningkatkan kontras warna untuk kemudahan membaca, cocok untuk lansia" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Warna lebih jelas untuk penglihatan lebih baik
+                  </p>
+                </div>
+                <Switch
+                  id="high-contrast"
+                  checked={settings.highContrast}
+                  onCheckedChange={setHighContrast}
+                />
+              </div>
+            </div>
+
+            {/* Color Theme */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label>Tema Warna</Label>
+                <HelpTooltip content="Pilih warna utama sesuai selera Anda" />
+              </div>
+              <RadioGroup
+                value={settings.colorTheme}
+                onValueChange={(value) => setColorTheme(value as ColorTheme)}
+                className="flex flex-wrap gap-3"
+              >
+                {colorThemes.map((theme) => (
+                  <div key={theme.value} className="flex items-center">
+                    <RadioGroupItem
+                      value={theme.value}
+                      id={`theme-${theme.value}`}
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor={`theme-${theme.value}`}
+                      className="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      <span
+                        className="h-5 w-5 rounded-full"
+                        style={{ backgroundColor: theme.color }}
+                      />
+                      <span>{theme.label}</span>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
+            {/* Reset Button */}
+            <div className="flex justify-between items-center pt-2 border-t">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetDefaults}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset ke Default
+              </Button>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Tutup
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

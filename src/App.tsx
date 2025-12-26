@@ -6,12 +6,19 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { useDisplaySettings } from "@/hooks/useDisplaySettings";
 
 const queryClient = new QueryClient();
+
+function DisplaySettingsInitializer() {
+  useDisplaySettings();
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <DisplaySettingsInitializer />
       <TooltipProvider>
         <Toaster />
         <Sonner position="top-center" />
