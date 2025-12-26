@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Clock, ChefHat, Heart, Share2, Printer, Flame, Beef, Wheat, Droplets } from "lucide-react";
+import { Clock, ChefHat, Heart, Share2, Printer, Flame, Beef, Wheat, Droplets, Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,22 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const [showTimerSummary, setShowTimerSummary] = useState(true);
   const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  const allIngredientsChecked = checkedIngredients.size === recipe.bahan.length && recipe.bahan.length > 0;
+
+  const toggleIngredient = (idx: number) => {
+    setCheckedIngredients(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(idx)) {
+        newSet.delete(idx);
+      } else {
+        newSet.add(idx);
+      }
+      return newSet;
+    });
+  };
 
   const voiceCooking = useVoiceCooking({
     steps: recipe.langkah,
@@ -204,20 +220,37 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
 
       <CardContent className="space-y-6">
         <div>
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            🥗 Bahan-bahan
-          </h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              🥗 Bahan-bahan
+            </h4>
+            {allIngredientsChecked && (
+              <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-600">
+                <Check className="h-3 w-3" />
+                Bahan Lengkap
+              </Badge>
+            )}
+          </div>
           <ul className="space-y-2">
             {recipe.bahan.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between gap-2 text-sm">
-                <div className="flex items-start gap-2 flex-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                  <span>
+                <div className="flex items-center gap-3 flex-1">
+                  <Checkbox
+                    id={`ingredient-${recipe.id}-${idx}`}
+                    checked={checkedIngredients.has(idx)}
+                    onCheckedChange={() => toggleIngredient(idx)}
+                  />
+                  <label
+                    htmlFor={`ingredient-${recipe.id}-${idx}`}
+                    className={`cursor-pointer transition-all ${
+                      checkedIngredients.has(idx) ? "line-through text-muted-foreground" : ""
+                    }`}
+                  >
                     <strong>{item.jumlah}</strong> {item.item}
                     {item.catatan && (
                       <span className="text-muted-foreground"> ({item.catatan})</span>
                     )}
-                  </span>
+                  </label>
                 </div>
                 {apiKey && (
                   <IngredientSubstitutionButton
