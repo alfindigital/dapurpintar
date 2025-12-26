@@ -34,21 +34,40 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const [showTimerSummary, setShowTimerSummary] = useState(true);
   const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
-  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+  const storageKey = `checklist_${recipe.id || recipe.nama}`;
+  
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch {
+        return new Set();
+      }
+    }
+    return new Set();
+  });
   const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const allIngredientsChecked = checkedIngredients.size === recipe.bahan.length && recipe.bahan.length > 0;
 
+  const updateCheckedIngredients = (newSet: Set<number>) => {
+    setCheckedIngredients(newSet);
+    if (newSet.size > 0) {
+      localStorage.setItem(storageKey, JSON.stringify([...newSet]));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  };
+
   const toggleIngredient = (idx: number) => {
-    setCheckedIngredients(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(idx)) {
-        newSet.delete(idx);
-      } else {
-        newSet.add(idx);
-      }
-      return newSet;
-    });
+    const newSet = new Set(checkedIngredients);
+    if (newSet.has(idx)) {
+      newSet.delete(idx);
+    } else {
+      newSet.add(idx);
+    }
+    updateCheckedIngredients(newSet);
   };
 
   const voiceCooking = useVoiceCooking({
@@ -229,7 +248,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setCheckedIngredients(new Set())}
+                  onClick={() => updateCheckedIngredients(new Set())}
                   className="h-6 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Reset Semua
