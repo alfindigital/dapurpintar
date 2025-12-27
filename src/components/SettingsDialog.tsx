@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles, UserCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,9 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { HelpTooltip } from "./HelpTooltip";
+import { ProfileTab } from "./ProfileTab";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
 import { useDisplaySettings, type FontSize, type ColorTheme, type AccessibilityProfile } from "@/hooks/useDisplaySettings";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -59,6 +61,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
   const [isValid, setIsValid] = useState<boolean | null>(null);
 
   const { settings, setFontSize, setHighContrast, setColorTheme, setProfile, resetToDefaults } = useDisplaySettings();
+  const { profile, updateProfile, addFamilyMember, removeFamilyMember, resetProfile } = useUserProfile();
 
   useEffect(() => {
     if (open) {
@@ -99,7 +102,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />
@@ -111,10 +114,14 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
         </DialogHeader>
 
         <Tabs defaultValue="api" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="api" className="flex items-center gap-2">
               <Key className="h-4 w-4" />
-              API Key
+              API
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <UserCircle className="h-4 w-4" />
+              Profil
             </TabsTrigger>
             <TabsTrigger value="display" className="flex items-center gap-2">
               <Palette className="h-4 w-4" />
@@ -164,6 +171,16 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
                 Simpan
               </Button>
             </div>
+          </TabsContent>
+
+          <TabsContent value="profile" className="mt-4">
+            <ProfileTab
+              profile={profile}
+              onUpdateProfile={updateProfile}
+              onAddFamilyMember={addFamilyMember}
+              onRemoveFamilyMember={removeFamilyMember}
+              onResetProfile={resetProfile}
+            />
           </TabsContent>
 
           <TabsContent value="display" className="space-y-6 mt-4">

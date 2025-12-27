@@ -1,8 +1,88 @@
 import { Recipe, RecipeResponse, Preferences } from "@/types/recipe";
+import { UserProfile } from "@/types/profile";
+import { REGIONAL_CUISINES } from "@/lib/profileConstants";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-const createSystemPrompt = (preferences: Preferences, isAutoMode: boolean) => {
+const createProfileContext = (profile?: UserProfile): string => {
+  if (!profile || !profile.nama) return '';
+
+  const lines: string[] = [];
+  lines.push('\n\n--- PROFIL PENGGUNA (GUNAKAN UNTUK PERSONALISASI) ---');
+
+  // Basic info
+  lines.push(`Nama: ${profile.nama}`);
+  if (profile.usia) lines.push(`Usia: ${profile.usia} tahun`);
+  lines.push(`Status: ${profile.status}`);
+
+  // Family members
+  if (profile.anggotaKeluarga.length > 0) {
+    const totalPersons = 1 + profile.anggotaKeluarga.length;
+    lines.push(`\nJumlah anggota keluarga: ${totalPersons} orang`);
+    lines.push('Anggota keluarga:');
+    for (const member of profile.anggotaKeluarga) {
+      let memberLine = `- ${member.nama} (${member.hubungan}, ${member.usia} tahun, kategori: ${member.kategoriUsia})`;
+      if (member.kondisiKhusus.length > 0) {
+        memberLine += ` - Kondisi: ${member.kondisiKhusus.join(', ')}`;
+      }
+      lines.push(memberLine);
+    }
+
+    // Collect all health conditions
+    const allConditions = profile.anggotaKeluarga.flatMap(m => m.kondisiKhusus);
+    if (allConditions.length > 0) {
+      lines.push(`\nPERTIMBANGAN KESEHATAN: ${[...new Set(allConditions)].join(', ')}`);
+    }
+
+    // Check for special age groups
+    const hasBaby = profile.anggotaKeluarga.some(m => m.kategoriUsia === 'bayi' || m.kategoriUsia === 'balita');
+    const hasElderly = profile.anggotaKeluarga.some(m => m.kategoriUsia === 'lansia');
+    if (hasBaby) lines.push('⚠️ Ada BAYI/BALITA - pertimbangkan tekstur lembut, hindari bumbu pedas berlebihan');
+    if (hasElderly) lines.push('⚠️ Ada LANSIA - pertimbangkan tekstur empuk, rendah garam, mudah dicerna');
+  }
+
+  // Location and regional preference
+  if (profile.provinsi) {
+    lines.push(`\nLokasi: ${profile.kota ? `${profile.kota}, ` : ''}${profile.provinsi}`);
+    
+    // Find regional cuisines
+    const regionalKey = Object.keys(REGIONAL_CUISINES).find(key => 
+      profile.provinsi.toLowerCase().includes(key.toLowerCase()) ||
+      key.toLowerCase().includes(profile.provinsi.toLowerCase())
+    );
+    if (regionalKey && REGIONAL_CUISINES[regionalKey]) {
+      lines.push(`Masakan daerah favorit: ${REGIONAL_CUISINES[regionalKey].join(', ')}`);
+      lines.push('→ PRIORITASKAN resep masakan dari daerah ini jika relevan dengan bahan');
+    }
+  }
+
+  // Cooking preferences
+  const skillMap = { pemula: 'Pemula (langkah sederhana)', menengah: 'Menengah', mahir: 'Mahir (boleh kompleks)' };
+  const timeMap = { singkat: '<30 menit', sedang: '30-60 menit', panjang: '>60 menit' };
+  const budgetMap = { hemat: 'Hemat (bahan murah)', sedang: 'Sedang', bebas: 'Bebas' };
+
+  lines.push(`\nKemampuan memasak: ${skillMap[profile.kemampuanMasak]}`);
+  lines.push(`Waktu tersedia: ${timeMap[profile.waktuMasakTersedia]}`);
+  lines.push(`Budget: ${budgetMap[profile.budgetMasak]}`);
+
+  // Additional notes
+  if (profile.catatanTambahan) {
+    lines.push(`\nCatatan tambahan: ${profile.catatanTambahan}`);
+  }
+
+  lines.push('\n--- INSTRUKSI PERSONALISASI ---');
+  lines.push('1. Sesuaikan PORSI resep dengan jumlah anggota keluarga');
+  lines.push('2. Pertimbangkan KONDISI KESEHATAN setiap anggota');
+  lines.push('3. Prioritaskan MASAKAN DAERAH jika bahan cocok');
+  lines.push('4. Sesuaikan TINGKAT KESULITAN dengan kemampuan');
+  lines.push('5. Perhatikan WAKTU dan BUDGET yang tersedia');
+  lines.push('--- AKHIR PROFIL ---\n');
+
+  return lines.join('\n');
+};
+
+const createSystemPrompt = (preferences: Preferences, isAutoMode: boolean, userProfile?: UserProfile) => {
+  const profileContext = createProfileContext(userProfile);
   // Auto mode: AI determines everything automatically
   if (isAutoMode) {
     return `Kamu adalah chef profesional Indonesia dengan pengalaman 20+ tahun. Spesialisasimu adalah masakan rumahan yang praktis dan lezat.
@@ -49,10 +129,9 @@ PENTING:
 - Berikan takaran yang jelas (sdm, sdt, gram, ml)
 - Langkah harus detail dan mudah diikuti
 - WAJIB sertakan estimasi nutrisi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
-- Berikan HANYA JSON tanpa markdown atau teks tambahan`;
+- Berikan HANYA JSON tanpa markdown atau teks tambahan
+${profileContext}`;
   }
-
-  // Manual mode: use user preferences
   let dietaryText = "";
   if (preferences.dietary.length > 0 && preferences.dietary[0]) {
     dietaryText = `\nPANTANGAN MAKANAN: Resep TIDAK BOLEH mengandung: ${preferences.dietary[0]}`;
@@ -120,16 +199,18 @@ PENTING:
 - Berikan takaran yang jelas (sdm, sdt, gram, ml)
 - Langkah harus detail dan mudah diikuti
 - WAJIB sertakan estimasi nutrisi (kalori dalam kkal, protein/karbohidrat/lemak dalam gram)
-- Berikan HANYA JSON tanpa markdown atau teks tambahan`;
+- Berikan HANYA JSON tanpa markdown atau teks tambahan
+${profileContext}`;
 };
 
 export async function generateRecipes(
   input: { text?: string; images?: string[] },
   apiKey: string,
   preferences: Preferences,
-  isAutoMode: boolean = false
+  isAutoMode: boolean = false,
+  userProfile?: UserProfile
 ): Promise<RecipeResponse> {
-  const systemPrompt = createSystemPrompt(preferences, isAutoMode);
+  const systemPrompt = createSystemPrompt(preferences, isAutoMode, userProfile);
   let userContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }> = "";
 
   // Build user message content

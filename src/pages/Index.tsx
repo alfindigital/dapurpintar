@@ -10,6 +10,7 @@ import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
@@ -38,6 +39,7 @@ const Index = () => {
 
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
   const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
+  const { profile } = useUserProfile();
 
   // Save auto mode preference
   useEffect(() => {
@@ -91,7 +93,7 @@ const Index = () => {
         submitData.text = inputData.text.trim();
       }
 
-      const result = await generateRecipes(submitData, apiKey, finalPreferences, isAutoMode);
+      const result = await generateRecipes(submitData, apiKey, finalPreferences, isAutoMode, profile);
       setRecipeData(result);
       saveToHistory(result, inputData.text);
       toast.success(`${result.recipes?.length || 0} resep ditemukan`);
