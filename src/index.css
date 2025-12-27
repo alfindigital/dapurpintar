@@ -95,6 +95,17 @@
     --sidebar-ring: 160 84% 45%;
   }
 
+  /* Smooth transitions for accessibility settings */
+  html {
+    transition: font-size 0.3s ease-out;
+  }
+
+  html *,
+  html *::before,
+  html *::after {
+    transition: background-color 0.3s ease-out, color 0.3s ease-out, border-color 0.3s ease-out, box-shadow 0.3s ease-out;
+  }
+
   /* Font Size Classes */
   html.font-small {
     font-size: 14px;
