@@ -2,17 +2,39 @@ import { useState, useEffect, useCallback } from "react";
 
 export type FontSize = "small" | "normal" | "large";
 export type ColorTheme = "green" | "blue" | "orange" | "purple";
+export type AccessibilityProfile = "default" | "lansia" | "low-vision";
 
 export interface DisplaySettings {
   fontSize: FontSize;
   highContrast: boolean;
   colorTheme: ColorTheme;
+  profile: AccessibilityProfile;
 }
 
 const DEFAULT_SETTINGS: DisplaySettings = {
   fontSize: "normal",
   highContrast: false,
   colorTheme: "green",
+  profile: "default",
+};
+
+// Profile presets
+const PROFILE_PRESETS: Record<AccessibilityProfile, Omit<DisplaySettings, "profile">> = {
+  default: {
+    fontSize: "normal",
+    highContrast: false,
+    colorTheme: "green",
+  },
+  lansia: {
+    fontSize: "large",
+    highContrast: true,
+    colorTheme: "blue",
+  },
+  "low-vision": {
+    fontSize: "large",
+    highContrast: true,
+    colorTheme: "orange",
+  },
 };
 
 const STORAGE_KEY = "display_settings";
@@ -55,15 +77,20 @@ export function useDisplaySettings() {
   }, [settings, applySettings]);
 
   const setFontSize = (fontSize: FontSize) => {
-    setSettings((prev) => ({ ...prev, fontSize }));
+    setSettings((prev) => ({ ...prev, fontSize, profile: "default" }));
   };
 
   const setHighContrast = (highContrast: boolean) => {
-    setSettings((prev) => ({ ...prev, highContrast }));
+    setSettings((prev) => ({ ...prev, highContrast, profile: "default" }));
   };
 
   const setColorTheme = (colorTheme: ColorTheme) => {
-    setSettings((prev) => ({ ...prev, colorTheme }));
+    setSettings((prev) => ({ ...prev, colorTheme, profile: "default" }));
+  };
+
+  const setProfile = (profile: AccessibilityProfile) => {
+    const preset = PROFILE_PRESETS[profile];
+    setSettings({ ...preset, profile });
   };
 
   const resetToDefaults = () => {
@@ -75,6 +102,8 @@ export function useDisplaySettings() {
     setFontSize,
     setHighContrast,
     setColorTheme,
+    setProfile,
     resetToDefaults,
+    profiles: PROFILE_PRESETS,
   };
 }

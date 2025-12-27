@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { HelpTooltip } from "./HelpTooltip";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
-import { useDisplaySettings, type FontSize, type ColorTheme } from "@/hooks/useDisplaySettings";
+import { useDisplaySettings, type FontSize, type ColorTheme, type AccessibilityProfile } from "@/hooks/useDisplaySettings";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -32,12 +32,33 @@ const colorThemes: { value: ColorTheme; label: string; color: string }[] = [
   { value: "purple", label: "Ungu", color: "hsl(270 70% 55%)" },
 ];
 
+const accessibilityProfiles: { value: AccessibilityProfile; label: string; description: string; icon: React.ReactNode }[] = [
+  { 
+    value: "default", 
+    label: "Default", 
+    description: "Pengaturan standar",
+    icon: <Sparkles className="h-5 w-5" />
+  },
+  { 
+    value: "lansia", 
+    label: "Lansia", 
+    description: "Font besar, kontras tinggi, warna biru",
+    icon: <User className="h-5 w-5" />
+  },
+  { 
+    value: "low-vision", 
+    label: "Low Vision", 
+    description: "Font besar, kontras tinggi, warna oranye",
+    icon: <Eye className="h-5 w-5" />
+  },
+];
+
 export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsDialogProps) {
   const [apiKey, setApiKey] = useState("");
   const [isTesting, setIsTesting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | null>(null);
 
-  const { settings, setFontSize, setHighContrast, setColorTheme, resetToDefaults } = useDisplaySettings();
+  const { settings, setFontSize, setHighContrast, setColorTheme, setProfile, resetToDefaults } = useDisplaySettings();
 
   useEffect(() => {
     if (open) {
@@ -146,6 +167,39 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
           </TabsContent>
 
           <TabsContent value="display" className="space-y-6 mt-4">
+            {/* Accessibility Profiles */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label>Profil Aksesibilitas</Label>
+                <HelpTooltip content="Pilih profil untuk mengatur beberapa pengaturan sekaligus" />
+              </div>
+              <RadioGroup
+                value={settings.profile}
+                onValueChange={(value) => setProfile(value as AccessibilityProfile)}
+                className="grid gap-2"
+              >
+                {accessibilityProfiles.map((profile) => (
+                  <div key={profile.value} className="flex items-center">
+                    <RadioGroupItem
+                      value={profile.value}
+                      id={`profile-${profile.value}`}
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor={`profile-${profile.value}`}
+                      className="flex items-center gap-3 w-full cursor-pointer rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      <span className="text-primary">{profile.icon}</span>
+                      <div className="flex-1">
+                        <span className="font-medium">{profile.label}</span>
+                        <p className="text-sm text-muted-foreground">{profile.description}</p>
+                      </div>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+
             {/* Font Size */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
