@@ -245,6 +245,40 @@ export const useMealPlan = () => {
     ));
   }, []);
 
+  const swapSlots = useCallback((slotId1: string, slotId2: string) => {
+    setMealPlan(prev => {
+      if (!prev) return prev;
+      
+      const slot1 = prev.slots.find(s => s.id === slotId1);
+      const slot2 = prev.slots.find(s => s.id === slotId2);
+      
+      if (!slot1 || !slot2) return prev;
+      
+      return {
+        ...prev,
+        slots: prev.slots.map(slot => {
+          if (slot.id === slotId1) {
+            return {
+              ...slot,
+              recipe: slot2.recipe,
+              isLocked: slot2.isLocked,
+              isSkipped: slot2.isSkipped,
+            };
+          }
+          if (slot.id === slotId2) {
+            return {
+              ...slot,
+              recipe: slot1.recipe,
+              isLocked: slot1.isLocked,
+              isSkipped: slot1.isSkipped,
+            };
+          }
+          return slot;
+        }),
+      };
+    });
+  }, []);
+
   return {
     mealPlan,
     templates,
@@ -262,5 +296,6 @@ export const useMealPlan = () => {
     applyTemplate,
     deleteTemplate,
     renameTemplate,
+    swapSlots,
   };
 };

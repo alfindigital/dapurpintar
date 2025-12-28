@@ -1,13 +1,15 @@
+import { useState } from "react";
 import { WeeklyMealPlan, MealSlot, DAYS, MEAL_TIMES, MealTime } from "@/types/mealPlan";
 import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface MealPlanGridProps {
   mealPlan: WeeklyMealPlan;
   onToggleLock: (slotId: string) => void;
   onToggleSkip: (slotId: string) => void;
   onViewDetail: (slot: MealSlot) => void;
+  onSwapSlots?: (slotId1: string, slotId2: string) => void;
 }
 
 export const MealPlanGrid = ({
@@ -15,10 +17,71 @@ export const MealPlanGrid = ({
   onToggleLock,
   onToggleSkip,
   onViewDetail,
+  onSwapSlots,
 }: MealPlanGridProps) => {
+  const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
+  const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
+
   const getSlot = (dayIndex: number, mealTime: MealTime): MealSlot | undefined => {
     return mealPlan.slots.find(
       slot => slot.dayIndex === dayIndex && slot.mealTime === mealTime
+    );
+  };
+
+  const handleDragStart = (e: React.DragEvent, slot: MealSlot) => {
+    setDraggingSlotId(slot.id);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", slot.id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingSlotId(null);
+    setDragOverSlotId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, slot: MealSlot) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (slot.id !== draggingSlotId) {
+      setDragOverSlotId(slot.id);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverSlotId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetSlot: MealSlot) => {
+    e.preventDefault();
+    const sourceSlotId = e.dataTransfer.getData("text/plain");
+    
+    if (sourceSlotId && sourceSlotId !== targetSlot.id && onSwapSlots) {
+      onSwapSlots(sourceSlotId, targetSlot.id);
+      toast.success("Menu berhasil ditukar posisinya");
+    }
+    
+    setDraggingSlotId(null);
+    setDragOverSlotId(null);
+  };
+
+  const renderCell = (slot: MealSlot | undefined, compact = false) => {
+    if (!slot) return null;
+    
+    return (
+      <MealPlanCell
+        slot={slot}
+        onToggleLock={() => onToggleLock(slot.id)}
+        onToggleSkip={() => onToggleSkip(slot.id)}
+        onViewDetail={() => onViewDetail(slot)}
+        compact={compact}
+        isDragging={draggingSlotId === slot.id}
+        isDragOver={dragOverSlotId === slot.id}
+        onDragStart={(e) => handleDragStart(e, slot)}
+        onDragEnd={handleDragEnd}
+        onDragOver={(e) => handleDragOver(e, slot)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, slot)}
+      />
     );
   };
 
@@ -49,15 +112,9 @@ export const MealPlanGrid = ({
                   </td>
                   {DAYS.map((_, dayIndex) => {
                     const slot = getSlot(dayIndex, key);
-                    if (!slot) return <td key={dayIndex} className="p-1"></td>;
                     return (
                       <td key={dayIndex} className="p-1">
-                        <MealPlanCell
-                          slot={slot}
-                          onToggleLock={() => onToggleLock(slot.id)}
-                          onToggleSkip={() => onToggleSkip(slot.id)}
-                          onViewDetail={() => onViewDetail(slot)}
-                        />
+                        {renderCell(slot)}
                       </td>
                     );
                   })}
@@ -83,17 +140,10 @@ export const MealPlanGrid = ({
                 <div className="space-y-2">
                   {MEAL_TIMES.map(({ key, label }) => {
                     const slot = getSlot(dayIndex, key);
-                    if (!slot) return null;
                     return (
                       <div key={key}>
                         <div className="text-xs text-muted-foreground mb-1">{label}</div>
-                        <MealPlanCell
-                          slot={slot}
-                          onToggleLock={() => onToggleLock(slot.id)}
-                          onToggleSkip={() => onToggleSkip(slot.id)}
-                          onViewDetail={() => onViewDetail(slot)}
-                          compact
-                        />
+                        {renderCell(slot, true)}
                       </div>
                     );
                   })}
