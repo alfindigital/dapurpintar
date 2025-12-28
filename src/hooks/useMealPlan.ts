@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { WeeklyMealPlan, MealSlot, MealTime, DAYS, MEAL_TIMES } from "@/types/mealPlan";
+import { WeeklyMealPlan, MealSlot, MealTime, MealPlanTemplate, MEAL_TIMES } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
 
 const STORAGE_KEY = "weekly_meal_plan";
+const TEMPLATES_KEY = "meal_plan_templates";
 
 const generateSlotId = (dayIndex: number, mealTime: MealTime) => 
   `${dayIndex}-${mealTime}`;
@@ -36,7 +37,25 @@ const getWeekStart = (): string => {
 
 export const useMealPlan = () => {
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
+  const [templates, setTemplates] = useState<MealPlanTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load templates from localStorage
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem(TEMPLATES_KEY);
+    if (savedTemplates) {
+      try {
+        setTemplates(JSON.parse(savedTemplates));
+      } catch {
+        setTemplates([]);
+      }
+    }
+  }, []);
+
+  // Save templates to localStorage
+  useEffect(() => {
+    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  }, [templates]);
 
   // Load from localStorage
   useEffect(() => {
@@ -165,8 +184,70 @@ export const useMealPlan = () => {
       .map(slot => slot.recipe!.nama) || [];
   }, [mealPlan]);
 
+  // Template functions
+  const saveAsTemplate = useCallback((name: string, description?: string) => {
+    if (!mealPlan) return null;
+    
+    const slotsWithRecipes = mealPlan.slots.filter(s => s.recipe);
+    if (slotsWithRecipes.length === 0) return null;
+
+    const template: MealPlanTemplate = {
+      id: crypto.randomUUID(),
+      name,
+      description,
+      slots: mealPlan.slots.map(slot => ({
+        ...slot,
+        isLocked: false,
+        isSkipped: false,
+      })),
+      createdAt: new Date().toISOString(),
+    };
+
+    setTemplates(prev => [template, ...prev]);
+    return template;
+  }, [mealPlan]);
+
+  const applyTemplate = useCallback((templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (!template || !mealPlan) return false;
+
+    const newSlots = mealPlan.slots.map(currentSlot => {
+      const templateSlot = template.slots.find(
+        ts => ts.dayIndex === currentSlot.dayIndex && ts.mealTime === currentSlot.mealTime
+      );
+      if (templateSlot?.recipe) {
+        return {
+          ...currentSlot,
+          recipe: templateSlot.recipe,
+          isLocked: false,
+          isSkipped: false,
+        };
+      }
+      return currentSlot;
+    });
+
+    setMealPlan(prev => prev ? {
+      ...prev,
+      slots: newSlots,
+      generatedAt: new Date().toISOString(),
+    } : prev);
+
+    return true;
+  }, [templates, mealPlan]);
+
+  const deleteTemplate = useCallback((templateId: string) => {
+    setTemplates(prev => prev.filter(t => t.id !== templateId));
+  }, []);
+
+  const renameTemplate = useCallback((templateId: string, newName: string) => {
+    setTemplates(prev => prev.map(t => 
+      t.id === templateId ? { ...t, name: newName } : t
+    ));
+  }, []);
+
   return {
     mealPlan,
+    templates,
     isLoading,
     setIsLoading,
     updateSlot,
@@ -177,5 +258,9 @@ export const useMealPlan = () => {
     getSlot,
     getFilledSlots,
     getExistingRecipeNames,
+    saveAsTemplate,
+    applyTemplate,
+    deleteTemplate,
+    renameTemplate,
   };
 };

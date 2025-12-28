@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2 } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MealPlanGrid } from "./MealPlanGrid";
 import { MealDetailSheet } from "./MealDetailSheet";
 import { GeneratePlanDialog } from "./GeneratePlanDialog";
 import { ShoppingListDialog } from "./ShoppingListDialog";
+import { TemplatesDialog } from "./TemplatesDialog";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ interface MealPlanViewProps {
 export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => {
   const { 
     mealPlan, 
+    templates,
     isLoading, 
     setIsLoading, 
     toggleLock, 
@@ -26,6 +28,10 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     setSlots, 
     clearPlan,
     getExistingRecipeNames,
+    saveAsTemplate,
+    applyTemplate,
+    deleteTemplate,
+    renameTemplate,
   } = useMealPlan();
   const { profile } = useUserProfile();
 
@@ -33,6 +39,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [shoppingOpen, setShoppingOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   const handleViewDetail = (slot: MealSlot) => {
     if (slot.recipe) {
@@ -106,6 +113,15 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
           <p className="text-sm text-muted-foreground">{getWeekRange()}</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTemplatesOpen(true)}
+            className="gap-1.5"
+          >
+            <BookmarkPlus className="h-4 w-4" />
+            <span className="hidden sm:inline">Template</span>
+          </Button>
           {hasAnyRecipes && (
             <>
               <Button
@@ -184,6 +200,18 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         open={shoppingOpen}
         onOpenChange={setShoppingOpen}
         slots={mealPlan.slots}
+      />
+
+      {/* Templates Dialog */}
+      <TemplatesDialog
+        open={templatesOpen}
+        onOpenChange={setTemplatesOpen}
+        templates={templates}
+        onSaveTemplate={saveAsTemplate}
+        onApplyTemplate={applyTemplate}
+        onDeleteTemplate={deleteTemplate}
+        onRenameTemplate={renameTemplate}
+        hasCurrentPlan={hasAnyRecipes}
       />
     </div>
   );

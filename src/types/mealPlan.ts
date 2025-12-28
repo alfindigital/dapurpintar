@@ -34,6 +34,14 @@ export interface ShoppingItem {
   recipes: string[]; // nama resep yang butuh bahan ini
 }
 
+export interface MealPlanTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  slots: MealSlot[];
+  createdAt: string;
+}
+
 export const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export const MEAL_TIMES: { key: MealTime; label: string }[] = [
