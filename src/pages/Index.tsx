@@ -6,6 +6,8 @@ import { RecipeCards } from "@/components/RecipeCards";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { HistoryDialog } from "@/components/HistoryDialog";
 import { FavoritesDialog } from "@/components/FavoritesDialog";
+import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
+import { MealPlanView } from "@/components/MealPlanView";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
@@ -16,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState<MainTab>("ide-resep");
   const [isLoading, setIsLoading] = useState(false);
   const [recipeData, setRecipeData] = useState<RecipeResponse | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -136,52 +139,58 @@ const Index = () => {
         onFavoritesClick={() => setFavoritesOpen(true)}
       />
 
-      <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
-        <InputSection onInputChange={handleInputChange} isLoading={isLoading} />
+      <MainTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <PreferencesSection
-          preferences={preferences}
-          onPreferencesChange={setPreferences}
-          isAutoMode={isAutoMode}
-          onAutoModeChange={setIsAutoMode}
-        />
+      {activeTab === "ide-resep" ? (
+        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
+          <InputSection onInputChange={handleInputChange} isLoading={isLoading} />
 
-        {/* Centralized Submit Button */}
-        <div className="pt-2">
-          <Button
-            onClick={handleSubmit}
-            disabled={!hasInput || isLoading}
-            className="w-full h-12 text-base font-medium"
-            size="lg"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                Mencari resep...
-              </>
-            ) : (
-              <>
-                <Search className="h-5 w-5 mr-2" />
-                Cari Ide Resep
-              </>
+          <PreferencesSection
+            preferences={preferences}
+            onPreferencesChange={setPreferences}
+            isAutoMode={isAutoMode}
+            onAutoModeChange={setIsAutoMode}
+          />
+
+          <div className="pt-2">
+            <Button
+              onClick={handleSubmit}
+              disabled={!hasInput || isLoading}
+              className="w-full h-12 text-base font-medium"
+              size="lg"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Mencari resep...
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5 mr-2" />
+                  Cari Ide Resep
+                </>
+              )}
+            </Button>
+            {!hasInput && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Masukkan bahan terlebih dahulu (foto atau teks)
+              </p>
             )}
-          </Button>
-          {!hasInput && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Masukkan bahan terlebih dahulu (foto atau teks)
-            </p>
-          )}
-        </div>
+          </div>
 
-        <RecipeCards 
-          data={recipeData} 
-          isLoading={isLoading}
-          onToggleFavorite={handleToggleFavorite}
-          isFavorite={isFavorite}
-          apiKey={apiKey}
-        />
-
-      </main>
+          <RecipeCards 
+            data={recipeData} 
+            isLoading={isLoading}
+            onToggleFavorite={handleToggleFavorite}
+            isFavorite={isFavorite}
+            apiKey={apiKey}
+          />
+        </main>
+      ) : (
+        <main className="container max-w-4xl mx-auto px-4 py-4">
+          <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+        </main>
+      )}
 
       {/* Sticky Footer */}
       <footer className="fixed bottom-0 left-0 right-0 bg-background border-t py-2 text-center text-xs text-muted-foreground z-40">
