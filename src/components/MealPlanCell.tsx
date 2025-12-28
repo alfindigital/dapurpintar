@@ -1,5 +1,5 @@
 import { MealSlot } from "@/types/mealPlan";
-import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical } from "lucide-react";
+import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -35,14 +35,20 @@ export const MealPlanCell = ({
   const hasRecipe = slot.recipe && !slot.isSkipped;
   const canDrag = hasRecipe || slot.isSkipped;
 
+  // Common transition classes for smooth animations
+  const baseTransition = "transition-all duration-300 ease-out";
+  const dragTransition = "transform-gpu";
+
   if (slot.isSkipped) {
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-muted bg-muted/30 flex items-center justify-center transition-all",
+          "relative rounded-lg border-2 border-dashed border-muted bg-muted/30 flex items-center justify-center",
+          baseTransition,
+          dragTransition,
           compact ? "h-16" : "h-24 md:h-28",
-          isDragging && "opacity-50 scale-95",
-          isDragOver && "border-primary bg-primary/10"
+          isDragging && "opacity-40 scale-90 rotate-2 shadow-lg border-primary/50",
+          isDragOver && "border-primary bg-primary/10 scale-105 shadow-md"
         )}
         draggable={canDrag}
         onDragStart={onDragStart}
@@ -51,10 +57,19 @@ export const MealPlanCell = ({
         onDragLeave={onDragLeave}
         onDrop={onDrop}
       >
+        {/* Drop indicator overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-lg animate-fade-in">
+            <ArrowLeftRight className="h-5 w-5 text-primary animate-pulse" />
+          </div>
+        )}
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground text-xs gap-1"
+          className={cn(
+            "text-muted-foreground text-xs gap-1",
+            isDragOver && "opacity-30"
+          )}
           onClick={onToggleSkip}
         >
           <SkipForward className="h-3 w-3" />
@@ -68,16 +83,33 @@ export const MealPlanCell = ({
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-muted hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer group",
+          "relative rounded-lg border-2 border-dashed border-muted hover:border-primary/50 flex flex-col items-center justify-center gap-1 cursor-pointer group",
+          baseTransition,
+          dragTransition,
           compact ? "h-16" : "h-24 md:h-28",
-          isDragOver && "border-primary bg-primary/10"
+          isDragOver && "border-primary bg-primary/10 scale-105 shadow-md border-solid"
         )}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
       >
-        <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-        <span className="text-xs text-muted-foreground">Kosong</span>
+        {/* Drop indicator overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-lg animate-fade-in">
+            <div className="flex flex-col items-center gap-1">
+              <ArrowLeftRight className="h-6 w-6 text-primary animate-pulse" />
+              <span className="text-xs font-medium text-primary">Lepas di sini</span>
+            </div>
+          </div>
+        )}
+        <Plus className={cn(
+          "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200",
+          isDragOver && "opacity-0"
+        )} />
+        <span className={cn(
+          "text-xs text-muted-foreground",
+          isDragOver && "opacity-0"
+        )}>Kosong</span>
         <div className="absolute top-1 right-1 flex gap-0.5">
           <Button
             variant="ghost"
@@ -99,11 +131,13 @@ export const MealPlanCell = ({
   return (
     <div 
       className={cn(
-        "relative rounded-lg border bg-card hover:bg-accent/50 transition-all cursor-pointer group overflow-hidden",
+        "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
+        baseTransition,
+        dragTransition,
         slot.isLocked && "ring-2 ring-primary/50",
         compact ? "h-16" : "h-24 md:h-28",
-        isDragging && "opacity-50 scale-95 ring-2 ring-primary",
-        isDragOver && "ring-2 ring-primary bg-primary/10"
+        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-2 ring-primary z-50",
+        isDragOver && "ring-2 ring-primary bg-primary/10 scale-105 shadow-lg"
       )}
       draggable={canDrag}
       onDragStart={onDragStart}
@@ -113,18 +147,33 @@ export const MealPlanCell = ({
       onDrop={onDrop}
       onClick={onViewDetail}
     >
+      {/* Drop indicator overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 z-10 animate-fade-in">
+          <div className="flex flex-col items-center gap-1">
+            <ArrowLeftRight className="h-5 w-5 text-primary animate-pulse" />
+            <span className="text-xs font-medium text-primary">Tukar</span>
+          </div>
+        </div>
+      )}
+
       {/* Drag handle indicator */}
       <div className={cn(
-        "absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-muted/50 to-transparent cursor-grab active:cursor-grabbing",
+        "absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-gradient-to-r from-muted/50 to-transparent cursor-grab active:cursor-grabbing z-20",
+        "transition-opacity duration-200",
         isDragging && "opacity-100"
       )}>
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
+        <GripVertical className={cn(
+          "h-4 w-4 text-muted-foreground transition-transform duration-200",
+          "group-hover:scale-110"
+        )} />
       </div>
 
       {/* Recipe content */}
       <div className={cn(
         "p-2 pl-6 h-full flex flex-col",
-        compact ? "gap-0" : "gap-1"
+        compact ? "gap-0" : "gap-1",
+        isDragOver && "opacity-30"
       )}>
         <h4 className={cn(
           "font-medium text-card-foreground line-clamp-2 leading-tight",
@@ -140,11 +189,14 @@ export const MealPlanCell = ({
       </div>
 
       {/* Actions overlay */}
-      <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={cn(
+        "absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+        isDragOver && "opacity-0"
+      )}>
         <Button
           variant="secondary"
           size="icon"
-          className="h-6 w-6"
+          className="h-6 w-6 transition-transform duration-150 hover:scale-110"
           onClick={(e) => {
             e.stopPropagation();
             onToggleLock();
@@ -161,13 +213,19 @@ export const MealPlanCell = ({
 
       {/* Lock indicator */}
       {slot.isLocked && (
-        <div className="absolute bottom-1 left-1">
+        <div className={cn(
+          "absolute bottom-1 left-1 transition-opacity duration-200",
+          isDragOver && "opacity-30"
+        )}>
           <Lock className="h-3 w-3 text-primary" />
         </div>
       )}
 
       {/* View detail indicator */}
-      <ChevronRight className="absolute right-1 bottom-1 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      <ChevronRight className={cn(
+        "absolute right-1 bottom-1 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-200",
+        isDragOver && "opacity-0"
+      )} />
     </div>
   );
 };
