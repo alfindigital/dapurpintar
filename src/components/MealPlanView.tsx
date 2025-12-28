@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2 } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MealPlanGrid } from "./MealPlanGrid";
@@ -33,6 +33,10 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     deleteTemplate,
     renameTemplate,
     swapSlots,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
   } = useMealPlan();
   const { profile } = useUserProfile();
 
@@ -41,6 +45,48 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
   const [generateOpen, setGenerateOpen] = useState(false);
   const [shoppingOpen, setShoppingOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (canRedo) {
+            redo();
+            toast.success("Redo berhasil");
+          }
+        } else {
+          if (canUndo) {
+            undo();
+            toast.success("Undo berhasil");
+          }
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
+        e.preventDefault();
+        if (canRedo) {
+          redo();
+          toast.success("Redo berhasil");
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, undo, redo]);
+
+  const handleUndo = () => {
+    if (undo()) {
+      toast.success("Undo berhasil");
+    }
+  };
+
+  const handleRedo = () => {
+    if (redo()) {
+      toast.success("Redo berhasil");
+    }
+  };
 
   const handleViewDetail = (slot: MealSlot) => {
     if (slot.recipe) {
@@ -114,6 +160,30 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
           <p className="text-sm text-muted-foreground">{getWeekRange()}</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Undo/Redo buttons */}
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleUndo}
+              disabled={!canUndo}
+              className="h-8 px-2 rounded-r-none border-r"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRedo}
+              disabled={!canRedo}
+              className="h-8 px-2 rounded-l-none"
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <Button
             variant="outline"
             size="sm"
