@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { WeeklyMealPlan, MealSlot, MealTime, MealPlanTemplate, MEAL_TIMES } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
 
 const STORAGE_KEY = "weekly_meal_plan";
 const TEMPLATES_KEY = "meal_plan_templates";
+const MAX_HISTORY_SIZE = 20;
 
 const generateSlotId = (dayIndex: number, mealTime: MealTime) => 
   `${dayIndex}-${mealTime}`;
@@ -39,6 +40,11 @@ export const useMealPlan = () => {
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
   const [templates, setTemplates] = useState<MealPlanTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Undo/Redo history
+  const [history, setHistory] = useState<MealSlot[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedoAction = useRef(false);
 
   // Load templates from localStorage
   useEffect(() => {
@@ -67,6 +73,9 @@ export const useMealPlan = () => {
         const currentWeekStart = getWeekStart();
         if (parsed.weekStart === currentWeekStart) {
           setMealPlan(parsed);
+          // Initialize history with current state
+          setHistory([parsed.slots]);
+          setHistoryIndex(0);
         } else {
           // Old week, create new empty plan
           const newPlan: WeeklyMealPlan = {
@@ -76,6 +85,8 @@ export const useMealPlan = () => {
             generatedAt: "",
           };
           setMealPlan(newPlan);
+          setHistory([newPlan.slots]);
+          setHistoryIndex(0);
         }
       } catch {
         // Invalid data, create new
@@ -86,6 +97,8 @@ export const useMealPlan = () => {
           generatedAt: "",
         };
         setMealPlan(newPlan);
+        setHistory([newPlan.slots]);
+        setHistoryIndex(0);
       }
     } else {
       // No saved plan
@@ -96,6 +109,8 @@ export const useMealPlan = () => {
         generatedAt: "",
       };
       setMealPlan(newPlan);
+      setHistory([newPlan.slots]);
+      setHistoryIndex(0);
     }
   }, []);
 
@@ -105,6 +120,64 @@ export const useMealPlan = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mealPlan));
     }
   }, [mealPlan]);
+
+  // Track changes for undo/redo (only when not doing undo/redo)
+  useEffect(() => {
+    if (mealPlan && !isUndoRedoAction.current) {
+      const currentSlots = JSON.stringify(mealPlan.slots);
+      const lastHistorySlots = history[historyIndex] ? JSON.stringify(history[historyIndex]) : null;
+      
+      if (currentSlots !== lastHistorySlots) {
+        // New change, add to history
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(mealPlan.slots);
+        
+        // Limit history size
+        if (newHistory.length > MAX_HISTORY_SIZE) {
+          newHistory.shift();
+        }
+        
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+      }
+    }
+    isUndoRedoAction.current = false;
+  }, [mealPlan?.slots]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  const undo = useCallback(() => {
+    if (!canUndo || !mealPlan) return false;
+    
+    isUndoRedoAction.current = true;
+    const newIndex = historyIndex - 1;
+    const previousSlots = history[newIndex];
+    
+    setHistoryIndex(newIndex);
+    setMealPlan(prev => prev ? {
+      ...prev,
+      slots: previousSlots,
+    } : prev);
+    
+    return true;
+  }, [canUndo, historyIndex, history, mealPlan]);
+
+  const redo = useCallback(() => {
+    if (!canRedo || !mealPlan) return false;
+    
+    isUndoRedoAction.current = true;
+    const newIndex = historyIndex + 1;
+    const nextSlots = history[newIndex];
+    
+    setHistoryIndex(newIndex);
+    setMealPlan(prev => prev ? {
+      ...prev,
+      slots: nextSlots,
+    } : prev);
+    
+    return true;
+  }, [canRedo, historyIndex, history, mealPlan]);
 
   const updateSlot = useCallback((slotId: string, recipe: Recipe | null) => {
     setMealPlan(prev => {
@@ -297,5 +370,10 @@ export const useMealPlan = () => {
     deleteTemplate,
     renameTemplate,
     swapSlots,
+    // Undo/Redo
+    canUndo,
+    canRedo,
+    undo,
+    redo,
   };
 };
