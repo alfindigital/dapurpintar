@@ -32,6 +32,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     applyTemplate,
     deleteTemplate,
     renameTemplate,
+    swapSlots,
   } = useMealPlan();
   const { profile } = useUserProfile();
 
@@ -177,6 +178,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         onToggleLock={toggleLock}
         onToggleSkip={toggleSkip}
         onViewDetail={handleViewDetail}
+        onSwapSlots={swapSlots}
       />
 
       {/* Detail Sheet */}
