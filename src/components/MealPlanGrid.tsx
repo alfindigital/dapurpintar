@@ -13,6 +13,7 @@ interface MealPlanGridProps {
   onViewDetail: (slot: MealSlot) => void;
   onSwapSlots?: (slotId1: string, slotId2: string) => void;
   onCopyToSlot?: (sourceSlotId: string, targetSlotId: string) => void;
+  onRemoveRecipe?: (slotId: string) => void;
 }
 
 export const MealPlanGrid = ({
@@ -22,6 +23,7 @@ export const MealPlanGrid = ({
   onViewDetail,
   onSwapSlots,
   onCopyToSlot,
+  onRemoveRecipe,
 }: MealPlanGridProps) => {
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
@@ -97,6 +99,14 @@ export const MealPlanGrid = ({
     }
   };
 
+  const handleRemove = (slot: MealSlot) => {
+    if (slot.recipe && onRemoveRecipe) {
+      const recipeName = slot.recipe.nama;
+      onRemoveRecipe(slot.id);
+      toast.success(`"${recipeName}" dihapus dari slot`);
+    }
+  };
+
   const renderCell = (slot: MealSlot | undefined, compact = false) => {
     if (!slot) return null;
     
@@ -119,6 +129,7 @@ export const MealPlanGrid = ({
         onDrop={(e) => handleDrop(e, slot)}
         onCopy={() => handleCopy(slot)}
         onPaste={() => handlePaste(slot)}
+        onRemove={() => handleRemove(slot)}
       />
     );
   };
