@@ -4,6 +4,7 @@ import { Recipe } from "@/types/recipe";
 
 const STORAGE_KEY = "weekly_meal_plan";
 const TEMPLATES_KEY = "meal_plan_templates";
+const LAST_SAVED_KEY = "meal_plan_last_saved";
 const MAX_HISTORY_SIZE = 20;
 
 const generateSlotId = (dayIndex: number, mealTime: MealTime) => 
@@ -40,11 +41,20 @@ export const useMealPlan = () => {
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
   const [templates, setTemplates] = useState<MealPlanTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   
   // Undo/Redo history
   const [history, setHistory] = useState<MealSlot[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoAction = useRef(false);
+
+  // Load last saved timestamp
+  useEffect(() => {
+    const savedTimestamp = localStorage.getItem(LAST_SAVED_KEY);
+    if (savedTimestamp) {
+      setLastSavedAt(savedTimestamp);
+    }
+  }, []);
 
   // Load templates from localStorage
   useEffect(() => {
@@ -114,10 +124,13 @@ export const useMealPlan = () => {
     }
   }, []);
 
-  // Save to localStorage
+  // Save to localStorage with timestamp
   useEffect(() => {
     if (mealPlan) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mealPlan));
+      const now = new Date().toISOString();
+      localStorage.setItem(LAST_SAVED_KEY, now);
+      setLastSavedAt(now);
     }
   }, [mealPlan]);
 
@@ -357,6 +370,7 @@ export const useMealPlan = () => {
     templates,
     isLoading,
     setIsLoading,
+    lastSavedAt,
     updateSlot,
     toggleLock,
     toggleSkip,
