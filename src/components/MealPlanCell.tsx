@@ -1,5 +1,5 @@
 import { MealSlot } from "@/types/mealPlan";
-import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight } from "lucide-react";
+import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight, Copy, ClipboardPaste } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,11 +11,14 @@ interface MealPlanCellProps {
   compact?: boolean;
   isDragging?: boolean;
   isDragOver?: boolean;
+  isCopySource?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDragLeave?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
 }
 
 export const MealPlanCell = ({
@@ -26,11 +29,14 @@ export const MealPlanCell = ({
   compact = false,
   isDragging = false,
   isDragOver = false,
+  isCopySource = false,
   onDragStart,
   onDragEnd,
   onDragOver,
   onDragLeave,
   onDrop,
+  onCopy,
+  onPaste,
 }: MealPlanCellProps) => {
   const hasRecipe = slot.recipe && !slot.isSkipped;
   const canDrag = hasRecipe || slot.isSkipped;
@@ -87,7 +93,8 @@ export const MealPlanCell = ({
           baseTransition,
           dragTransition,
           compact ? "h-16" : "h-24 md:h-28",
-          isDragOver && "border-primary bg-primary/10 scale-105 shadow-md border-solid"
+          isDragOver && "border-primary bg-primary/10 scale-105 shadow-md border-solid",
+          isCopySource && "border-primary/30 bg-primary/5"
         )}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -102,13 +109,32 @@ export const MealPlanCell = ({
             </div>
           </div>
         )}
+        
+        {/* Paste indicator when copy mode active */}
+        {isCopySource && !isDragOver && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-lg animate-fade-in">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary text-xs gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPaste?.();
+              }}
+            >
+              <ClipboardPaste className="h-4 w-4" />
+              Tempel di sini
+            </Button>
+          </div>
+        )}
+        
         <Plus className={cn(
           "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200",
-          isDragOver && "opacity-0"
+          (isDragOver || isCopySource) && "opacity-0"
         )} />
         <span className={cn(
           "text-xs text-muted-foreground",
-          isDragOver && "opacity-0"
+          (isDragOver || isCopySource) && "opacity-0"
         )}>Kosong</span>
         <div className="absolute top-1 right-1 flex gap-0.5">
           <Button
@@ -137,7 +163,8 @@ export const MealPlanCell = ({
         slot.isLocked && "ring-2 ring-primary/50",
         compact ? "h-16" : "h-24 md:h-28",
         isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-2 ring-primary z-50",
-        isDragOver && "ring-2 ring-primary bg-primary/10 scale-105 shadow-lg"
+        isDragOver && "ring-2 ring-primary bg-primary/10 scale-105 shadow-lg",
+        isCopySource && "ring-2 ring-primary/50 bg-primary/5"
       )}
       draggable={canDrag}
       onDragStart={onDragStart}
@@ -154,6 +181,24 @@ export const MealPlanCell = ({
             <ArrowLeftRight className="h-5 w-5 text-primary animate-pulse" />
             <span className="text-xs font-medium text-primary">Tukar</span>
           </div>
+        </div>
+      )}
+
+      {/* Paste indicator when copy mode active */}
+      {isCopySource && !isDragOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 z-10 animate-fade-in">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-primary text-xs gap-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPaste?.();
+            }}
+          >
+            <ClipboardPaste className="h-4 w-4" />
+            Tempel (Timpa)
+          </Button>
         </div>
       )}
 
@@ -191,8 +236,20 @@ export const MealPlanCell = ({
       {/* Actions overlay */}
       <div className={cn(
         "absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-        isDragOver && "opacity-0"
+        (isDragOver || isCopySource) && "opacity-0"
       )}>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="h-6 w-6 transition-transform duration-150 hover:scale-110"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCopy?.();
+          }}
+          title="Copy resep"
+        >
+          <Copy className="h-3 w-3" />
+        </Button>
         <Button
           variant="secondary"
           size="icon"
@@ -215,7 +272,7 @@ export const MealPlanCell = ({
       {slot.isLocked && (
         <div className={cn(
           "absolute bottom-1 left-1 transition-opacity duration-200",
-          isDragOver && "opacity-30"
+          (isDragOver || isCopySource) && "opacity-30"
         )}>
           <Lock className="h-3 w-3 text-primary" />
         </div>
@@ -224,7 +281,7 @@ export const MealPlanCell = ({
       {/* View detail indicator */}
       <ChevronRight className={cn(
         "absolute right-1 bottom-1 h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all duration-200",
-        isDragOver && "opacity-0"
+        (isDragOver || isCopySource) && "opacity-0"
       )} />
     </div>
   );

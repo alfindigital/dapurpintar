@@ -365,6 +365,30 @@ export const useMealPlan = () => {
     });
   }, []);
 
+  const copyToSlot = useCallback((sourceSlotId: string, targetSlotId: string) => {
+    setMealPlan(prev => {
+      if (!prev) return prev;
+      
+      const sourceSlot = prev.slots.find(s => s.id === sourceSlotId);
+      if (!sourceSlot || !sourceSlot.recipe) return prev;
+      
+      return {
+        ...prev,
+        slots: prev.slots.map(slot => {
+          if (slot.id === targetSlotId) {
+            return {
+              ...slot,
+              recipe: sourceSlot.recipe,
+              isLocked: false,
+              isSkipped: false,
+            };
+          }
+          return slot;
+        }),
+      };
+    });
+  }, []);
+
   return {
     mealPlan,
     templates,
@@ -384,6 +408,7 @@ export const useMealPlan = () => {
     deleteTemplate,
     renameTemplate,
     swapSlots,
+    copyToSlot,
     // Undo/Redo
     canUndo,
     canRedo,

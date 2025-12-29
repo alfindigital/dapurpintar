@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WeeklyMealPlan, MealSlot, DAYS, MEAL_TIMES, MealTime } from "@/types/mealPlan";
 import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 
 interface MealPlanGridProps {
@@ -10,6 +12,7 @@ interface MealPlanGridProps {
   onToggleSkip: (slotId: string) => void;
   onViewDetail: (slot: MealSlot) => void;
   onSwapSlots?: (slotId1: string, slotId2: string) => void;
+  onCopyToSlot?: (sourceSlotId: string, targetSlotId: string) => void;
 }
 
 export const MealPlanGrid = ({
@@ -18,9 +21,23 @@ export const MealPlanGrid = ({
   onToggleSkip,
   onViewDetail,
   onSwapSlots,
+  onCopyToSlot,
 }: MealPlanGridProps) => {
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
+  const [copySourceSlotId, setCopySourceSlotId] = useState<string | null>(null);
+
+  // Cancel copy mode with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && copySourceSlotId) {
+        setCopySourceSlotId(null);
+        toast.info("Mode copy dibatalkan");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copySourceSlotId]);
 
   const getSlot = (dayIndex: number, mealTime: MealTime): MealSlot | undefined => {
     return mealPlan.slots.find(
@@ -64,8 +81,26 @@ export const MealPlanGrid = ({
     setDragOverSlotId(null);
   };
 
+  const handleCopy = (slot: MealSlot) => {
+    if (slot.recipe) {
+      setCopySourceSlotId(slot.id);
+      toast.info(`Resep "${slot.recipe.nama}" siap di-copy. Klik slot tujuan atau tekan ESC untuk batal.`);
+    }
+  };
+
+  const handlePaste = (targetSlot: MealSlot) => {
+    if (copySourceSlotId && copySourceSlotId !== targetSlot.id && onCopyToSlot) {
+      const sourceSlot = mealPlan.slots.find(s => s.id === copySourceSlotId);
+      onCopyToSlot(copySourceSlotId, targetSlot.id);
+      toast.success(`Resep "${sourceSlot?.recipe?.nama}" berhasil di-copy`);
+      setCopySourceSlotId(null);
+    }
+  };
+
   const renderCell = (slot: MealSlot | undefined, compact = false) => {
     if (!slot) return null;
+    
+    const isCopySource = copySourceSlotId !== null && copySourceSlotId !== slot.id;
     
     return (
       <MealPlanCell
@@ -76,17 +111,41 @@ export const MealPlanGrid = ({
         compact={compact}
         isDragging={draggingSlotId === slot.id}
         isDragOver={dragOverSlotId === slot.id}
+        isCopySource={isCopySource}
         onDragStart={(e) => handleDragStart(e, slot)}
         onDragEnd={handleDragEnd}
         onDragOver={(e) => handleDragOver(e, slot)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e, slot)}
+        onCopy={() => handleCopy(slot)}
+        onPaste={() => handlePaste(slot)}
       />
     );
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      {/* Copy mode indicator */}
+      {copySourceSlotId && (
+        <div className="mb-3 p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between animate-fade-in">
+          <span className="text-sm text-primary">
+            Mode copy aktif - klik slot tujuan untuk menempel resep
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-primary"
+            onClick={() => {
+              setCopySourceSlotId(null);
+              toast.info("Mode copy dibatalkan");
+            }}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Batal
+          </Button>
+        </div>
+      )}
+      
       {/* Desktop Grid View */}
       <div className="hidden md:block">
         <div className="overflow-x-auto">
