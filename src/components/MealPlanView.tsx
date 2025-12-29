@@ -34,6 +34,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     deleteTemplate,
     renameTemplate,
     swapSlots,
+    copyToSlot,
     canUndo,
     canRedo,
     undo,
@@ -283,6 +284,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         onToggleSkip={toggleSkip}
         onViewDetail={handleViewDetail}
         onSwapSlots={swapSlots}
+        onCopyToSlot={copyToSlot}
       />
 
       {/* Detail Sheet */}
