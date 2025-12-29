@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2 } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { MealPlanGrid } from "./MealPlanGrid";
@@ -23,6 +23,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     templates,
     isLoading, 
     setIsLoading, 
+    lastSavedAt,
     toggleLock, 
     toggleSkip, 
     setSlots, 
@@ -134,6 +135,28 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
   const hasLockedSlots = mealPlan?.slots.some(s => s.isLocked) || false;
   const hasAnyRecipes = mealPlan?.slots.some(s => s.recipe && !s.isSkipped) || false;
 
+  const formattedLastSaved = useMemo(() => {
+    if (!lastSavedAt) return null;
+    const date = new Date(lastSavedAt);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    
+    if (diffSec < 10) return "Baru saja";
+    if (diffSec < 60) return `${diffSec} detik lalu`;
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    if (diffHour < 24) return `${diffHour} jam lalu`;
+    
+    return date.toLocaleDateString("id-ID", { 
+      day: "numeric", 
+      month: "short", 
+      hour: "2-digit", 
+      minute: "2-digit" 
+    });
+  }, [lastSavedAt]);
+
   const getWeekRange = () => {
     if (!mealPlan) return "";
     const start = new Date(mealPlan.weekStart);
@@ -157,7 +180,18 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Meal Plan Minggu Ini</h2>
-          <p className="text-sm text-muted-foreground">{getWeekRange()}</p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{getWeekRange()}</span>
+            {formattedLastSaved && (
+              <>
+                <span className="text-muted-foreground/50">•</span>
+                <span className="flex items-center gap-1">
+                  <Save className="h-3 w-3" />
+                  {formattedLastSaved}
+                </span>
+              </>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {/* Undo/Redo buttons */}
