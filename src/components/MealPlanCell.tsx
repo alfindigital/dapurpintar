@@ -1,5 +1,5 @@
 import { MealSlot } from "@/types/mealPlan";
-import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight, Copy, ClipboardPaste } from "lucide-react";
+import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight, Copy, ClipboardPaste, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,7 @@ interface MealPlanCellProps {
   onDrop?: (e: React.DragEvent) => void;
   onCopy?: () => void;
   onPaste?: () => void;
+  onRemove?: () => void;
 }
 
 export const MealPlanCell = ({
@@ -37,6 +38,7 @@ export const MealPlanCell = ({
   onDrop,
   onCopy,
   onPaste,
+  onRemove,
 }: MealPlanCellProps) => {
   const hasRecipe = slot.recipe && !slot.isSkipped;
   const canDrag = hasRecipe || slot.isSkipped;
@@ -265,6 +267,18 @@ export const MealPlanCell = ({
           ) : (
             <LockOpen className="h-3 w-3" />
           )}
+        </Button>
+        <Button
+          variant="destructive"
+          size="icon"
+          className="h-6 w-6 transition-transform duration-150 hover:scale-110"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove?.();
+          }}
+          title="Hapus resep"
+        >
+          <Trash2 className="h-3 w-3" />
         </Button>
       </div>
 
