@@ -28,18 +28,44 @@ export const MealPlanGrid = ({
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
   const [copySourceSlotId, setCopySourceSlotId] = useState<string | null>(null);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [clipboardSlotId, setClipboardSlotId] = useState<string | null>(null);
 
-  // Cancel copy mode with Escape key
+  // Keyboard shortcuts: Escape, Ctrl+C, Ctrl+V
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Cancel copy mode with Escape
       if (e.key === "Escape" && copySourceSlotId) {
         setCopySourceSlotId(null);
         toast.info("Mode copy dibatalkan");
+        return;
+      }
+
+      // Ctrl+C to copy selected slot
+      if ((e.ctrlKey || e.metaKey) && e.key === "c" && selectedSlotId) {
+        const slot = mealPlan.slots.find(s => s.id === selectedSlotId);
+        if (slot?.recipe) {
+          setClipboardSlotId(selectedSlotId);
+          toast.info(`Resep "${slot.recipe.nama}" di-copy (Ctrl+V untuk paste)`);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Ctrl+V to paste to selected slot
+      if ((e.ctrlKey || e.metaKey) && e.key === "v" && clipboardSlotId && selectedSlotId && onCopyToSlot) {
+        if (clipboardSlotId !== selectedSlotId) {
+          const sourceSlot = mealPlan.slots.find(s => s.id === clipboardSlotId);
+          onCopyToSlot(clipboardSlotId, selectedSlotId);
+          toast.success(`Resep "${sourceSlot?.recipe?.nama}" berhasil di-paste`);
+          e.preventDefault();
+        }
+        return;
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copySourceSlotId]);
+  }, [copySourceSlotId, selectedSlotId, clipboardSlotId, mealPlan.slots, onCopyToSlot]);
 
   const getSlot = (dayIndex: number, mealTime: MealTime): MealSlot | undefined => {
     return mealPlan.slots.find(
@@ -111,31 +137,59 @@ export const MealPlanGrid = ({
     if (!slot) return null;
     
     const isCopySource = copySourceSlotId !== null && copySourceSlotId !== slot.id;
+    const isSelected = selectedSlotId === slot.id;
+    const isClipboardSource = clipboardSlotId === slot.id;
     
     return (
-      <MealPlanCell
-        slot={slot}
-        onToggleLock={() => onToggleLock(slot.id)}
-        onToggleSkip={() => onToggleSkip(slot.id)}
-        onViewDetail={() => onViewDetail(slot)}
-        compact={compact}
-        isDragging={draggingSlotId === slot.id}
-        isDragOver={dragOverSlotId === slot.id}
-        isCopySource={isCopySource}
-        onDragStart={(e) => handleDragStart(e, slot)}
-        onDragEnd={handleDragEnd}
-        onDragOver={(e) => handleDragOver(e, slot)}
-        onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e, slot)}
-        onCopy={() => handleCopy(slot)}
-        onPaste={() => handlePaste(slot)}
-        onRemove={() => handleRemove(slot)}
-      />
+      <div 
+        onClick={() => setSelectedSlotId(slot.id)}
+        className={isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""}
+      >
+        <MealPlanCell
+          slot={slot}
+          onToggleLock={() => onToggleLock(slot.id)}
+          onToggleSkip={() => onToggleSkip(slot.id)}
+          onViewDetail={() => onViewDetail(slot)}
+          compact={compact}
+          isDragging={draggingSlotId === slot.id}
+          isDragOver={dragOverSlotId === slot.id}
+          isCopySource={isCopySource || isClipboardSource}
+          onDragStart={(e) => handleDragStart(e, slot)}
+          onDragEnd={handleDragEnd}
+          onDragOver={(e) => handleDragOver(e, slot)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, slot)}
+          onCopy={() => handleCopy(slot)}
+          onPaste={() => handlePaste(slot)}
+          onRemove={() => handleRemove(slot)}
+        />
+      </div>
     );
   };
 
   return (
     <div className="w-full relative">
+      {/* Keyboard shortcut hint */}
+      {clipboardSlotId && (
+        <div className="mb-3 p-2 rounded-lg bg-muted/50 border border-border flex items-center justify-between animate-fade-in">
+          <span className="text-sm text-muted-foreground">
+            📋 Resep di clipboard - pilih slot dan tekan Ctrl+V untuk paste
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2"
+            onClick={() => {
+              setClipboardSlotId(null);
+              toast.info("Clipboard dikosongkan");
+            }}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Hapus
+          </Button>
+        </div>
+      )}
+      
       {/* Copy mode indicator */}
       {copySourceSlotId && (
         <div className="mb-3 p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between animate-fade-in">
