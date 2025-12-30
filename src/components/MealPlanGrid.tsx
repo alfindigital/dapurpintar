@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { WeeklyMealPlan, MealSlot, DAYS, MEAL_TIMES, MealTime } from "@/types/mealPlan";
 import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface MealPlanGridProps {
@@ -30,6 +31,21 @@ export const MealPlanGrid = ({
   const [copySourceSlotId, setCopySourceSlotId] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [clipboardSlotId, setClipboardSlotId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Get slots that match search query
+  const matchingSlotIds = useMemo(() => {
+    if (!searchQuery.trim()) return new Set<string>();
+    const query = searchQuery.toLowerCase();
+    return new Set(
+      mealPlan.slots
+        .filter(slot => slot.recipe?.nama?.toLowerCase().includes(query))
+        .map(slot => slot.id)
+    );
+  }, [mealPlan.slots, searchQuery]);
+
+  const hasSearchResults = searchQuery.trim() && matchingSlotIds.size > 0;
+  const hasNoResults = searchQuery.trim() && matchingSlotIds.size === 0;
 
   // Get slot by position
   const getSlotByPosition = useCallback((dayIndex: number, mealTimeIndex: number): MealSlot | undefined => {
@@ -246,11 +262,13 @@ export const MealPlanGrid = ({
     const isCopySource = copySourceSlotId !== null && copySourceSlotId !== slot.id;
     const isSelected = selectedSlotId === slot.id;
     const isClipboardSource = clipboardSlotId === slot.id;
+    const isSearchMatch = matchingSlotIds.has(slot.id);
+    const isDimmed = searchQuery.trim() && !isSearchMatch;
     
     return (
       <div 
         onClick={() => setSelectedSlotId(slot.id)}
-        className={isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""}
+        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""}`}
       >
         <MealPlanCell
           slot={slot}
@@ -276,6 +294,40 @@ export const MealPlanGrid = ({
 
   return (
     <div className="w-full relative" tabIndex={0}>
+      {/* Search/filter input */}
+      <div className="mb-3 flex items-center gap-2">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Cari resep dalam meal plan..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-9"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+        {hasSearchResults && (
+          <span className="text-xs text-muted-foreground">
+            {matchingSlotIds.size} resep ditemukan
+          </span>
+        )}
+        {hasNoResults && (
+          <span className="text-xs text-destructive">
+            Tidak ada resep yang cocok
+          </span>
+        )}
+      </div>
+
       {/* Selected slot indicator with keyboard hints */}
       {selectedSlotId && !clipboardSlotId && !copySourceSlotId && (
         <div className="mb-3 p-2 rounded-lg bg-muted/30 border border-border/50 flex items-center justify-between animate-fade-in">
