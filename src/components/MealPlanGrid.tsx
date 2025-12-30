@@ -4,7 +4,16 @@ import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Search, ChevronUp, ChevronDown } from "lucide-react";
+import { X, Search, ChevronUp, ChevronDown, Filter } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 interface MealPlanGridProps {
@@ -33,24 +42,90 @@ export const MealPlanGrid = ({
   const [clipboardSlotId, setClipboardSlotId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
+  const [mealTimeFilter, setMealTimeFilter] = useState<Set<MealTime>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<Set<"locked" | "skipped" | "filled" | "empty">>(new Set());
 
-  // Get slots that match search query (ordered by day and meal time)
+  // Check if slot matches filters
+  const slotMatchesFilters = useCallback((slot: MealSlot): boolean => {
+    // Check meal time filter
+    if (mealTimeFilter.size > 0 && !mealTimeFilter.has(slot.mealTime)) {
+      return false;
+    }
+    
+    // Check status filter
+    if (statusFilter.size > 0) {
+      const isLocked = slot.isLocked;
+      const isSkipped = slot.isSkipped;
+      const isFilled = !!slot.recipe;
+      const isEmpty = !slot.recipe;
+      
+      const matchesStatus = 
+        (statusFilter.has("locked") && isLocked) ||
+        (statusFilter.has("skipped") && isSkipped) ||
+        (statusFilter.has("filled") && isFilled) ||
+        (statusFilter.has("empty") && isEmpty);
+      
+      if (!matchesStatus) return false;
+    }
+    
+    return true;
+  }, [mealTimeFilter, statusFilter]);
+
+  // Get slots that match search query and filters (ordered by day and meal time)
   const matchingSlots = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
     return mealPlan.slots
-      .filter(slot => slot.recipe?.nama?.toLowerCase().includes(query))
+      .filter(slot => {
+        // Must match filters first
+        if (!slotMatchesFilters(slot)) return false;
+        // Then match search query if present
+        if (query && !slot.recipe?.nama?.toLowerCase().includes(query)) return false;
+        return true;
+      })
       .sort((a, b) => {
         if (a.dayIndex !== b.dayIndex) return a.dayIndex - b.dayIndex;
-        const mealOrder = { breakfast: 0, lunch: 1, dinner: 2 };
+        const mealOrder: Record<MealTime, number> = { sarapan: 0, makan_siang: 1, makan_malam: 2 };
         return mealOrder[a.mealTime] - mealOrder[b.mealTime];
       });
-  }, [mealPlan.slots, searchQuery]);
+  }, [mealPlan.slots, searchQuery, slotMatchesFilters]);
 
   const matchingSlotIds = useMemo(() => new Set(matchingSlots.map(s => s.id)), [matchingSlots]);
 
-  const hasSearchResults = searchQuery.trim() && matchingSlots.length > 0;
-  const hasNoResults = searchQuery.trim() && matchingSlots.length === 0;
+  const hasActiveFilters = mealTimeFilter.size > 0 || statusFilter.size > 0;
+  const hasSearchOrFilter = searchQuery.trim() || hasActiveFilters;
+  const hasSearchResults = hasSearchOrFilter && matchingSlots.length > 0;
+  const hasNoResults = hasSearchOrFilter && matchingSlots.length === 0;
+
+  // Toggle filter helpers
+  const toggleMealTimeFilter = (mealTime: MealTime) => {
+    setMealTimeFilter(prev => {
+      const next = new Set(prev);
+      if (next.has(mealTime)) {
+        next.delete(mealTime);
+      } else {
+        next.add(mealTime);
+      }
+      return next;
+    });
+  };
+
+  const toggleStatusFilter = (status: "locked" | "skipped" | "filled" | "empty") => {
+    setStatusFilter(prev => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
+  };
+
+  const clearAllFilters = () => {
+    setMealTimeFilter(new Set());
+    setStatusFilter(new Set());
+    setSearchQuery("");
+  };
 
   // Jump to search result
   const jumpToSearchResult = useCallback((direction: "next" | "prev") => {
@@ -68,13 +143,13 @@ export const MealPlanGrid = ({
     toast.info(`Hasil ${newIndex + 1} dari ${matchingSlots.length}: "${matchingSlots[newIndex].recipe?.nama}"`);
   }, [matchingSlots, searchResultIndex]);
 
-  // Reset search result index when search query changes
+  // Reset search result index when search query or filters change
   useEffect(() => {
     setSearchResultIndex(0);
-    if (matchingSlots.length > 0) {
+    if (matchingSlots.length > 0 && hasSearchOrFilter) {
       setSelectedSlotId(matchingSlots[0].id);
     }
-  }, [searchQuery]);
+  }, [searchQuery, mealTimeFilter, statusFilter]);
 
   // Get slot by position
   const getSlotByPosition = useCallback((dayIndex: number, mealTimeIndex: number): MealSlot | undefined => {
@@ -324,7 +399,7 @@ export const MealPlanGrid = ({
     const isSelected = selectedSlotId === slot.id;
     const isClipboardSource = clipboardSlotId === slot.id;
     const isSearchMatch = matchingSlotIds.has(slot.id);
-    const isDimmed = searchQuery.trim() && !isSearchMatch;
+    const isDimmed = hasSearchOrFilter && !isSearchMatch;
     
     return (
       <div 
@@ -356,8 +431,8 @@ export const MealPlanGrid = ({
   return (
     <div className="w-full relative" tabIndex={0}>
       {/* Search/filter input */}
-      <div className="mb-3 flex items-center gap-2">
-        <div className="relative flex-1 max-w-xs">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -377,6 +452,134 @@ export const MealPlanGrid = ({
             </Button>
           )}
         </div>
+
+        {/* Filter dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-9 gap-1.5">
+              <Filter className="h-4 w-4" />
+              Filter
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  {mealTimeFilter.size + statusFilter.size}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuLabel>Waktu Makan</DropdownMenuLabel>
+            <DropdownMenuCheckboxItem
+              checked={mealTimeFilter.has("sarapan")}
+              onCheckedChange={() => toggleMealTimeFilter("sarapan")}
+            >
+              Sarapan
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={mealTimeFilter.has("makan_siang")}
+              onCheckedChange={() => toggleMealTimeFilter("makan_siang")}
+            >
+              Makan Siang
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={mealTimeFilter.has("makan_malam")}
+              onCheckedChange={() => toggleMealTimeFilter("makan_malam")}
+            >
+              Makan Malam
+            </DropdownMenuCheckboxItem>
+            
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Status Slot</DropdownMenuLabel>
+            <DropdownMenuCheckboxItem
+              checked={statusFilter.has("locked")}
+              onCheckedChange={() => toggleStatusFilter("locked")}
+            >
+              🔒 Terkunci
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={statusFilter.has("skipped")}
+              onCheckedChange={() => toggleStatusFilter("skipped")}
+            >
+              ⏭️ Dilewati
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={statusFilter.has("filled")}
+              onCheckedChange={() => toggleStatusFilter("filled")}
+            >
+              ✅ Terisi
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={statusFilter.has("empty")}
+              onCheckedChange={() => toggleStatusFilter("empty")}
+            >
+              ⬜ Kosong
+            </DropdownMenuCheckboxItem>
+            
+            {hasActiveFilters && (
+              <>
+                <DropdownMenuSeparator />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-destructive hover:text-destructive"
+                  onClick={clearAllFilters}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Hapus Semua Filter
+                </Button>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Active filter badges */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap gap-1">
+            {mealTimeFilter.has("sarapan") && (
+              <Badge variant="secondary" className="text-xs">
+                Sarapan
+                <button onClick={() => toggleMealTimeFilter("sarapan")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {mealTimeFilter.has("makan_siang") && (
+              <Badge variant="secondary" className="text-xs">
+                Makan Siang
+                <button onClick={() => toggleMealTimeFilter("makan_siang")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {mealTimeFilter.has("makan_malam") && (
+              <Badge variant="secondary" className="text-xs">
+                Makan Malam
+                <button onClick={() => toggleMealTimeFilter("makan_malam")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {statusFilter.has("locked") && (
+              <Badge variant="secondary" className="text-xs">
+                🔒 Terkunci
+                <button onClick={() => toggleStatusFilter("locked")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {statusFilter.has("skipped") && (
+              <Badge variant="secondary" className="text-xs">
+                ⏭️ Dilewati
+                <button onClick={() => toggleStatusFilter("skipped")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {statusFilter.has("filled") && (
+              <Badge variant="secondary" className="text-xs">
+                ✅ Terisi
+                <button onClick={() => toggleStatusFilter("filled")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+            {statusFilter.has("empty") && (
+              <Badge variant="secondary" className="text-xs">
+                ⬜ Kosong
+                <button onClick={() => toggleStatusFilter("empty")} className="ml-1 hover:text-destructive">×</button>
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Results count */}
         {hasSearchResults && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
@@ -402,14 +605,11 @@ export const MealPlanGrid = ({
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </div>
-            <span className="text-xs text-muted-foreground hidden sm:inline">
-              (Enter/↑↓ untuk navigasi)
-            </span>
           </div>
         )}
         {hasNoResults && (
           <span className="text-xs text-destructive">
-            Tidak ada resep yang cocok
+            Tidak ada slot yang cocok
           </span>
         )}
       </div>
