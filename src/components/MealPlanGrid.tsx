@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { WeeklyMealPlan, MealSlot, DAYS, MEAL_TIMES, MealTime } from "@/types/mealPlan";
 import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -31,13 +31,120 @@ export const MealPlanGrid = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [clipboardSlotId, setClipboardSlotId] = useState<string | null>(null);
 
-  // Keyboard shortcuts: Escape, Ctrl+C, Ctrl+V
+  // Get slot by position
+  const getSlotByPosition = useCallback((dayIndex: number, mealTimeIndex: number): MealSlot | undefined => {
+    const mealTime = MEAL_TIMES[mealTimeIndex]?.key;
+    if (!mealTime) return undefined;
+    return mealPlan.slots.find(
+      slot => slot.dayIndex === dayIndex && slot.mealTime === mealTime
+    );
+  }, [mealPlan.slots]);
+
+  // Get current slot position
+  const getSlotPosition = useCallback((slotId: string): { dayIndex: number; mealTimeIndex: number } | null => {
+    const slot = mealPlan.slots.find(s => s.id === slotId);
+    if (!slot) return null;
+    const mealTimeIndex = MEAL_TIMES.findIndex(m => m.key === slot.mealTime);
+    return { dayIndex: slot.dayIndex, mealTimeIndex };
+  }, [mealPlan.slots]);
+
+  // Navigate to adjacent slot
+  const navigateSlot = useCallback((direction: "up" | "down" | "left" | "right") => {
+    if (!selectedSlotId) {
+      // Select first slot if none selected
+      const firstSlot = getSlotByPosition(0, 0);
+      if (firstSlot) setSelectedSlotId(firstSlot.id);
+      return;
+    }
+
+    const pos = getSlotPosition(selectedSlotId);
+    if (!pos) return;
+
+    let newDayIndex = pos.dayIndex;
+    let newMealTimeIndex = pos.mealTimeIndex;
+
+    switch (direction) {
+      case "left":
+        newDayIndex = Math.max(0, pos.dayIndex - 1);
+        break;
+      case "right":
+        newDayIndex = Math.min(DAYS.length - 1, pos.dayIndex + 1);
+        break;
+      case "up":
+        newMealTimeIndex = Math.max(0, pos.mealTimeIndex - 1);
+        break;
+      case "down":
+        newMealTimeIndex = Math.min(MEAL_TIMES.length - 1, pos.mealTimeIndex + 1);
+        break;
+    }
+
+    const newSlot = getSlotByPosition(newDayIndex, newMealTimeIndex);
+    if (newSlot) {
+      setSelectedSlotId(newSlot.id);
+    }
+  }, [selectedSlotId, getSlotPosition, getSlotByPosition]);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       // Cancel copy mode with Escape
-      if (e.key === "Escape" && copySourceSlotId) {
-        setCopySourceSlotId(null);
-        toast.info("Mode copy dibatalkan");
+      if (e.key === "Escape") {
+        if (copySourceSlotId) {
+          setCopySourceSlotId(null);
+          toast.info("Mode copy dibatalkan");
+        }
+        if (selectedSlotId) {
+          setSelectedSlotId(null);
+        }
+        return;
+      }
+
+      // Arrow keys for navigation
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        navigateSlot("up");
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        navigateSlot("down");
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        navigateSlot("left");
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        navigateSlot("right");
+        return;
+      }
+
+      // Delete key to remove recipe
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedSlotId && onRemoveRecipe) {
+        const slot = mealPlan.slots.find(s => s.id === selectedSlotId);
+        if (slot?.recipe) {
+          const recipeName = slot.recipe.nama;
+          onRemoveRecipe(selectedSlotId);
+          toast.success(`"${recipeName}" dihapus dari slot`);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Enter to view detail
+      if (e.key === "Enter" && selectedSlotId) {
+        const slot = mealPlan.slots.find(s => s.id === selectedSlotId);
+        if (slot?.recipe) {
+          onViewDetail(slot);
+          e.preventDefault();
+        }
         return;
       }
 
@@ -65,7 +172,7 @@ export const MealPlanGrid = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copySourceSlotId, selectedSlotId, clipboardSlotId, mealPlan.slots, onCopyToSlot]);
+  }, [copySourceSlotId, selectedSlotId, clipboardSlotId, mealPlan.slots, onCopyToSlot, onRemoveRecipe, onViewDetail, navigateSlot]);
 
   const getSlot = (dayIndex: number, mealTime: MealTime): MealSlot | undefined => {
     return mealPlan.slots.find(
@@ -168,7 +275,16 @@ export const MealPlanGrid = ({
   };
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative" tabIndex={0}>
+      {/* Selected slot indicator with keyboard hints */}
+      {selectedSlotId && !clipboardSlotId && !copySourceSlotId && (
+        <div className="mb-3 p-2 rounded-lg bg-muted/30 border border-border/50 flex items-center justify-between animate-fade-in">
+          <span className="text-xs text-muted-foreground">
+            ⌨️ Arrow keys: navigasi | Ctrl+C: copy | Ctrl+V: paste | Delete: hapus | Enter: lihat detail | ESC: batal
+          </span>
+        </div>
+      )}
+
       {/* Keyboard shortcut hint */}
       {clipboardSlotId && (
         <div className="mb-3 p-2 rounded-lg bg-muted/50 border border-border flex items-center justify-between animate-fade-in">
