@@ -4,7 +4,7 @@ import { MealPlanCell } from "./MealPlanCell";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Search } from "lucide-react";
+import { X, Search, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface MealPlanGridProps {
@@ -32,20 +32,49 @@ export const MealPlanGrid = ({
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [clipboardSlotId, setClipboardSlotId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
 
-  // Get slots that match search query
-  const matchingSlotIds = useMemo(() => {
-    if (!searchQuery.trim()) return new Set<string>();
+  // Get slots that match search query (ordered by day and meal time)
+  const matchingSlots = useMemo(() => {
+    if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    return new Set(
-      mealPlan.slots
-        .filter(slot => slot.recipe?.nama?.toLowerCase().includes(query))
-        .map(slot => slot.id)
-    );
+    return mealPlan.slots
+      .filter(slot => slot.recipe?.nama?.toLowerCase().includes(query))
+      .sort((a, b) => {
+        if (a.dayIndex !== b.dayIndex) return a.dayIndex - b.dayIndex;
+        const mealOrder = { breakfast: 0, lunch: 1, dinner: 2 };
+        return mealOrder[a.mealTime] - mealOrder[b.mealTime];
+      });
   }, [mealPlan.slots, searchQuery]);
 
-  const hasSearchResults = searchQuery.trim() && matchingSlotIds.size > 0;
-  const hasNoResults = searchQuery.trim() && matchingSlotIds.size === 0;
+  const matchingSlotIds = useMemo(() => new Set(matchingSlots.map(s => s.id)), [matchingSlots]);
+
+  const hasSearchResults = searchQuery.trim() && matchingSlots.length > 0;
+  const hasNoResults = searchQuery.trim() && matchingSlots.length === 0;
+
+  // Jump to search result
+  const jumpToSearchResult = useCallback((direction: "next" | "prev") => {
+    if (matchingSlots.length === 0) return;
+    
+    let newIndex: number;
+    if (direction === "next") {
+      newIndex = (searchResultIndex + 1) % matchingSlots.length;
+    } else {
+      newIndex = (searchResultIndex - 1 + matchingSlots.length) % matchingSlots.length;
+    }
+    
+    setSearchResultIndex(newIndex);
+    setSelectedSlotId(matchingSlots[newIndex].id);
+    toast.info(`Hasil ${newIndex + 1} dari ${matchingSlots.length}: "${matchingSlots[newIndex].recipe?.nama}"`);
+  }, [matchingSlots, searchResultIndex]);
+
+  // Reset search result index when search query changes
+  useEffect(() => {
+    setSearchResultIndex(0);
+    if (matchingSlots.length > 0) {
+      setSelectedSlotId(matchingSlots[0].id);
+    }
+  }, [searchQuery]);
 
   // Get slot by position
   const getSlotByPosition = useCallback((dayIndex: number, mealTimeIndex: number): MealSlot | undefined => {
@@ -103,7 +132,25 @@ export const MealPlanGrid = ({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if typing in input/textarea
+      const isInSearchInput = e.target instanceof HTMLInputElement && 
+        (e.target as HTMLInputElement).placeholder?.includes("Cari resep");
+
+      // If in search input, handle search navigation
+      if (isInSearchInput) {
+        if (e.key === "Enter" && hasSearchResults) {
+          e.preventDefault();
+          jumpToSearchResult(e.shiftKey ? "prev" : "next");
+          return;
+        }
+        if (e.key === "Escape") {
+          setSearchQuery("");
+          (e.target as HTMLInputElement).blur();
+          return;
+        }
+        return;
+      }
+
+      // Ignore other inputs
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
@@ -120,26 +167,40 @@ export const MealPlanGrid = ({
         return;
       }
 
-      // Arrow keys for navigation
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        navigateSlot("up");
-        return;
-      }
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        navigateSlot("down");
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        navigateSlot("left");
-        return;
-      }
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        navigateSlot("right");
-        return;
+      // If search is active, use arrow keys for search navigation
+      if (hasSearchResults) {
+        if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+          e.preventDefault();
+          jumpToSearchResult("next");
+          return;
+        }
+        if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          jumpToSearchResult("prev");
+          return;
+        }
+      } else {
+        // Normal arrow key navigation when no search
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          navigateSlot("up");
+          return;
+        }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          navigateSlot("down");
+          return;
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          navigateSlot("left");
+          return;
+        }
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          navigateSlot("right");
+          return;
+        }
       }
 
       // Delete key to remove recipe
@@ -188,7 +249,7 @@ export const MealPlanGrid = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [copySourceSlotId, selectedSlotId, clipboardSlotId, mealPlan.slots, onCopyToSlot, onRemoveRecipe, onViewDetail, navigateSlot]);
+  }, [copySourceSlotId, selectedSlotId, clipboardSlotId, mealPlan.slots, onCopyToSlot, onRemoveRecipe, onViewDetail, navigateSlot, hasSearchResults, jumpToSearchResult]);
 
   const getSlot = (dayIndex: number, mealTime: MealTime): MealSlot | undefined => {
     return mealPlan.slots.find(
@@ -317,9 +378,34 @@ export const MealPlanGrid = ({
           )}
         </div>
         {hasSearchResults && (
-          <span className="text-xs text-muted-foreground">
-            {matchingSlotIds.size} resep ditemukan
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {searchResultIndex + 1}/{matchingSlots.length} ditemukan
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => jumpToSearchResult("prev")}
+                title="Hasil sebelumnya (↑)"
+              >
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => jumpToSearchResult("next")}
+                title="Hasil berikutnya (↓)"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </div>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              (Enter/↑↓ untuk navigasi)
+            </span>
+          </div>
         )}
         {hasNoResults && (
           <span className="text-xs text-destructive">
