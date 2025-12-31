@@ -8,11 +8,13 @@ import { HistoryDialog } from "@/components/HistoryDialog";
 import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
 import { MealPlanView } from "@/components/MealPlanView";
+import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useDailyNutrition } from "@/hooks/useDailyNutrition";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
@@ -43,6 +45,28 @@ const Index = () => {
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
   const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
   const { profile } = useUserProfile();
+  const { dailyData, addEntry, removeEntry, clearToday } = useDailyNutrition();
+
+  const handleLogNutrition = useCallback((recipe: Recipe) => {
+    if (!recipe.nutrisi) {
+      toast.error("Resep ini tidak memiliki info nutrisi");
+      return;
+    }
+    
+    const now = new Date();
+    const waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    
+    addEntry({
+      nama: recipe.nama,
+      kalori: recipe.nutrisi.kalori,
+      protein: recipe.nutrisi.protein,
+      karbohidrat: recipe.nutrisi.karbohidrat,
+      lemak: recipe.nutrisi.lemak,
+      waktu,
+    });
+    
+    toast.success(`${recipe.nama} dicatat ke nutrisi harian`);
+  }, [addEntry]);
 
   // Save auto mode preference
   useEffect(() => {
@@ -184,6 +208,22 @@ const Index = () => {
             onToggleFavorite={handleToggleFavorite}
             isFavorite={isFavorite}
             apiKey={apiKey}
+            onLogNutrition={handleLogNutrition}
+          />
+
+          {/* Daily Nutrition Tracker */}
+          <DailyNutritionTracker
+            entries={dailyData.entries}
+            totalKalori={dailyData.totalKalori}
+            totalProtein={dailyData.totalProtein}
+            totalKarbohidrat={dailyData.totalKarbohidrat}
+            totalLemak={dailyData.totalLemak}
+            targetKalori={profile.targetKalori || 2000}
+            targetProtein={profile.targetProtein || 50}
+            targetKarbohidrat={profile.targetKarbohidrat || 250}
+            targetLemak={profile.targetLemak || 65}
+            onRemoveEntry={removeEntry}
+            onClearAll={clearToday}
           />
         </main>
       ) : (

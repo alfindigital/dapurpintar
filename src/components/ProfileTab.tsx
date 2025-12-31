@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -289,6 +289,68 @@ export function ProfileTab({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Target Nutrisi Harian */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" />
+            <h3 className="font-medium">Target Nutrisi Harian</h3>
+            <HelpTooltip content="Target nutrisi untuk tracking harian Anda" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="target-kalori">Target Kalori (kkal)</Label>
+              <Input
+                id="target-kalori"
+                type="number"
+                min="1000"
+                max="5000"
+                placeholder="2000"
+                value={profile.targetKalori || ''}
+                onChange={(e) => onUpdateProfile({ targetKalori: parseInt(e.target.value, 10) || 2000 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="target-protein">Target Protein (g)</Label>
+              <Input
+                id="target-protein"
+                type="number"
+                min="20"
+                max="200"
+                placeholder="50"
+                value={profile.targetProtein || ''}
+                onChange={(e) => onUpdateProfile({ targetProtein: parseInt(e.target.value, 10) || 50 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="target-karbo">Target Karbohidrat (g)</Label>
+              <Input
+                id="target-karbo"
+                type="number"
+                min="100"
+                max="500"
+                placeholder="250"
+                value={profile.targetKarbohidrat || ''}
+                onChange={(e) => onUpdateProfile({ targetKarbohidrat: parseInt(e.target.value, 10) || 250 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="target-lemak">Target Lemak (g)</Label>
+              <Input
+                id="target-lemak"
+                type="number"
+                min="20"
+                max="150"
+                placeholder="65"
+                value={profile.targetLemak || ''}
+                onChange={(e) => onUpdateProfile({ targetLemak: parseInt(e.target.value, 10) || 65 })}
+              />
             </div>
           </div>
         </div>

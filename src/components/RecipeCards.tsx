@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy } from "lucide-react";
+import { Copy, ClipboardPlus } from "lucide-react";
 import { Clock, ChefHat, Heart, Share2, Printer, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -23,6 +23,7 @@ interface RecipeCardsProps {
   onToggleFavorite?: (recipe: Recipe) => void;
   isFavorite?: (recipeName: string) => boolean;
   apiKey?: string;
+  onLogNutrition?: (recipe: Recipe) => void;
 }
 
 interface RecipeCardProps {
@@ -30,9 +31,10 @@ interface RecipeCardProps {
   onToggleFavorite?: (recipe: Recipe) => void;
   isFavorite?: (recipeName: string) => boolean;
   apiKey?: string;
+  onLogNutrition?: (recipe: Recipe) => void;
 }
 
-function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCardProps) {
+function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutrition }: RecipeCardProps) {
   const [highlightedStep, setHighlightedStep] = useState<number | null>(null);
   const [showTimerSummary, setShowTimerSummary] = useState(true);
   const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
@@ -168,6 +170,17 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
             <p className="text-sm text-muted-foreground">{recipe.deskripsi}</p>
           </div>
           <div className="flex gap-1">
+            {recipe.nutrisi && onLogNutrition && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onLogNutrition(recipe)}
+                title="Catat ke nutrisi harian"
+              >
+                <ClipboardPlus className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -394,7 +407,7 @@ function TipsCard({ tips }: TipsCardProps) {
   );
 }
 
-export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, apiKey }: RecipeCardsProps) {
+export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, apiKey, onLogNutrition }: RecipeCardsProps) {
   if (isLoading) {
     return (
       <Card className="animate-pulse-soft">
@@ -430,6 +443,7 @@ export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, api
             onToggleFavorite={onToggleFavorite}
             isFavorite={isFavorite}
             apiKey={apiKey}
+            onLogNutrition={onLogNutrition}
           />
           {recipe.tips && <TipsCard tips={recipe.tips} />}
         </div>
