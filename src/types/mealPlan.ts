@@ -19,12 +19,18 @@ export interface WeeklyMealPlan {
   totalNutrisi?: Nutrition;
 }
 
+export type MealGoal = "hemat" | "diet" | "bulking" | "seimbang";
+export type TingkatKesulitan = "mudah" | "sedang" | "sulit";
+
 export interface MealPlanPreferences {
   includeSarapan: boolean;
   includeMakanSiang: boolean;
   includeMakanMalam: boolean;
   prioritasDaerah: boolean;
-  variasi: "tinggi" | "sedang" | "rendah"; // how varied the meals should be
+  variasi: "tinggi" | "sedang" | "rendah";
+  budgetHarian?: number;
+  mealGoal: MealGoal;
+  tingkatKesulitan?: TingkatKesulitan;
 }
 
 export interface ShoppingItem {
@@ -56,4 +62,7 @@ export const DEFAULT_MEAL_PREFERENCES: MealPlanPreferences = {
   includeMakanMalam: true,
   prioritasDaerah: true,
   variasi: "tinggi",
+  budgetHarian: undefined,
+  mealGoal: "seimbang",
+  tingkatKesulitan: undefined,
 };

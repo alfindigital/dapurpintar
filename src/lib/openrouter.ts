@@ -160,6 +160,27 @@ ${profileContext}`;
     timeText = `\nWAKTU MEMASAK: ${timeMap[preferences.time] || preferences.time}`;
   }
 
+  let goalText = "";
+  if (preferences.mealGoal) {
+    const goalMap: Record<string, string> = {
+      hemat: "HEMAT - Gunakan bahan murah (tempe, tahu, telur, sayuran lokal)",
+      diet: "DIET - Rendah kalori (<400 kkal), tinggi protein & serat, hindari gorengan",
+      bulking: "BULKING - Tinggi protein (>30g), porsi besar, karbohidrat kompleks",
+      seimbang: "SEIMBANG - Nutrisi lengkap untuk keluarga",
+    };
+    goalText = `\nTUJUAN MENU: ${goalMap[preferences.mealGoal]}`;
+  }
+
+  let difficultyText = "";
+  if (preferences.difficulty) {
+    const diffMap: Record<string, string> = {
+      mudah: "MUDAH - Resep sederhana untuk pemula",
+      sedang: "SEDANG - Sedikit tantangan",
+      sulit: "SULIT - Resep kompleks untuk yang mahir",
+    };
+    difficultyText = `\nTINGKAT KESULITAN: ${diffMap[preferences.difficulty] || preferences.difficulty}`;
+  }
+
   return `Kamu adalah chef profesional Indonesia dengan pengalaman 20+ tahun. Spesialisasimu adalah masakan rumahan yang praktis dan lezat.
 
 Tugasmu:
@@ -167,7 +188,7 @@ Tugasmu:
 2. Buat 1-3 resep unik dan praktis
 3. Prioritaskan penggunaan bahan yang tersedia
 4. Berikan instruksi jelas yang bisa diikuti ibu rumah tangga
-${dietaryText}${cuisineText}${timeText}
+${dietaryText}${cuisineText}${timeText}${goalText}${difficultyText}
 
 Format respons HARUS dalam JSON valid dengan struktur:
 {

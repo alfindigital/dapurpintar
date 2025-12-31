@@ -43,9 +43,12 @@ export interface CuisineType {
   label: string;
 }
 
+export type MealGoal = "hemat" | "diet" | "bulking" | "seimbang";
+
 export interface Preferences {
   dietary: string[];
   cuisine: string[];
   difficulty: string;
   time: string;
+  mealGoal?: MealGoal;
 }

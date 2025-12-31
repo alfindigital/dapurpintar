@@ -9,10 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { MealPlanPreferences, DEFAULT_MEAL_PREFERENCES } from "@/types/mealPlan";
+import { Input } from "@/components/ui/input";
+import { MealPlanPreferences, DEFAULT_MEAL_PREFERENCES, MealGoal, TingkatKesulitan } from "@/types/mealPlan";
 import { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { MEAL_GOAL_OPTIONS, DIFFICULTY_OPTIONS, BUDGET_PRESETS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface GeneratePlanDialogProps {
   open: boolean;
@@ -22,6 +26,10 @@ interface GeneratePlanDialogProps {
   hasLockedSlots: boolean;
 }
 
+const formatRupiah = (value: number): string => {
+  return new Intl.NumberFormat("id-ID").format(value);
+};
+
 export const GeneratePlanDialog = ({
   open,
   onOpenChange,
@@ -30,9 +38,25 @@ export const GeneratePlanDialog = ({
   hasLockedSlots,
 }: GeneratePlanDialogProps) => {
   const [preferences, setPreferences] = useState<MealPlanPreferences>(DEFAULT_MEAL_PREFERENCES);
+  const [budgetInput, setBudgetInput] = useState<string>("");
 
   const handleGenerate = () => {
     onGenerate(preferences);
+  };
+
+  const handleBudgetChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, "");
+    setBudgetInput(numericValue);
+    const parsed = parseInt(numericValue, 10);
+    setPreferences({
+      ...preferences,
+      budgetHarian: isNaN(parsed) ? undefined : parsed,
+    });
+  };
+
+  const handleBudgetPreset = (value: number) => {
+    setBudgetInput(value.toString());
+    setPreferences({ ...preferences, budgetHarian: value });
   };
 
   const totalMeals = 
@@ -40,9 +64,11 @@ export const GeneratePlanDialog = ({
     (preferences.includeMakanSiang ? 7 : 0) +
     (preferences.includeMakanMalam ? 7 : 0);
 
+  const weeklyBudget = preferences.budgetHarian ? preferences.budgetHarian * 7 : undefined;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -124,6 +150,82 @@ export const GeneratePlanDialog = ({
                 </Label>
               </div>
             </RadioGroup>
+          </div>
+
+          {/* Budget Harian */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">💰 Budget Harian (opsional):</Label>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rp</span>
+                <Input
+                  type="text"
+                  placeholder="Contoh: 50000"
+                  value={budgetInput}
+                  onChange={(e) => handleBudgetChange(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              {weeklyBudget && (
+                <p className="text-xs text-muted-foreground">
+                  = Rp {formatRupiah(weeklyBudget)}/minggu
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {BUDGET_PRESETS.map((preset) => (
+                  <Badge
+                    key={preset.value}
+                    variant={preferences.budgetHarian === preset.value ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/10"
+                    onClick={() => handleBudgetPreset(preset.value)}
+                  >
+                    {preset.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Meal Goal */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">🎯 Tujuan Menu:</Label>
+            <div className="flex flex-wrap gap-2">
+              {MEAL_GOAL_OPTIONS.map((option) => (
+                <Badge
+                  key={option.id}
+                  variant={preferences.mealGoal === option.id ? "default" : "outline"}
+                  className={cn(
+                    "cursor-pointer transition-all hover:scale-105",
+                    preferences.mealGoal === option.id && "bg-primary"
+                  )}
+                  onClick={() => setPreferences({ ...preferences, mealGoal: option.id as MealGoal })}
+                >
+                  {option.label}
+                  <span className="ml-1 text-xs opacity-70">({option.desc})</span>
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Difficulty */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">👨‍🍳 Tingkat Kesulitan:</Label>
+            <div className="flex flex-wrap gap-2">
+              {DIFFICULTY_OPTIONS.map((option) => (
+                <Badge
+                  key={option.id}
+                  variant={preferences.tingkatKesulitan === option.id ? "default" : "outline"}
+                  className={cn(
+                    "cursor-pointer transition-all hover:scale-105",
+                    preferences.tingkatKesulitan === option.id && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => setPreferences({ ...preferences, tingkatKesulitan: option.id as TingkatKesulitan })}
+                >
+                  <span className="mr-1">{option.icon}</span>
+                  {option.label}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           {/* Regional preference */}

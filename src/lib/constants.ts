@@ -13,3 +13,23 @@ export const TIME_OPTIONS = [
   { id: "sedang", label: "Sedang", icon: "🕐", desc: "30-60 menit" },
   { id: "lama", label: "Lama", icon: "🕑", desc: "> 60 menit" },
 ];
+
+export const MEAL_GOAL_OPTIONS = [
+  { id: "hemat", label: "💰 Hemat", desc: "Budget minimal" },
+  { id: "diet", label: "🥗 Diet", desc: "Rendah kalori" },
+  { id: "bulking", label: "💪 Bulking", desc: "Massa otot" },
+  { id: "seimbang", label: "⚖️ Seimbang", desc: "Keluarga" },
+] as const;
+
+export const DIFFICULTY_OPTIONS = [
+  { id: "mudah", label: "Mudah", icon: "👶", desc: "Pemula" },
+  { id: "sedang", label: "Sedang", icon: "👨‍🍳", desc: "Menengah" },
+  { id: "sulit", label: "Sulit", icon: "🧑‍🍳", desc: "Mahir" },
+] as const;
+
+export const BUDGET_PRESETS = [
+  { value: 30000, label: "30rb" },
+  { value: 50000, label: "50rb" },
+  { value: 75000, label: "75rb" },
+  { value: 100000, label: "100rb" },
+] as const;
