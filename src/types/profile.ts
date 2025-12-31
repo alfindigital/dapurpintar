@@ -18,6 +18,11 @@ export interface UserProfile {
   waktuMasakTersedia: 'singkat' | 'sedang' | 'panjang';
   budgetMasak: 'hemat' | 'sedang' | 'bebas';
   catatanTambahan: string;
+  // Target nutrisi harian
+  targetKalori?: number;
+  targetProtein?: number;
+  targetKarbohidrat?: number;
+  targetLemak?: number;
 }
 
 export const DEFAULT_PROFILE: UserProfile = {
@@ -31,6 +36,10 @@ export const DEFAULT_PROFILE: UserProfile = {
   waktuMasakTersedia: 'sedang',
   budgetMasak: 'sedang',
   catatanTambahan: '',
+  targetKalori: 2000,
+  targetProtein: 50,
+  targetKarbohidrat: 250,
+  targetLemak: 65,
 };
 
 export function getKategoriUsia(usia: number): FamilyMember['kategoriUsia'] {
