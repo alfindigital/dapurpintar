@@ -22,6 +22,10 @@ const getMealTimeLabel = (mealTime: MealTime): string => {
   return labels[mealTime];
 };
 
+const formatRupiah = (value: number): string => {
+  return new Intl.NumberFormat("id-ID").format(value);
+};
+
 const buildPrompt = (
   slotsToFill: MealSlot[],
   preferences: MealPlanPreferences,
@@ -49,6 +53,32 @@ const buildPrompt = (
   if (existingRecipeNames.length > 0) {
     lines.push("");
     lines.push(`HINDARI resep ini (sudah ada di plan): ${existingRecipeNames.join(", ")}`);
+  }
+
+  // New preferences: Budget, Goal, Difficulty
+  lines.push("");
+  lines.push("PREFERENSI PENGGUNA:");
+  
+  if (preferences.budgetHarian) {
+    const weeklyBudget = preferences.budgetHarian * 7;
+    lines.push(`- Budget harian: Rp ${formatRupiah(preferences.budgetHarian)} (maksimal Rp ${formatRupiah(weeklyBudget)}/minggu)`);
+  }
+  
+  const goalInstructions: Record<string, string> = {
+    hemat: "HEMAT - Prioritaskan bahan murah dan mudah didapat (tempe, tahu, telur, sayuran lokal). Minimalkan daging mahal.",
+    diet: "DIET - Fokus protein tinggi, karbohidrat rendah, hindari gorengan. Target <400 kkal per porsi.",
+    bulking: "BULKING - Porsi besar, tinggi protein (>30g), tinggi karbohidrat kompleks untuk massa otot.",
+    seimbang: "SEIMBANG - Nutrisi lengkap dan seimbang untuk kesehatan keluarga.",
+  };
+  lines.push(`- Tujuan: ${goalInstructions[preferences.mealGoal] || goalInstructions.seimbang}`);
+  
+  if (preferences.tingkatKesulitan) {
+    const difficultyMap: Record<string, string> = {
+      mudah: "MUDAH - Resep sederhana, langkah sedikit, bahan mudah didapat",
+      sedang: "SEDANG - Sedikit tantangan, variasi teknik memasak",
+      sulit: "SULIT - Resep kompleks untuk chef rumahan mahir",
+    };
+    lines.push(`- Kesulitan: ${difficultyMap[preferences.tingkatKesulitan]}`);
   }
   
   if (userProfile) {
@@ -81,11 +111,17 @@ const buildPrompt = (
       }
     }
     
-    const skillMap = { pemula: "sederhana", menengah: "sedang", mahir: "boleh kompleks" };
-    lines.push(`- Tingkat kesulitan: ${skillMap[userProfile.kemampuanMasak]}`);
+    // Only use profile skill if no explicit difficulty set
+    if (!preferences.tingkatKesulitan) {
+      const skillMap = { pemula: "sederhana", menengah: "sedang", mahir: "boleh kompleks" };
+      lines.push(`- Tingkat kesulitan: ${skillMap[userProfile.kemampuanMasak]}`);
+    }
     
-    const budgetMap = { hemat: "bahan murah", sedang: "sedang", bebas: "bebas" };
-    lines.push(`- Budget: ${budgetMap[userProfile.budgetMasak]}`);
+    // Only use profile budget if no explicit budget set
+    if (!preferences.budgetHarian) {
+      const budgetMap = { hemat: "bahan murah", sedang: "sedang", bebas: "bebas" };
+      lines.push(`- Budget: ${budgetMap[userProfile.budgetMasak]}`);
+    }
   }
   
   return lines.join("\n");
