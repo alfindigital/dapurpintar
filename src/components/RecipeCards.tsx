@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Copy } from "lucide-react";
 import { Clock, ChefHat, Heart, Share2, Printer, Flame, Beef, Wheat, Droplets, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -104,23 +105,26 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
     }
   }, [voiceCooking.isSpeaking, voiceCooking.isPaused]);
 
-  const shareRecipe = async () => {
-    const text = `${recipe.nama}\n\n${recipe.deskripsi}\n\nBahan:\n${recipe.bahan.map((b) => `• ${b.jumlah} ${b.item}`).join("\n")}\n\nLangkah:\n${recipe.langkah.map((l, i) => `${i + 1}. ${l}`).join("\n")}`;
+  const formatRecipeText = () => {
+    return `${recipe.nama}\n\n${recipe.deskripsi}\n\nBahan:\n${recipe.bahan.map((b) => `• ${b.jumlah} ${b.item}${b.catatan ? ` (${b.catatan})` : ""}`).join("\n")}\n\nLangkah:\n${recipe.langkah.map((l, i) => `${i + 1}. ${l}`).join("\n")}${recipe.tips ? `\n\nTips:\n${recipe.tips}` : ""}`;
+  };
 
+  const shareRecipe = async () => {
+    const text = formatRecipeText();
     if (navigator.share) {
       try {
         await navigator.share({ title: recipe.nama, text });
         toast.success("Berhasil dibagikan!");
       } catch {
-        copyToClipboard(text);
+        copyRecipe();
       }
     } else {
-      copyToClipboard(text);
+      copyRecipe();
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyRecipe = () => {
+    navigator.clipboard.writeText(formatRecipeText());
     toast.success("Resep disalin ke clipboard!");
   };
 
@@ -181,7 +185,17 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
               variant="ghost"
               size="icon"
               className="h-8 w-8"
+              onClick={copyRecipe}
+              title="Salin resep"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
               onClick={shareRecipe}
+              title="Bagikan resep"
             >
               <Share2 className="h-4 w-4" />
             </Button>
@@ -190,6 +204,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
               size="icon"
               className="h-8 w-8"
               onClick={printRecipe}
+              title="Cetak resep"
             >
               <Printer className="h-4 w-4" />
             </Button>
