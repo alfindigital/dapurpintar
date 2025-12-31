@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Copy } from "lucide-react";
-import { Clock, ChefHat, Heart, Share2, Printer, Flame, Beef, Wheat, Droplets, Check } from "lucide-react";
+import { Clock, ChefHat, Heart, Share2, Printer, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { HelpTooltip } from "./HelpTooltip";
 import { VoiceCookingPlayer } from "./VoiceCookingPlayer";
 import { TimerSetButton, TimerDisplay, FloatingTimerSummary } from "./CookingTimerPlayer";
 import { IngredientSubstitutionButton } from "./IngredientSubstitution";
+import { MacroRings } from "./MacroProgressRing";
 import { useVoiceCooking } from "@/hooks/useVoiceCooking";
 import { useVoiceCommand } from "@/hooks/useVoiceCommand";
 import { useCookingTimer } from "@/hooks/useCookingTimer";
@@ -219,36 +220,12 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey }: RecipeCard
         </div>
 
         {recipe.nutrisi && (
-          <div className="grid grid-cols-4 gap-2 mt-4 p-3 bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-orange-500 dark:text-orange-400">
-                <Flame className="h-4 w-4" />
-                <span className="font-bold text-sm">{recipe.nutrisi.kalori}</span>
-              </div>
-              <span className="text-xs text-muted-foreground">kkal</span>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-red-500 dark:text-red-400">
-                <Beef className="h-4 w-4" />
-                <span className="font-bold text-sm">{recipe.nutrisi.protein}g</span>
-              </div>
-              <span className="text-xs text-muted-foreground">Protein</span>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-amber-500 dark:text-amber-400">
-                <Wheat className="h-4 w-4" />
-                <span className="font-bold text-sm">{recipe.nutrisi.karbohidrat}g</span>
-              </div>
-              <span className="text-xs text-muted-foreground">Karbo</span>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-blue-500 dark:text-blue-400">
-                <Droplets className="h-4 w-4" />
-                <span className="font-bold text-sm">{recipe.nutrisi.lemak}g</span>
-              </div>
-              <span className="text-xs text-muted-foreground">Lemak</span>
-            </div>
-          </div>
+          <MacroRings
+            kalori={recipe.nutrisi.kalori}
+            protein={recipe.nutrisi.protein}
+            karbohidrat={recipe.nutrisi.karbohidrat}
+            lemak={recipe.nutrisi.lemak}
+          />
         )}
       </CardHeader>
 
