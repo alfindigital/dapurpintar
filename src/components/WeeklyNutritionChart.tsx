@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, LineChart, Line, ReferenceLine } from "recharts";
 import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
@@ -10,6 +10,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;
   targetKalori: number;
+  targetProtein?: number;
+  targetKarbohidrat?: number;
+  targetLemak?: number;
 }
 
 type MacroType = "kalori" | "protein" | "karbohidrat" | "lemak";
@@ -44,9 +47,22 @@ const chartConfig = {
 
 const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
-export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutritionChartProps) {
+export function WeeklyNutritionChart({ 
+  weeklyData, 
+  targetKalori, 
+  targetProtein = 50, 
+  targetKarbohidrat = 250, 
+  targetLemak = 65 
+}: WeeklyNutritionChartProps) {
   const [activeMacro, setActiveMacro] = useState<MacroType>("kalori");
   const [chartType, setChartType] = useState<ChartType>("bar");
+
+  const targets: Record<MacroType, number> = {
+    kalori: targetKalori,
+    protein: targetProtein,
+    karbohidrat: targetKarbohidrat,
+    lemak: targetLemak,
+  };
 
   const chartData = useMemo(() => {
     const data = [];
@@ -161,6 +177,18 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
                   />
                 }
               />
+              <ReferenceLine 
+                y={targets[activeMacro]} 
+                stroke="hsl(var(--destructive))"
+                strokeDasharray="5 5"
+                strokeWidth={2}
+                label={{ 
+                  value: `Target: ${targets[activeMacro]}${activeConfig.unit}`, 
+                  position: "insideTopRight",
+                  fontSize: 10,
+                  fill: "hsl(var(--destructive))"
+                }}
+              />
               <Bar 
                 dataKey={activeMacro}
                 fill={activeConfig.color}
@@ -190,6 +218,18 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
                     }}
                   />
                 }
+              />
+              <ReferenceLine 
+                y={targets[activeMacro]} 
+                stroke="hsl(var(--destructive))"
+                strokeDasharray="5 5"
+                strokeWidth={2}
+                label={{ 
+                  value: `Target: ${targets[activeMacro]}${activeConfig.unit}`, 
+                  position: "insideTopRight",
+                  fontSize: 10,
+                  fill: "hsl(var(--destructive))"
+                }}
               />
               <Line 
                 type="monotone"

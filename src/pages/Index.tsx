@@ -231,6 +231,9 @@ const Index = () => {
           <WeeklyNutritionChart
             weeklyData={weeklyData}
             targetKalori={profile.targetKalori || 2000}
+            targetProtein={profile.targetProtein}
+            targetKarbohidrat={profile.targetKarbohidrat}
+            targetLemak={profile.targetLemak}
           />
         </main>
       ) : (
