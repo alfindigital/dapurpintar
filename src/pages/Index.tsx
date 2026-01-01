@@ -9,6 +9,7 @@ import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
 import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
+import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
@@ -45,7 +46,7 @@ const Index = () => {
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
   const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
   const { profile } = useUserProfile();
-  const { dailyData, addEntry, removeEntry, clearToday } = useDailyNutrition();
+  const { dailyData, weeklyData, addEntry, removeEntry, clearToday } = useDailyNutrition();
 
   const handleLogNutrition = useCallback((recipe: Recipe) => {
     if (!recipe.nutrisi) {
@@ -224,6 +225,12 @@ const Index = () => {
             targetLemak={profile.targetLemak || 65}
             onRemoveEntry={removeEntry}
             onClearAll={clearToday}
+          />
+
+          {/* Weekly Nutrition Chart */}
+          <WeeklyNutritionChart
+            weeklyData={weeklyData}
+            targetKalori={profile.targetKalori || 2000}
           />
         </main>
       ) : (
