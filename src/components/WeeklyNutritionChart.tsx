@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis } from "recharts";
-import { CalendarDays, Flame, Beef, Wheat, Droplets } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, LineChart, Line } from "recharts";
+import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,6 +13,7 @@ interface WeeklyNutritionChartProps {
 }
 
 type MacroType = "kalori" | "protein" | "karbohidrat" | "lemak";
+type ChartType = "bar" | "line";
 
 const chartConfig = {
   kalori: {
@@ -45,6 +46,7 @@ const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutritionChartProps) {
   const [activeMacro, setActiveMacro] = useState<MacroType>("kalori");
+  const [chartType, setChartType] = useState<ChartType>("bar");
 
   const chartData = useMemo(() => {
     const data = [];
@@ -88,8 +90,24 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
             <CardTitle className="text-base">Statistik Mingguan</CardTitle>
             <HelpTooltip content="Grafik nutrisi 7 hari terakhir" />
           </div>
-          <div className="text-xs text-muted-foreground">
-            Rata-rata: {avgDaily} {activeConfig.unit}/hari
+          <div className="flex items-center gap-2">
+            <div className="text-xs text-muted-foreground">
+              Rata-rata: {avgDaily} {activeConfig.unit}/hari
+            </div>
+            {/* Chart Type Toggle */}
+            <ToggleGroup 
+              type="single" 
+              value={chartType} 
+              onValueChange={(v) => v && setChartType(v as ChartType)}
+              size="sm"
+            >
+              <ToggleGroupItem value="bar" className="h-7 w-7 p-0">
+                <BarChart3 className="h-3.5 w-3.5" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="line" className="h-7 w-7 p-0">
+                <TrendingUp className="h-3.5 w-3.5" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </div>
       </CardHeader>
@@ -120,35 +138,69 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
 
         {/* Chart */}
         <ChartContainer config={chartConfig} className="h-[180px] w-full">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <XAxis 
-              dataKey="day" 
-              tick={{ fontSize: 12 }} 
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis 
-              tick={{ fontSize: 10 }} 
-              tickLine={false}
-              axisLine={false}
-              width={40}
-            />
-            <ChartTooltip 
-              content={
-                <ChartTooltipContent 
-                  formatter={(value) => {
-                    return [`${value} ${activeConfig.unit}`, activeConfig.label];
-                  }}
-                />
-              }
-            />
-            <Bar 
-              dataKey={activeMacro}
-              fill={activeConfig.color}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={30}
-            />
-          </BarChart>
+          {chartType === "bar" ? (
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <XAxis 
+                dataKey="day" 
+                tick={{ fontSize: 12 }} 
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 10 }} 
+                tickLine={false}
+                axisLine={false}
+                width={40}
+              />
+              <ChartTooltip 
+                content={
+                  <ChartTooltipContent 
+                    formatter={(value) => {
+                      return [`${value} ${activeConfig.unit}`, activeConfig.label];
+                    }}
+                  />
+                }
+              />
+              <Bar 
+                dataKey={activeMacro}
+                fill={activeConfig.color}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={30}
+              />
+            </BarChart>
+          ) : (
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <XAxis 
+                dataKey="day" 
+                tick={{ fontSize: 12 }} 
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 10 }} 
+                tickLine={false}
+                axisLine={false}
+                width={40}
+              />
+              <ChartTooltip 
+                content={
+                  <ChartTooltipContent 
+                    formatter={(value) => {
+                      return [`${value} ${activeConfig.unit}`, activeConfig.label];
+                    }}
+                  />
+                }
+              />
+              <Line 
+                type="monotone"
+                dataKey={activeMacro}
+                stroke={activeConfig.color}
+                strokeWidth={2}
+                dot={{ fill: activeConfig.color, strokeWidth: 0, r: 4 }}
+                activeDot={{ r: 6, strokeWidth: 0 }}
+              />
+            </LineChart>
+          )}
         </ChartContainer>
 
         {/* Macro Summary */}
