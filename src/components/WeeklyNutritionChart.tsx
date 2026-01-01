@@ -248,6 +248,9 @@ export function WeeklyNutritionChart({
           {(Object.keys(chartConfig) as MacroType[]).map((key) => {
             const config = chartConfig[key];
             const isActive = key === activeMacro;
+            const weeklyTarget = targets[key] * 7;
+            const percentage = weeklyTarget > 0 ? Math.round((totals[key] / weeklyTarget) * 100) : 0;
+            const isOverTarget = percentage > 100;
             return (
               <button
                 key={key}
@@ -259,6 +262,11 @@ export function WeeklyNutritionChart({
                 <div className="text-xs text-muted-foreground">{config.label}</div>
                 <div className="text-sm font-semibold" style={{ color: config.color }}>
                   {totals[key]}{config.unit === "kkal" ? "" : "g"}
+                </div>
+                <div className={`text-[10px] font-medium ${
+                  isOverTarget ? "text-destructive" : percentage >= 80 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                }`}>
+                  {percentage}% target
                 </div>
               </button>
             );
