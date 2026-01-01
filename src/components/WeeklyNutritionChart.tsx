@@ -1,11 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, LineChart, Line, ReferenceLine } from "recharts";
-import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp } from "lucide-react";
+import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp, Download, Image, FileText } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;
@@ -56,6 +61,8 @@ export function WeeklyNutritionChart({
 }: WeeklyNutritionChartProps) {
   const [activeMacro, setActiveMacro] = useState<MacroType>("kalori");
   const [chartType, setChartType] = useState<ChartType>("bar");
+  const [isExporting, setIsExporting] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const targets: Record<MacroType, number> = {
     kalori: targetKalori,
@@ -63,6 +70,52 @@ export function WeeklyNutritionChart({
     karbohidrat: targetKarbohidrat,
     lemak: targetLemak,
   };
+
+  const exportAsImage = useCallback(async () => {
+    if (!chartRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      const link = document.createElement("a");
+      link.download = `nutrisi-mingguan-${new Date().toISOString().split("T")[0]}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Gambar berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengekspor gambar");
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  const exportAsPDF = useCallback(async () => {
+    if (!chartRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a5",
+      });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 10, pdfWidth, pdfHeight);
+      pdf.save(`nutrisi-mingguan-${new Date().toISOString().split("T")[0]}.pdf`);
+      toast.success("PDF berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengekspor PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
 
   const chartData = useMemo(() => {
     const data = [];
@@ -98,7 +151,7 @@ export function WeeklyNutritionChart({
   const avgDaily = Math.round(totals[activeMacro] / 7);
 
   return (
-    <Card>
+    <Card ref={chartRef}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -107,9 +160,27 @@ export function WeeklyNutritionChart({
             <HelpTooltip content="Grafik nutrisi 7 hari terakhir" />
           </div>
           <div className="flex items-center gap-2">
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground hidden sm:block">
               Rata-rata: {avgDaily} {activeConfig.unit}/hari
             </div>
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={isExporting}>
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={exportAsImage}>
+                  <Image className="h-4 w-4 mr-2" />
+                  Unduh Gambar (PNG)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportAsPDF}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Unduh PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* Chart Type Toggle */}
             <ToggleGroup 
               type="single" 
