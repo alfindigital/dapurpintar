@@ -1,38 +1,51 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend } from "recharts";
-import { CalendarDays } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis } from "recharts";
+import { CalendarDays, Flame, Beef, Wheat, Droplets } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;
   targetKalori: number;
 }
 
+type MacroType = "kalori" | "protein" | "karbohidrat" | "lemak";
+
 const chartConfig = {
   kalori: {
     label: "Kalori",
     color: "hsl(var(--chart-1))",
+    icon: Flame,
+    unit: "kkal",
   },
   protein: {
     label: "Protein",
     color: "hsl(var(--chart-2))",
+    icon: Beef,
+    unit: "g",
   },
   karbohidrat: {
     label: "Karbohidrat", 
     color: "hsl(var(--chart-3))",
+    icon: Wheat,
+    unit: "g",
   },
   lemak: {
     label: "Lemak",
     color: "hsl(var(--chart-4))",
+    icon: Droplets,
+    unit: "g",
   },
 };
 
 const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutritionChartProps) {
+  const [activeMacro, setActiveMacro] = useState<MacroType>("kalori");
+
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
@@ -56,8 +69,15 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
     return data;
   }, [weeklyData]);
 
-  const totalWeeklyKalori = chartData.reduce((sum, d) => sum + d.kalori, 0);
-  const avgDailyKalori = Math.round(totalWeeklyKalori / 7);
+  const totals = useMemo(() => ({
+    kalori: chartData.reduce((sum, d) => sum + d.kalori, 0),
+    protein: chartData.reduce((sum, d) => sum + d.protein, 0),
+    karbohidrat: chartData.reduce((sum, d) => sum + d.karbohidrat, 0),
+    lemak: chartData.reduce((sum, d) => sum + d.lemak, 0),
+  }), [chartData]);
+
+  const activeConfig = chartConfig[activeMacro];
+  const avgDaily = Math.round(totals[activeMacro] / 7);
 
   return (
     <Card>
@@ -69,12 +89,37 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
             <HelpTooltip content="Grafik nutrisi 7 hari terakhir" />
           </div>
           <div className="text-xs text-muted-foreground">
-            Rata-rata: {avgDailyKalori} kkal/hari
+            Rata-rata: {avgDaily} {activeConfig.unit}/hari
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[200px] w-full">
+      <CardContent className="space-y-4">
+        {/* Macro Toggle */}
+        <ToggleGroup 
+          type="single" 
+          value={activeMacro} 
+          onValueChange={(v) => v && setActiveMacro(v as MacroType)}
+          className="justify-start gap-1"
+        >
+          {(Object.keys(chartConfig) as MacroType[]).map((key) => {
+            const config = chartConfig[key];
+            const Icon = config.icon;
+            return (
+              <ToggleGroupItem
+                key={key}
+                value={key}
+                size="sm"
+                className="text-xs gap-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                <Icon className="h-3 w-3" />
+                {config.label}
+              </ToggleGroupItem>
+            );
+          })}
+        </ToggleGroup>
+
+        {/* Chart */}
+        <ChartContainer config={chartConfig} className="h-[180px] w-full">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis 
               dataKey="day" 
@@ -91,16 +136,15 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
             <ChartTooltip 
               content={
                 <ChartTooltipContent 
-                  formatter={(value, name) => {
-                    const unit = name === "kalori" ? " kkal" : " g";
-                    return [`${value}${unit}`, chartConfig[name as keyof typeof chartConfig]?.label || name];
+                  formatter={(value) => {
+                    return [`${value} ${activeConfig.unit}`, activeConfig.label];
                   }}
                 />
               }
             />
             <Bar 
-              dataKey="kalori" 
-              fill="var(--color-kalori)" 
+              dataKey={activeMacro}
+              fill={activeConfig.color}
               radius={[4, 4, 0, 0]}
               maxBarSize={30}
             />
@@ -108,31 +152,25 @@ export function WeeklyNutritionChart({ weeklyData, targetKalori }: WeeklyNutriti
         </ChartContainer>
 
         {/* Macro Summary */}
-        <div className="grid grid-cols-4 gap-2 mt-4 text-center">
-          <div className="p-2 bg-muted/50 rounded">
-            <div className="text-xs text-muted-foreground">Kalori</div>
-            <div className="text-sm font-semibold" style={{ color: "hsl(var(--chart-1))" }}>
-              {totalWeeklyKalori}
-            </div>
-          </div>
-          <div className="p-2 bg-muted/50 rounded">
-            <div className="text-xs text-muted-foreground">Protein</div>
-            <div className="text-sm font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
-              {chartData.reduce((sum, d) => sum + d.protein, 0)}g
-            </div>
-          </div>
-          <div className="p-2 bg-muted/50 rounded">
-            <div className="text-xs text-muted-foreground">Karbo</div>
-            <div className="text-sm font-semibold" style={{ color: "hsl(var(--chart-3))" }}>
-              {chartData.reduce((sum, d) => sum + d.karbohidrat, 0)}g
-            </div>
-          </div>
-          <div className="p-2 bg-muted/50 rounded">
-            <div className="text-xs text-muted-foreground">Lemak</div>
-            <div className="text-sm font-semibold" style={{ color: "hsl(var(--chart-4))" }}>
-              {chartData.reduce((sum, d) => sum + d.lemak, 0)}g
-            </div>
-          </div>
+        <div className="grid grid-cols-4 gap-2 text-center">
+          {(Object.keys(chartConfig) as MacroType[]).map((key) => {
+            const config = chartConfig[key];
+            const isActive = key === activeMacro;
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveMacro(key)}
+                className={`p-2 rounded transition-colors ${
+                  isActive ? "bg-primary/10 ring-1 ring-primary" : "bg-muted/50 hover:bg-muted"
+                }`}
+              >
+                <div className="text-xs text-muted-foreground">{config.label}</div>
+                <div className="text-sm font-semibold" style={{ color: config.color }}>
+                  {totals[key]}{config.unit === "kkal" ? "" : "g"}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
