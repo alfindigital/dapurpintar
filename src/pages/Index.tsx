@@ -10,6 +10,7 @@ import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
 import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
+import { WeightProgressChart } from "@/components/WeightProgressChart";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
@@ -235,6 +236,9 @@ const Index = () => {
             targetKarbohidrat={profile.targetKarbohidrat}
             targetLemak={profile.targetLemak}
           />
+
+          {/* Weight Progress Chart */}
+          <WeightProgressChart targetWeight={profile.beratBadan} />
         </main>
       ) : (
         <main className="container max-w-4xl mx-auto px-4 py-4">
