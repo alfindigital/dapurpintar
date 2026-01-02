@@ -2,7 +2,7 @@ import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, LineChart, Line, ReferenceLine } from "recharts";
-import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp, Download, Image, FileText } from "lucide-react";
+import { CalendarDays, Flame, Beef, Wheat, Droplets, BarChart3, TrendingUp, Download, Image, FileText, Share2, MessageCircle } from "lucide-react";
 import { HelpTooltip } from "./HelpTooltip";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -117,6 +117,7 @@ export function WeeklyNutritionChart({
     }
   }, []);
 
+
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
@@ -146,6 +147,41 @@ export function WeeklyNutritionChart({
     karbohidrat: chartData.reduce((sum, d) => sum + d.karbohidrat, 0),
     lemak: chartData.reduce((sum, d) => sum + d.lemak, 0),
   }), [chartData]);
+
+  const getShareText = useCallback(() => {
+    const avgKalori = Math.round(totals.kalori / 7);
+    const avgProtein = Math.round(totals.protein / 7);
+    const avgKarbo = Math.round(totals.karbohidrat / 7);
+    const avgLemak = Math.round(totals.lemak / 7);
+    return `📊 Progress Nutrisi Mingguanku!\n\n🔥 Kalori: ${avgKalori} kkal/hari\n🥩 Protein: ${avgProtein}g/hari\n🌾 Karbohidrat: ${avgKarbo}g/hari\n💧 Lemak: ${avgLemak}g/hari\n\n#NutrisiSehat #HealthyLifestyle`;
+  }, [totals]);
+
+  const shareToTwitter = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+    toast.success("Membuka Twitter...");
+  }, [getShareText]);
+
+  const shareToFacebook = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, "_blank");
+    toast.success("Membuka Facebook...");
+  }, [getShareText]);
+
+  const shareToWhatsApp = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+    toast.success("Membuka WhatsApp...");
+  }, [getShareText]);
+
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(getShareText());
+      toast.success("Teks berhasil disalin!");
+    } catch {
+      toast.error("Gagal menyalin teks");
+    }
+  }, [getShareText]);
 
   const activeConfig = chartConfig[activeMacro];
   const avgDaily = Math.round(totals[activeMacro] / 7);
@@ -178,6 +214,36 @@ export function WeeklyNutritionChart({
                 <DropdownMenuItem onClick={exportAsPDF}>
                   <FileText className="h-4 w-4 mr-2" />
                   Unduh PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {/* Share Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Share2 className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={shareToTwitter}>
+                  <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  Twitter / X
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={shareToFacebook}>
+                  <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  Facebook
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={shareToWhatsApp}>
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={copyToClipboard}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Salin Teks
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
