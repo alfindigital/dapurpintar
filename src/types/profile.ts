@@ -24,6 +24,7 @@ export interface UserProfile {
   tinggiBadan?: number; // cm
   levelAktivitas?: 'sangat_ringan' | 'ringan' | 'sedang' | 'aktif' | 'sangat_aktif';
   tujuanNutrisi?: 'turun_berat' | 'jaga_berat' | 'naik_berat';
+  targetBeratBadan?: number; // kg - target weight goal
   // Target nutrisi harian
   targetKalori?: number;
   targetProtein?: number;
@@ -49,6 +50,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   tinggiBadan: undefined,
   levelAktivitas: 'sedang',
   tujuanNutrisi: 'jaga_berat',
+  targetBeratBadan: undefined,
   targetKalori: 2000,
   targetProtein: 50,
   targetKarbohidrat: 250,

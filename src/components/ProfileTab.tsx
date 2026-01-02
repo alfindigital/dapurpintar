@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -440,6 +440,33 @@ export function ProfileTab({
                 <Label htmlFor="goal-naik" className="cursor-pointer text-sm">Naik Berat</Label>
               </div>
             </RadioGroup>
+          </div>
+
+          {/* Target Berat Badan */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <Goal className="h-3 w-3 text-muted-foreground" />
+              <Label htmlFor="target-berat">Target Berat Badan (kg)</Label>
+            </div>
+            <Input
+              id="target-berat"
+              type="number"
+              step="0.1"
+              min="30"
+              max="200"
+              placeholder="Contoh: 55"
+              value={profile.targetBeratBadan || ''}
+              onChange={(e) => onUpdateProfile({ targetBeratBadan: parseFloat(e.target.value) || undefined })}
+            />
+            {profile.beratBadan && profile.targetBeratBadan && (
+              <p className="text-xs text-muted-foreground">
+                {profile.beratBadan > profile.targetBeratBadan 
+                  ? `Perlu turun ${(profile.beratBadan - profile.targetBeratBadan).toFixed(1)} kg`
+                  : profile.beratBadan < profile.targetBeratBadan
+                    ? `Perlu naik ${(profile.targetBeratBadan - profile.beratBadan).toFixed(1)} kg`
+                    : "Sudah mencapai target! 🎉"}
+              </p>
+            )}
           </div>
         </div>
 
