@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,11 +14,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
+import { useEffect, useCallback } from "react";
 
 interface ProfileTabProps {
   profile: UserProfile;
@@ -44,6 +46,38 @@ export function ProfileTab({
   const handleReset = () => {
     onResetProfile();
     toast.success("Profil direset ke default");
+  };
+
+  // Auto-calculate targets when relevant fields change
+  const handleAutoCalculate = useCallback(() => {
+    if (!profile.autoCalculateTarget) return;
+    
+    const targets = calculateNutritionTargets(profile);
+    onUpdateProfile({
+      targetKalori: targets.kalori,
+      targetProtein: targets.protein,
+      targetKarbohidrat: targets.karbohidrat,
+      targetLemak: targets.lemak,
+    });
+  }, [profile.autoCalculateTarget, profile.jenisKelamin, profile.beratBadan, profile.tinggiBadan, profile.usia, profile.levelAktivitas, profile.tujuanNutrisi, onUpdateProfile]);
+
+  useEffect(() => {
+    handleAutoCalculate();
+  }, [handleAutoCalculate]);
+
+  const handleToggleAutoCalculate = (enabled: boolean) => {
+    onUpdateProfile({ autoCalculateTarget: enabled });
+    if (enabled) {
+      const targets = calculateNutritionTargets(profile);
+      onUpdateProfile({
+        autoCalculateTarget: true,
+        targetKalori: targets.kalori,
+        targetProtein: targets.protein,
+        targetKarbohidrat: targets.karbohidrat,
+        targetLemak: targets.lemak,
+      });
+      toast.success("Target nutrisi dihitung otomatis!");
+    }
   };
 
   const getKategoriLabel = (kategori: FamilyMember['kategoriUsia']) => {
@@ -295,12 +329,131 @@ export function ProfileTab({
 
         <Separator />
 
+        {/* Goal Setting */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-4 w-4 text-primary" />
+            <h3 className="font-medium">Goal Setting</h3>
+            <HelpTooltip content="Hitung target nutrisi otomatis berdasarkan berat, tinggi, dan aktivitas" />
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-calc" className="font-medium">Hitung Otomatis</Label>
+              <p className="text-xs text-muted-foreground">
+                Gunakan rumus Mifflin-St Jeor
+              </p>
+            </div>
+            <Switch
+              id="auto-calc"
+              checked={profile.autoCalculateTarget || false}
+              onCheckedChange={handleToggleAutoCalculate}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Jenis Kelamin</Label>
+              <Select 
+                value={profile.jenisKelamin || ''} 
+                onValueChange={(value) => onUpdateProfile({ jenisKelamin: value as 'pria' | 'wanita' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pria">Pria</SelectItem>
+                  <SelectItem value="wanita">Wanita</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-1">
+                <Scale className="h-3 w-3 text-muted-foreground" />
+                <Label htmlFor="berat">Berat (kg)</Label>
+              </div>
+              <Input
+                id="berat"
+                type="number"
+                min="30"
+                max="200"
+                placeholder="60"
+                value={profile.beratBadan || ''}
+                onChange={(e) => onUpdateProfile({ beratBadan: parseFloat(e.target.value) || undefined })}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-1">
+                <Ruler className="h-3 w-3 text-muted-foreground" />
+                <Label htmlFor="tinggi">Tinggi (cm)</Label>
+              </div>
+              <Input
+                id="tinggi"
+                type="number"
+                min="100"
+                max="250"
+                placeholder="165"
+                value={profile.tinggiBadan || ''}
+                onChange={(e) => onUpdateProfile({ tinggiBadan: parseFloat(e.target.value) || undefined })}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-1">
+                <Activity className="h-3 w-3 text-muted-foreground" />
+                <Label>Level Aktivitas</Label>
+              </div>
+              <Select 
+                value={profile.levelAktivitas || 'sedang'} 
+                onValueChange={(value) => onUpdateProfile({ levelAktivitas: value as UserProfile['levelAktivitas'] })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sangat_ringan">Sangat Ringan</SelectItem>
+                  <SelectItem value="ringan">Ringan</SelectItem>
+                  <SelectItem value="sedang">Sedang</SelectItem>
+                  <SelectItem value="aktif">Aktif</SelectItem>
+                  <SelectItem value="sangat_aktif">Sangat Aktif</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tujuan Nutrisi</Label>
+            <RadioGroup
+              value={profile.tujuanNutrisi || 'jaga_berat'}
+              onValueChange={(value) => onUpdateProfile({ tujuanNutrisi: value as UserProfile['tujuanNutrisi'] })}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="turun_berat" id="goal-turun" />
+                <Label htmlFor="goal-turun" className="cursor-pointer text-sm">Turun Berat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="jaga_berat" id="goal-jaga" />
+                <Label htmlFor="goal-jaga" className="cursor-pointer text-sm">Jaga Berat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="naik_berat" id="goal-naik" />
+                <Label htmlFor="goal-naik" className="cursor-pointer text-sm">Naik Berat</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+
+        <Separator />
+
         {/* Target Nutrisi Harian */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-primary" />
             <h3 className="font-medium">Target Nutrisi Harian</h3>
             <HelpTooltip content="Target nutrisi untuk tracking harian Anda" />
+            {profile.autoCalculateTarget && (
+              <Badge variant="secondary" className="text-xs">Auto</Badge>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -313,7 +466,8 @@ export function ProfileTab({
                 max="5000"
                 placeholder="2000"
                 value={profile.targetKalori || ''}
-                onChange={(e) => onUpdateProfile({ targetKalori: parseInt(e.target.value, 10) || 2000 })}
+                onChange={(e) => onUpdateProfile({ targetKalori: parseInt(e.target.value, 10) || 2000, autoCalculateTarget: false })}
+                disabled={profile.autoCalculateTarget}
               />
             </div>
             <div className="space-y-2">
@@ -325,7 +479,8 @@ export function ProfileTab({
                 max="200"
                 placeholder="50"
                 value={profile.targetProtein || ''}
-                onChange={(e) => onUpdateProfile({ targetProtein: parseInt(e.target.value, 10) || 50 })}
+                onChange={(e) => onUpdateProfile({ targetProtein: parseInt(e.target.value, 10) || 50, autoCalculateTarget: false })}
+                disabled={profile.autoCalculateTarget}
               />
             </div>
             <div className="space-y-2">
@@ -337,7 +492,8 @@ export function ProfileTab({
                 max="500"
                 placeholder="250"
                 value={profile.targetKarbohidrat || ''}
-                onChange={(e) => onUpdateProfile({ targetKarbohidrat: parseInt(e.target.value, 10) || 250 })}
+                onChange={(e) => onUpdateProfile({ targetKarbohidrat: parseInt(e.target.value, 10) || 250, autoCalculateTarget: false })}
+                disabled={profile.autoCalculateTarget}
               />
             </div>
             <div className="space-y-2">
@@ -349,7 +505,8 @@ export function ProfileTab({
                 max="150"
                 placeholder="65"
                 value={profile.targetLemak || ''}
-                onChange={(e) => onUpdateProfile({ targetLemak: parseInt(e.target.value, 10) || 65 })}
+                onChange={(e) => onUpdateProfile({ targetLemak: parseInt(e.target.value, 10) || 65, autoCalculateTarget: false })}
+                disabled={profile.autoCalculateTarget}
               />
             </div>
           </div>
