@@ -166,6 +166,41 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Progress to Target */}
+        {targetWeight && stats.current && (
+          <div className="p-3 rounded-lg border bg-primary/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">Progress Menuju Target</span>
+              <Badge variant={Math.abs(stats.current - targetWeight) < 0.5 ? "default" : "secondary"} className="text-xs">
+                {Math.abs(stats.current - targetWeight) < 0.5 
+                  ? "🎉 Tercapai!" 
+                  : stats.current > targetWeight 
+                    ? `${(stats.current - targetWeight).toFixed(1)} kg lagi`
+                    : `${(targetWeight - stats.current).toFixed(1)} kg lagi`
+                }
+              </Badge>
+            </div>
+            <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+              {(() => {
+                const initial = stats.initial || stats.current;
+                const totalToLose = Math.abs(initial - targetWeight);
+                const currentProgress = Math.abs(initial - stats.current);
+                const percentage = totalToLose > 0 ? Math.min(100, (currentProgress / totalToLose) * 100) : 100;
+                return (
+                  <div 
+                    className="absolute h-full bg-primary rounded-full transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                  />
+                );
+              })()}
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{stats.initial} kg</span>
+              <span className="font-medium text-primary">{targetWeight} kg</span>
+            </div>
+          </div>
+        )}
+
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-2 rounded-lg bg-muted/50">

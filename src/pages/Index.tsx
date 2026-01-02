@@ -238,7 +238,7 @@ const Index = () => {
           />
 
           {/* Weight Progress Chart */}
-          <WeightProgressChart targetWeight={profile.beratBadan} />
+          <WeightProgressChart targetWeight={profile.targetBeratBadan} />
         </main>
       ) : (
         <main className="container max-w-4xl mx-auto px-4 py-4">
