@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Lightbulb } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Lightbulb, Droplets } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, getHealthTips } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, getHealthTips, calculateDailyWaterIntake } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -490,6 +490,45 @@ export function ProfileTab({
               </ul>
             </div>
           ) : null}
+
+          {/* Daily Water Intake */}
+          {profile.beratBadan && (
+            <div className="p-3 rounded-lg border bg-blue-500/10 space-y-2">
+              <div className="flex items-center gap-2">
+                <Droplets className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">Kebutuhan Air Harian</span>
+              </div>
+              {(() => {
+                const { liters, glasses } = calculateDailyWaterIntake(
+                  profile.beratBadan!,
+                  profile.levelAktivitas
+                );
+                return (
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                        {liters} Liter
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {glasses} gelas (250ml)
+                      </p>
+                    </div>
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: Math.min(8, glasses) }).map((_, i) => (
+                        <div 
+                          key={i} 
+                          className="w-2 h-6 rounded-sm bg-blue-500/70"
+                        />
+                      ))}
+                      {glasses > 8 && (
+                        <span className="text-xs text-muted-foreground ml-1">+{glasses - 8}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
