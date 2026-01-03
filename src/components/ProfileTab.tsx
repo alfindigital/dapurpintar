@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Lightbulb } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, getHealthTips } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -467,6 +467,29 @@ export function ProfileTab({
               })()}
             </div>
           )}
+
+          {/* Health Tips */}
+          {(profile.beratBadan && profile.tinggiBadan) || profile.tujuanNutrisi ? (
+            <div className="p-3 rounded-lg border bg-accent/30 space-y-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-accent-foreground" />
+                <span className="text-sm font-medium">Tips Kesehatan</span>
+              </div>
+              <ul className="space-y-1.5">
+                {(() => {
+                  const bmiCategory = profile.beratBadan && profile.tinggiBadan 
+                    ? getBMICategory(calculateBMI(profile.beratBadan, profile.tinggiBadan)).category 
+                    : null;
+                  const tips = getHealthTips(bmiCategory, profile.tujuanNutrisi);
+                  return tips.map((tip, index) => (
+                    <li key={index} className="text-xs text-muted-foreground leading-relaxed">
+                      {tip}
+                    </li>
+                  ));
+                })()}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

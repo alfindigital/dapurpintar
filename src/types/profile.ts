@@ -165,3 +165,46 @@ export function calculateIdealWeightRange(tinggiBadan: number): { min: number; m
     max: Math.round(25 * tinggiSquared * 10) / 10,
   };
 }
+
+// Health tips based on BMI category and nutrition goal
+export function getHealthTips(
+  bmiCategory: BMICategory | null,
+  tujuanNutrisi: UserProfile['tujuanNutrisi']
+): string[] {
+  const tips: string[] = [];
+
+  // BMI-based tips
+  if (bmiCategory === 'underweight') {
+    tips.push('💪 Fokus pada makanan padat nutrisi seperti kacang-kacangan, alpukat, dan protein berkualitas');
+    tips.push('🍽️ Makan lebih sering dengan porsi kecil (5-6x sehari) untuk menambah kalori');
+    tips.push('🥛 Tambahkan susu, keju, atau yogurt dalam menu harian');
+  } else if (bmiCategory === 'normal') {
+    tips.push('✅ Pertahankan pola makan seimbang dengan variasi makanan');
+    tips.push('🏃 Lanjutkan aktivitas fisik rutin 150 menit per minggu');
+    tips.push('💧 Jaga hidrasi dengan minum air putih 8 gelas sehari');
+  } else if (bmiCategory === 'overweight') {
+    tips.push('🥗 Perbanyak sayuran dan buah dalam setiap makan');
+    tips.push('⏰ Hindari makan 3 jam sebelum tidur');
+    tips.push('🚶 Tingkatkan aktivitas fisik secara bertahap');
+  } else if (bmiCategory === 'obese') {
+    tips.push('👩‍⚕️ Konsultasikan dengan dokter atau ahli gizi untuk program yang tepat');
+    tips.push('📝 Catat makanan harian untuk awareness kalori');
+    tips.push('🎯 Target penurunan 0.5-1 kg per minggu untuk hasil berkelanjutan');
+  }
+
+  // Goal-based tips
+  if (tujuanNutrisi === 'turun_berat') {
+    tips.push('🔥 Defisit kalori 500 kkal/hari untuk turun 0.5 kg/minggu');
+    tips.push('🥩 Prioritaskan protein untuk menjaga massa otot saat diet');
+    tips.push('🚫 Kurangi makanan olahan dan minuman manis');
+  } else if (tujuanNutrisi === 'naik_berat') {
+    tips.push('📈 Surplus kalori 300-500 kkal/hari untuk kenaikan sehat');
+    tips.push('🏋️ Kombinasikan dengan latihan kekuatan untuk massa otot');
+    tips.push('🍌 Konsumsi smoothie tinggi kalori sebagai camilan');
+  } else if (tujuanNutrisi === 'jaga_berat') {
+    tips.push('⚖️ Pantau berat badan mingguan untuk deteksi dini perubahan');
+    tips.push('🍱 Persiapkan meal prep untuk konsistensi nutrisi');
+  }
+
+  return tips.slice(0, 4); // Limit to 4 tips
+}
