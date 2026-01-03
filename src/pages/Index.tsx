@@ -11,6 +11,7 @@ import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
 import { WeightProgressChart } from "@/components/WeightProgressChart";
+import { WaterTracker } from "@/components/WaterTracker";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
@@ -239,6 +240,12 @@ const Index = () => {
 
           {/* Weight Progress Chart */}
           <WeightProgressChart targetWeight={profile.targetBeratBadan} />
+
+          {/* Water Tracker */}
+          <WaterTracker 
+            beratBadan={profile.beratBadan} 
+            levelAktivitas={profile.levelAktivitas} 
+          />
         </main>
       ) : (
         <main className="container max-w-4xl mx-auto px-4 py-4">
