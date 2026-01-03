@@ -155,3 +155,13 @@ export function getBMICategory(bmi: number): { category: BMICategory; label: str
   if (bmi < 30) return { category: 'overweight', label: 'Berat Badan Berlebih', color: 'text-yellow-500' };
   return { category: 'obese', label: 'Obesitas', color: 'text-red-500' };
 }
+
+// Calculate ideal weight range based on height and optimal BMI (18.5-25)
+export function calculateIdealWeightRange(tinggiBadan: number): { min: number; max: number } {
+  const tinggiMeter = tinggiBadan / 100;
+  const tinggiSquared = tinggiMeter * tinggiMeter;
+  return {
+    min: Math.round(18.5 * tinggiSquared * 10) / 10,
+    max: Math.round(25 * tinggiSquared * 10) / 10,
+  };
+}
