@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -397,6 +397,46 @@ export function ProfileTab({
                 onChange={(e) => onUpdateProfile({ tinggiBadan: parseFloat(e.target.value) || undefined })}
               />
             </div>
+          </div>
+
+          {/* BMI Display */}
+          {profile.beratBadan && profile.tinggiBadan && (
+            <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Body Mass Index (BMI)</span>
+                {(() => {
+                  const bmi = calculateBMI(profile.beratBadan!, profile.tinggiBadan!);
+                  const { label, color } = getBMICategory(bmi);
+                  return (
+                    <Badge variant="outline" className={color}>
+                      {bmi.toFixed(1)} - {label}
+                    </Badge>
+                  );
+                })()}
+              </div>
+              <div className="relative h-2 bg-gradient-to-r from-blue-500 via-green-500 via-yellow-500 to-red-500 rounded-full">
+                {(() => {
+                  const bmi = calculateBMI(profile.beratBadan!, profile.tinggiBadan!);
+                  // Scale BMI 15-40 to 0-100%
+                  const position = Math.min(100, Math.max(0, ((bmi - 15) / 25) * 100));
+                  return (
+                    <div 
+                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-background border-2 border-foreground rounded-full shadow-sm"
+                      style={{ left: `calc(${position}% - 6px)` }}
+                    />
+                  );
+                })()}
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Kurang</span>
+                <span>Normal</span>
+                <span>Lebih</span>
+                <span>Obesitas</span>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-1">
                 <Activity className="h-3 w-3 text-muted-foreground" />
