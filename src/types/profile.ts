@@ -140,3 +140,18 @@ export function getKategoriUsia(usia: number): FamilyMember['kategoriUsia'] {
   if (usia < 60) return 'dewasa';
   return 'lansia';
 }
+
+// BMI calculation and interpretation
+export function calculateBMI(beratBadan: number, tinggiBadan: number): number {
+  const tinggiMeter = tinggiBadan / 100;
+  return beratBadan / (tinggiMeter * tinggiMeter);
+}
+
+export type BMICategory = 'underweight' | 'normal' | 'overweight' | 'obese';
+
+export function getBMICategory(bmi: number): { category: BMICategory; label: string; color: string } {
+  if (bmi < 18.5) return { category: 'underweight', label: 'Berat Badan Kurang', color: 'text-blue-500' };
+  if (bmi < 25) return { category: 'normal', label: 'Berat Badan Normal', color: 'text-green-500' };
+  if (bmi < 30) return { category: 'overweight', label: 'Berat Badan Berlebih', color: 'text-yellow-500' };
+  return { category: 'obese', label: 'Obesitas', color: 'text-red-500' };
+}
