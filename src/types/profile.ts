@@ -208,3 +208,39 @@ export function getHealthTips(
 
   return tips.slice(0, 4); // Limit to 4 tips
 }
+
+// Calculate daily water intake based on weight and activity level
+export function calculateDailyWaterIntake(
+  beratBadan: number,
+  levelAktivitas: UserProfile['levelAktivitas']
+): { liters: number; glasses: number } {
+  // Base: 30ml per kg body weight
+  let mlPerKg = 30;
+  
+  // Adjust for activity level
+  switch (levelAktivitas) {
+    case 'sangat_ringan':
+      mlPerKg = 30;
+      break;
+    case 'ringan':
+      mlPerKg = 33;
+      break;
+    case 'sedang':
+      mlPerKg = 35;
+      break;
+    case 'aktif':
+      mlPerKg = 38;
+      break;
+    case 'sangat_aktif':
+      mlPerKg = 40;
+      break;
+    default:
+      mlPerKg = 35;
+  }
+  
+  const totalMl = beratBadan * mlPerKg;
+  const liters = Math.round(totalMl / 100) / 10; // Round to 1 decimal
+  const glasses = Math.round(totalMl / 250); // 250ml per glass
+  
+  return { liters, glasses };
+}
