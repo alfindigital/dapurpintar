@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -433,6 +433,38 @@ export function ProfileTab({
                 <span>Lebih</span>
                 <span>Obesitas</span>
               </div>
+            </div>
+          )}
+
+          {/* Ideal Weight Recommendation */}
+          {profile.tinggiBadan && (
+            <div className="p-3 rounded-lg border bg-primary/5 space-y-1">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Rekomendasi Berat Ideal</span>
+              </div>
+              {(() => {
+                const { min, max } = calculateIdealWeightRange(profile.tinggiBadan!);
+                const isInRange = profile.beratBadan && profile.beratBadan >= min && profile.beratBadan <= max;
+                return (
+                  <>
+                    <p className="text-sm">
+                      Untuk tinggi <span className="font-medium">{profile.tinggiBadan} cm</span>, berat ideal Anda adalah{' '}
+                      <span className="font-semibold text-primary">{min} - {max} kg</span>
+                    </p>
+                    {profile.beratBadan && (
+                      <p className="text-xs text-muted-foreground">
+                        {isInRange 
+                          ? "✅ Berat badan Anda sudah dalam rentang ideal!"
+                          : profile.beratBadan < min
+                            ? `Perlu menambah ${(min - profile.beratBadan).toFixed(1)} kg untuk mencapai batas bawah ideal`
+                            : `Perlu menurunkan ${(profile.beratBadan - max).toFixed(1)} kg untuk mencapai batas atas ideal`
+                        }
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
 
