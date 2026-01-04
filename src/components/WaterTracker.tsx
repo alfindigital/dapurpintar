@@ -6,6 +6,7 @@ import { useWaterTracking } from "@/hooks/useWaterTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
 import { toast } from "sonner";
 import { WeeklyWaterChart } from "./WeeklyWaterChart";
+import { WaterAchievements } from "./WaterAchievements";
 
 interface WaterTrackerProps {
   beratBadan?: number;
@@ -18,7 +19,16 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
     ? calculateDailyWaterIntake(beratBadan, levelAktivitas).glasses
     : 8;
 
-  const { glasses, addGlass, removeGlass, resetToday, weeklyData, stats } = useWaterTracking(target);
+  const { 
+    glasses, 
+    addGlass, 
+    removeGlass, 
+    resetToday, 
+    weeklyData, 
+    stats,
+    unlockedAchievements,
+    totalGlassesAllTime,
+  } = useWaterTracking(target);
 
   const percentage = Math.min(100, (glasses / target) * 100);
   const isComplete = glasses >= target;
@@ -121,6 +131,13 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
               Terakhir minum: {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
             </p>
           )}
+
+          {/* Achievements Preview */}
+          <WaterAchievements 
+            unlockedIds={unlockedAchievements}
+            streak={stats.streak}
+            totalGlasses={totalGlassesAllTime}
+          />
         </CardContent>
       </Card>
 
