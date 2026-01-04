@@ -1,13 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Droplets, TrendingUp, Trophy, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Droplets, TrendingUp, Trophy, Flame, Download, Image, FileText, Share2, MessageCircle } from "lucide-react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
   ReferenceLine,
   Cell,
@@ -18,6 +19,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface DailyWaterRecord {
   date: string;
@@ -46,6 +50,9 @@ const chartConfig = {
 const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
   const chartData = useMemo(() => {
     return weeklyData.map(d => {
       const date = new Date(d.date);
@@ -60,13 +67,142 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
     });
   }, [weeklyData]);
 
+  const exportAsImage = useCallback(async () => {
+    if (!chartRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      const link = document.createElement("a");
+      link.download = `statistik-air-${new Date().toISOString().split("T")[0]}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Gambar berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengekspor gambar");
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  const exportAsPDF = useCallback(async () => {
+    if (!chartRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a5",
+      });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 10, pdfWidth, pdfHeight);
+      pdf.save(`statistik-air-${new Date().toISOString().split("T")[0]}.pdf`);
+      toast.success("PDF berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengekspor PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+
+  const getShareText = useCallback(() => {
+    return `💧 Progress Minum Air Mingguanku!\n\n🥛 Total: ${stats.totalGlasses} gelas\n📊 Rata-rata: ${stats.avgGlasses} gelas/hari\n🏆 Target tercapai: ${stats.daysCompleted}/7 hari\n🔥 Streak: ${stats.streak} hari\n\n#HidrasiSehat #WaterChallenge`;
+  }, [stats]);
+
+  const shareToTwitter = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+    toast.success("Membuka Twitter...");
+  }, [getShareText]);
+
+  const shareToFacebook = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://www.facebook.com/sharer/sharer.php?quote=${text}`, "_blank");
+    toast.success("Membuka Facebook...");
+  }, [getShareText]);
+
+  const shareToWhatsApp = useCallback(() => {
+    const text = encodeURIComponent(getShareText());
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+    toast.success("Membuka WhatsApp...");
+  }, [getShareText]);
+
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(getShareText());
+      toast.success("Teks berhasil disalin!");
+    } catch {
+      toast.error("Gagal menyalin teks");
+    }
+  }, [getShareText]);
+
   return (
-    <Card>
+    <Card ref={chartRef}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-blue-500" />
-          Statistik Mingguan Air
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-blue-500" />
+            Statistik Mingguan Air
+          </CardTitle>
+          <div className="flex items-center gap-1">
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={isExporting}>
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={exportAsImage}>
+                  <Image className="h-4 w-4 mr-2" />
+                  Unduh Gambar (PNG)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportAsPDF}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Unduh PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {/* Share Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Share2 className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={shareToTwitter}>
+                  <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  Twitter / X
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={shareToFacebook}>
+                  <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  Facebook
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={shareToWhatsApp}>
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={copyToClipboard}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Salin Teks
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Stats Grid */}
