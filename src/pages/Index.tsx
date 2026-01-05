@@ -168,7 +168,7 @@ const Index = () => {
 
       <MainTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === "ide-resep" ? (
+      {activeTab === "ide-resep" && (
         <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
           <InputSection onInputChange={handleInputChange} isLoading={isLoading} />
 
@@ -213,7 +213,17 @@ const Index = () => {
             apiKey={apiKey}
             onLogNutrition={handleLogNutrition}
           />
+        </main>
+      )}
 
+      {activeTab === "meal-planning" && (
+        <main className="container max-w-4xl mx-auto px-4 py-4">
+          <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+        </main>
+      )}
+
+      {activeTab === "nutrisi" && (
+        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
           {/* Daily Nutrition Tracker */}
           <DailyNutritionTracker
             entries={dailyData.entries}
@@ -246,10 +256,6 @@ const Index = () => {
             beratBadan={profile.beratBadan} 
             levelAktivitas={profile.levelAktivitas} 
           />
-        </main>
-      ) : (
-        <main className="container max-w-4xl mx-auto px-4 py-4">
-          <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
         </main>
       )}
 
