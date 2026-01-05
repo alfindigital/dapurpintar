@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChefHat, CalendarDays } from "lucide-react";
+import { ChefHat, CalendarDays, Activity } from "lucide-react";
 
-export type MainTab = "ide-resep" | "meal-planning";
+export type MainTab = "ide-resep" | "meal-planning" | "nutrisi";
 
 interface MainTabNavigationProps {
   activeTab: MainTab;
@@ -27,8 +27,16 @@ export const MainTabNavigation = ({ activeTab, onTabChange }: MainTabNavigationP
               className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none gap-2"
             >
               <CalendarDays className="h-4 w-4" />
-              <span className="hidden sm:inline">Meal Planning</span>
-              <span className="sm:hidden">Meal Plan</span>
+              <span className="hidden sm:inline">Meal Plan</span>
+              <span className="sm:hidden">Plan</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="nutrisi"
+              className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none gap-2"
+            >
+              <Activity className="h-4 w-4" />
+              <span className="hidden sm:inline">Nutrisi</span>
+              <span className="sm:hidden">Nutrisi</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
