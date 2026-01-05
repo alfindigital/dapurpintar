@@ -7,6 +7,7 @@ import { calculateDailyWaterIntake } from "@/types/profile";
 import { toast } from "sonner";
 import { WeeklyWaterChart } from "./WeeklyWaterChart";
 import { WaterAchievements } from "./WaterAchievements";
+import { WaterReminderSettings } from "./WaterReminderSettings";
 
 interface WaterTrackerProps {
   beratBadan?: number;
@@ -143,6 +144,9 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
 
       {/* Weekly Water Stats */}
       <WeeklyWaterChart weeklyData={weeklyData} stats={stats} target={target} />
+
+      {/* Water Reminder Settings */}
+      <WaterReminderSettings />
     </div>
   );
 }
