@@ -10,6 +10,7 @@ import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
 import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
+import { WeeklyNutritionReport } from "@/components/WeeklyNutritionReport";
 import { WeightProgressChart } from "@/components/WeightProgressChart";
 import { WaterTracker } from "@/components/WaterTracker";
 import { NutritionOverview } from "@/components/NutritionOverview";
@@ -257,6 +258,17 @@ const Index = () => {
           />
 
           {/* Weekly Nutrition Chart */}
+          <div className="flex justify-end">
+            <WeeklyNutritionReport
+              weeklyData={weeklyNutritionData}
+              targetKalori={profile.targetKalori || 2000}
+              targetProtein={profile.targetProtein}
+              targetKarbohidrat={profile.targetKarbohidrat}
+              targetLemak={profile.targetLemak}
+              waterStats={waterStats}
+              waterTarget={waterTarget}
+            />
+          </div>
           <WeeklyNutritionChart
             weeklyData={weeklyNutritionData}
             targetKalori={profile.targetKalori || 2000}
