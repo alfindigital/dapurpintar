@@ -14,10 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useWeightTracking, WeightEntry } from "@/hooks/useWeightTracking";
+import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { WeightAchievements } from "./WeightAchievements";
 
 interface WeightProgressChartProps {
   targetWeight?: number;
@@ -290,6 +291,14 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
             </Badge>
           </div>
         )}
+
+        {/* Weight Achievements */}
+        <WeightAchievements
+          initialWeight={stats.initial}
+          currentWeight={stats.current}
+          targetWeight={targetWeight}
+          totalEntries={entries.length}
+        />
       </CardContent>
     </Card>
   );
