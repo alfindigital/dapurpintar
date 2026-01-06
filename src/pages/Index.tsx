@@ -12,6 +12,9 @@ import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
 import { WeightProgressChart } from "@/components/WeightProgressChart";
 import { WaterTracker } from "@/components/WaterTracker";
+import { NutritionOverview } from "@/components/NutritionOverview";
+import { useWaterTracking } from "@/hooks/useWaterTracking";
+import { calculateDailyWaterIntake } from "@/types/profile";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
 import { useRecipeHistory } from "@/hooks/useRecipeHistory";
@@ -48,7 +51,13 @@ const Index = () => {
   const { history, saveToHistory, removeFromHistory, clearHistory } = useRecipeHistory();
   const { favorites, addFavorite, removeFavorite, isFavorite, clearFavorites } = useFavorites();
   const { profile } = useUserProfile();
-  const { dailyData, weeklyData, addEntry, removeEntry, clearToday } = useDailyNutrition();
+  const { dailyData, weeklyData: weeklyNutritionData, addEntry, removeEntry, clearToday } = useDailyNutrition();
+  
+  // Water tracking for overview stats
+  const waterTarget = profile.beratBadan 
+    ? calculateDailyWaterIntake(profile.beratBadan, profile.levelAktivitas).glasses
+    : 8;
+  const { stats: waterStats } = useWaterTracking(waterTarget);
 
   const handleLogNutrition = useCallback((recipe: Recipe) => {
     if (!recipe.nutrisi) {
@@ -224,6 +233,14 @@ const Index = () => {
 
       {activeTab === "nutrisi" && (
         <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
+          {/* Overview Summary */}
+          <NutritionOverview
+            weeklyNutrition={weeklyNutritionData}
+            targetKalori={profile.targetKalori || 2000}
+            waterStats={waterStats}
+            waterTarget={waterTarget}
+          />
+
           {/* Daily Nutrition Tracker */}
           <DailyNutritionTracker
             entries={dailyData.entries}
@@ -241,7 +258,7 @@ const Index = () => {
 
           {/* Weekly Nutrition Chart */}
           <WeeklyNutritionChart
-            weeklyData={weeklyData}
+            weeklyData={weeklyNutritionData}
             targetKalori={profile.targetKalori || 2000}
             targetProtein={profile.targetProtein}
             targetKarbohidrat={profile.targetKarbohidrat}
