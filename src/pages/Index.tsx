@@ -11,10 +11,12 @@ import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
 import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
 import { WeeklyNutritionReport } from "@/components/WeeklyNutritionReport";
+import { MonthlyNutritionReport } from "@/components/MonthlyNutritionReport";
 import { WeightProgressChart } from "@/components/WeightProgressChart";
 import { WaterTracker } from "@/components/WaterTracker";
 import { NutritionOverview } from "@/components/NutritionOverview";
 import { useWaterTracking } from "@/hooks/useWaterTracking";
+import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
 import { generateRecipes } from "@/lib/openrouter";
 import { RecipeResponse, Preferences, Recipe } from "@/types/recipe";
@@ -58,7 +60,11 @@ const Index = () => {
   const waterTarget = profile.beratBadan 
     ? calculateDailyWaterIntake(profile.beratBadan, profile.levelAktivitas).glasses
     : 8;
-  const { stats: waterStats } = useWaterTracking(waterTarget);
+  const { stats: waterStats, unlockedAchievements: unlockedWaterAchievements } = useWaterTracking(waterTarget);
+  
+  // Weight tracking for monthly report
+  const { entries: weightEntries } = useWeightTracking();
+  const unlockedWeightAchievements: string[] = JSON.parse(localStorage.getItem('weight_achievements') || '[]');
 
   const handleLogNutrition = useCallback((recipe: Recipe) => {
     if (!recipe.nutrisi) {
@@ -257,8 +263,8 @@ const Index = () => {
             onClearAll={clearToday}
           />
 
-          {/* Weekly Nutrition Chart */}
-          <div className="flex justify-end">
+          {/* Weekly & Monthly Reports */}
+          <div className="flex justify-end gap-2 flex-wrap">
             <WeeklyNutritionReport
               weeklyData={weeklyNutritionData}
               targetKalori={profile.targetKalori || 2000}
@@ -267,6 +273,19 @@ const Index = () => {
               targetLemak={profile.targetLemak}
               waterStats={waterStats}
               waterTarget={waterTarget}
+            />
+            <MonthlyNutritionReport
+              monthlyData={weeklyNutritionData}
+              targetKalori={profile.targetKalori || 2000}
+              targetProtein={profile.targetProtein}
+              targetKarbohidrat={profile.targetKarbohidrat}
+              targetLemak={profile.targetLemak}
+              weightEntries={weightEntries}
+              targetWeight={profile.targetBeratBadan}
+              waterStats={waterStats}
+              waterTarget={waterTarget}
+              unlockedWaterAchievements={unlockedWaterAchievements}
+              unlockedWeightAchievements={unlockedWeightAchievements}
             />
           </div>
           <WeeklyNutritionChart
