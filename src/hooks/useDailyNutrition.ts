@@ -69,7 +69,7 @@ export function useDailyNutrition() {
     allData[data.date] = data;
     
     // Keep only last 7 days
-    const dates = Object.keys(allData).sort().reverse().slice(0, 7);
+    const dates = Object.keys(allData).sort().reverse().slice(0, 30);
     const filtered: Record<string, DailyNutrition> = {};
     dates.forEach(d => {
       filtered[d] = allData[d];
