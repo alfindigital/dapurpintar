@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Utensils, Zap } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QUICK_FOODS, KATEGORI_LABELS, KATEGORI_ORDER, QuickFood } from "@/lib/quickFoodsData";
+import { useCustomFoods, CustomFood } from "@/hooks/useCustomFoods";
+import { CustomFoodForm } from "@/components/CustomFoodForm";
 import { toast } from "sonner";
 
 interface QuickAddFoodsDialogProps {
@@ -26,11 +28,24 @@ interface QuickAddFoodsDialogProps {
   }) => void;
 }
 
-function FoodItem({ food, onAdd }: { food: QuickFood; onAdd: (food: QuickFood) => void }) {
+function FoodItem({ 
+  food, 
+  onAdd,
+  onDelete,
+  isCustom = false,
+}: { 
+  food: QuickFood | CustomFood; 
+  onAdd: (food: QuickFood | CustomFood) => void;
+  onDelete?: (id: string) => void;
+  isCustom?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm">{food.nama}</div>
+        <div className="font-medium text-sm flex items-center gap-1.5">
+          {isCustom && <Star className="h-3 w-3 text-amber-500 fill-amber-500" />}
+          {food.nama}
+        </div>
         <div className="text-xs text-muted-foreground mt-0.5">
           {food.porsi} • {food.kalori} kkal
         </div>
@@ -46,14 +61,26 @@ function FoodItem({ food, onAdd }: { food: QuickFood; onAdd: (food: QuickFood) =
           </Badge>
         </div>
       </div>
-      <Button
-        size="sm"
-        variant="secondary"
-        className="h-8 w-8 p-0 shrink-0"
-        onClick={() => onAdd(food)}
-      >
-        <Plus className="h-4 w-4" />
-      </Button>
+      <div className="flex gap-1 shrink-0">
+        {isCustom && onDelete && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(food.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          size="sm"
+          variant="secondary"
+          className="h-8 w-8 p-0"
+          onClick={() => onAdd(food)}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -62,12 +89,22 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activeKategori, setActiveKategori] = useState<string>("semua");
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  
+  const { customFoods, addCustomFood, removeCustomFood } = useCustomFoods();
+
+  // Combine quick foods with custom foods
+  const allFoods = useMemo(() => {
+    return [...customFoods, ...QUICK_FOODS];
+  }, [customFoods]);
 
   const filteredFoods = useMemo(() => {
-    let foods = QUICK_FOODS;
+    let foods = allFoods;
     
-    // Filter by kategori
-    if (activeKategori !== "semua") {
+    // Filter by kategori - "custom" shows only custom foods
+    if (activeKategori === "custom") {
+      foods = customFoods;
+    } else if (activeKategori !== "semua") {
       foods = foods.filter(f => f.kategori === activeKategori);
     }
     
@@ -80,16 +117,30 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     }
     
     return foods;
-  }, [search, activeKategori]);
+  }, [search, activeKategori, allFoods, customFoods]);
 
   const groupedFoods = useMemo(() => {
+    if (activeKategori === "custom") {
+      return { custom: filteredFoods };
+    }
+    
     if (activeKategori !== "semua") {
       return { [activeKategori]: filteredFoods };
     }
     
-    const grouped: Record<string, QuickFood[]> = {};
+    const grouped: Record<string, (QuickFood | CustomFood)[]> = {};
+    
+    // Add custom foods first if any
+    const customItems = filteredFoods.filter(f => 'isCustom' in f && f.isCustom);
+    if (customItems.length > 0) {
+      grouped['custom'] = customItems;
+    }
+    
+    // Then add regular foods by category
     KATEGORI_ORDER.forEach(kategori => {
-      const foods = filteredFoods.filter(f => f.kategori === kategori);
+      const foods = filteredFoods.filter(f => 
+        f.kategori === kategori && !('isCustom' in f && f.isCustom)
+      );
       if (foods.length > 0) {
         grouped[kategori] = foods;
       }
@@ -97,7 +148,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     return grouped;
   }, [filteredFoods, activeKategori]);
 
-  const handleAddFood = (food: QuickFood) => {
+  const handleAddFood = (food: QuickFood | CustomFood) => {
     const now = new Date();
     const waktu = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     
@@ -111,6 +162,17 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     });
     
     toast.success(`${food.nama} ditambahkan ke nutrisi harian`);
+  };
+
+  const handleAddCustomFood = (food: Omit<QuickFood, 'id'>) => {
+    addCustomFood(food);
+    setShowCustomForm(false);
+    toast.success(`${food.nama} berhasil disimpan`);
+  };
+
+  const handleDeleteCustomFood = (id: string) => {
+    removeCustomFood(id);
+    toast.success("Makanan custom dihapus");
   };
 
   return (
@@ -129,62 +191,119 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
           </DialogTitle>
         </DialogHeader>
         
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cari makanan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+        {showCustomForm ? (
+          <div className="py-2">
+            <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Tambah Makanan Custom
+            </h3>
+            <CustomFoodForm 
+              onSubmit={handleAddCustomFood}
+              onCancel={() => setShowCustomForm(false)}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Search + Add Custom Button */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cari makanan..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setShowCustomForm(true)}
+                title="Tambah makanan custom"
+              >
+                <PlusCircle className="h-4 w-4" />
+              </Button>
+            </div>
 
-        {/* Kategori Tabs */}
-        <Tabs value={activeKategori} onValueChange={setActiveKategori} className="flex-1 flex flex-col min-h-0">
-          <TabsList className="w-full flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="semua" className="text-xs px-2 py-1">
-              Semua
-            </TabsTrigger>
-            {KATEGORI_ORDER.map(kategori => (
-              <TabsTrigger key={kategori} value={kategori} className="text-xs px-2 py-1">
-                {KATEGORI_LABELS[kategori]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
-          <TabsContent value={activeKategori} className="flex-1 mt-3 min-h-0">
-            <ScrollArea className="h-[350px] pr-3">
-              {Object.keys(groupedFoods).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Tidak ada makanan ditemukan</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(groupedFoods).map(([kategori, foods]) => (
-                    <div key={kategori}>
-                      {activeKategori === "semua" && (
-                        <h3 className="text-sm font-medium mb-2 text-muted-foreground">
-                          {KATEGORI_LABELS[kategori as QuickFood['kategori']]}
-                        </h3>
+            {/* Kategori Tabs */}
+            <Tabs value={activeKategori} onValueChange={setActiveKategori} className="flex-1 flex flex-col min-h-0">
+              <TabsList className="w-full flex-wrap h-auto gap-1 p-1">
+                <TabsTrigger value="semua" className="text-xs px-2 py-1">
+                  Semua
+                </TabsTrigger>
+                <TabsTrigger value="custom" className="text-xs px-2 py-1">
+                  <Star className="h-3 w-3 mr-1" />
+                  Custom
+                </TabsTrigger>
+                {KATEGORI_ORDER.map(kategori => (
+                  <TabsTrigger key={kategori} value={kategori} className="text-xs px-2 py-1">
+                    {KATEGORI_LABELS[kategori]}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              <TabsContent value={activeKategori} className="flex-1 mt-3 min-h-0">
+                <ScrollArea className="h-[350px] pr-3">
+                  {Object.keys(groupedFoods).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">
+                        {activeKategori === "custom" 
+                          ? "Belum ada makanan custom" 
+                          : "Tidak ada makanan ditemukan"}
+                      </p>
+                      {activeKategori === "custom" && (
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={() => setShowCustomForm(true)}
+                        >
+                          <PlusCircle className="h-4 w-4 mr-1" />
+                          Tambah sekarang
+                        </Button>
                       )}
-                      <div className="space-y-2">
-                        {foods.map(food => (
-                          <FoodItem key={food.id} food={food} onAdd={handleAddFood} />
-                        ))}
-                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
+                  ) : (
+                    <div className="space-y-4">
+                      {Object.entries(groupedFoods).map(([kategori, foods]) => (
+                        <div key={kategori}>
+                          {activeKategori === "semua" && (
+                            <h3 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
+                              {kategori === 'custom' ? (
+                                <>
+                                  <Star className="h-3 w-3 text-amber-500" />
+                                  Makanan Custom
+                                </>
+                              ) : (
+                                KATEGORI_LABELS[kategori as QuickFood['kategori']]
+                              )}
+                            </h3>
+                          )}
+                          <div className="space-y-2">
+                            {foods.map(food => (
+                              <FoodItem 
+                                key={food.id} 
+                                food={food} 
+                                onAdd={handleAddFood}
+                                onDelete={handleDeleteCustomFood}
+                                isCustom={'isCustom' in food && food.isCustom}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
 
-        <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-          {QUICK_FOODS.length} makanan tersedia • Klik + untuk menambahkan
-        </div>
+            <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+              {allFoods.length} makanan tersedia ({customFoods.length} custom) • Klik + untuk menambahkan
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
