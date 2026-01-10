@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { QUICK_FOODS, KATEGORI_LABELS, KATEGORI_ORDER, QuickFood } from "@/lib/quickFoodsData";
 import { useCustomFoods, CustomFood } from "@/hooks/useCustomFoods";
 import { CustomFoodForm } from "@/components/CustomFoodForm";
@@ -90,8 +97,9 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [search, setSearch] = useState("");
   const [activeKategori, setActiveKategori] = useState<string>("semua");
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { customFoods, addCustomFood, removeCustomFood } = useCustomFoods();
+  const { customFoods, addCustomFood, removeCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
   // Combine quick foods with custom foods
   const allFoods = useMemo(() => {
@@ -175,6 +183,40 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     toast.success("Makanan custom dihapus");
   };
 
+  const handleExport = () => {
+    const count = exportCustomFoods();
+    if (count > 0) {
+      toast.success(`${count} makanan custom berhasil diekspor`);
+    } else {
+      toast.error("Tidak ada makanan custom untuk diekspor");
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const result = importCustomFoods(content, 'merge');
+      
+      if (result.success) {
+        toast.success(`${result.count} makanan berhasil diimpor`);
+      } else {
+        toast.error(result.error || "Gagal mengimpor data");
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -204,7 +246,16 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
           </div>
         ) : (
           <>
-            {/* Search + Add Custom Button */}
+            {/* Hidden file input for import */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            {/* Search + Actions */}
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -215,6 +266,8 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   className="pl-9"
                 />
               </div>
+              
+              {/* Add Custom Button */}
               <Button 
                 variant="outline" 
                 size="icon"
@@ -223,6 +276,26 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
               >
                 <PlusCircle className="h-4 w-4" />
               </Button>
+              
+              {/* Import/Export Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" title="Import/Export">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExport} disabled={customFoods.length === 0}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export ({customFoods.length})
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleImportClick}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Kategori Tabs */}
