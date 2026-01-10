@@ -261,6 +261,7 @@ const Index = () => {
             targetLemak={profile.targetLemak || 65}
             onRemoveEntry={removeEntry}
             onClearAll={clearToday}
+            onAddEntry={addEntry}
           />
 
           {/* Weekly & Monthly Reports */}
