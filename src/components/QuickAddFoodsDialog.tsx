@@ -7,6 +7,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -97,6 +107,9 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [search, setSearch] = useState("");
   const [activeKategori, setActiveKategori] = useState<string>("semua");
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { customFoods, addCustomFood, removeCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
@@ -192,7 +205,8 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     }
   };
 
-  const handleImportClick = () => {
+  const handleImportClick = (mode: 'merge' | 'replace') => {
+    setImportMode(mode);
     fileInputRef.current?.click();
   };
 
@@ -203,12 +217,19 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      const result = importCustomFoods(content, 'merge');
       
-      if (result.success) {
-        toast.success(`${result.count} makanan berhasil diimpor`);
+      if (importMode === 'replace' && customFoods.length > 0) {
+        // Show confirmation for replace mode
+        setPendingImportContent(content);
+        setShowReplaceConfirm(true);
       } else {
-        toast.error(result.error || "Gagal mengimpor data");
+        // Direct import for merge mode or when no existing data
+        const result = importCustomFoods(content, importMode);
+        if (result.success) {
+          toast.success(`${result.count} makanan berhasil diimpor`);
+        } else {
+          toast.error(result.error || "Gagal mengimpor data");
+        }
       }
     };
     reader.readAsText(file);
@@ -217,7 +238,39 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     e.target.value = '';
   };
 
+  const handleConfirmReplace = () => {
+    if (pendingImportContent) {
+      const result = importCustomFoods(pendingImportContent, 'replace');
+      if (result.success) {
+        toast.success(`${result.count} makanan berhasil diimpor (data lama diganti)`);
+      } else {
+        toast.error(result.error || "Gagal mengimpor data");
+      }
+    }
+    setPendingImportContent(null);
+    setShowReplaceConfirm(false);
+  };
+
   return (
+    <>
+    <AlertDialog open={showReplaceConfirm} onOpenChange={setShowReplaceConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Ganti Semua Data?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Semua {customFoods.length} makanan custom yang ada akan dihapus dan diganti dengan data dari file. Tindakan ini tidak dapat dibatalkan.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setPendingImportContent(null)}>
+            Batal
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirmReplace}>
+            Ya, Ganti Semua
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5">
@@ -290,9 +343,13 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     Export ({customFoods.length})
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleImportClick}>
+                  <DropdownMenuItem onClick={() => handleImportClick('merge')}>
                     <Upload className="h-4 w-4 mr-2" />
-                    Import JSON
+                    Import (Gabung)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleImportClick('replace')}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import (Ganti Semua)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -379,5 +436,6 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }
