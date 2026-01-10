@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HelpTooltip } from "./HelpTooltip";
+import { QuickAddFoodsDialog } from "./QuickAddFoodsDialog";
 import { NutritionEntry } from "@/hooks/useDailyNutrition";
 
 interface DailyNutritionTrackerProps {
@@ -19,6 +20,7 @@ interface DailyNutritionTrackerProps {
   targetLemak: number;
   onRemoveEntry: (id: string) => void;
   onClearAll: () => void;
+  onAddEntry: (entry: Omit<NutritionEntry, 'id' | 'timestamp'>) => void;
 }
 
 interface MacroProgressProps {
@@ -65,6 +67,7 @@ export function DailyNutritionTracker({
   targetLemak,
   onRemoveEntry,
   onClearAll,
+  onAddEntry,
 }: DailyNutritionTrackerProps) {
   const remainingKalori = targetKalori - totalKalori;
 
@@ -76,11 +79,14 @@ export function DailyNutritionTracker({
             <CardTitle className="text-base">Nutrisi Hari Ini</CardTitle>
             <HelpTooltip content="Tracking nutrisi harian berdasarkan resep yang dikonsumsi" />
           </div>
-          {entries.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onClearAll} className="text-xs text-muted-foreground">
-              Reset
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <QuickAddFoodsDialog onAddFood={onAddEntry} />
+            {entries.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={onClearAll} className="text-xs text-muted-foreground">
+                Reset
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -171,7 +177,7 @@ export function DailyNutritionTracker({
             <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
             Belum ada makanan tercatat hari ini.
             <br />
-            Klik "Catat" pada resep untuk menambahkan.
+            Gunakan "Quick Add" atau klik "Catat" pada resep.
           </div>
         )}
       </CardContent>
