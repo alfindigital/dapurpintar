@@ -131,21 +131,36 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
     toast.success("Resep disalin ke clipboard!");
   };
 
+  const escapeHtml = (text: string): string => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
   const printRecipe = () => {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
+      const safeNama = escapeHtml(recipe.nama);
+      const safeDeskripsi = escapeHtml(recipe.deskripsi);
+      const safeWaktu = escapeHtml(recipe.waktu);
+      const safeBahan = recipe.bahan.map((b) => 
+        `<li>${escapeHtml(b.jumlah)} ${escapeHtml(b.item)}${b.catatan ? ` (${escapeHtml(b.catatan)})` : ""}</li>`
+      ).join("");
+      const safeLangkah = recipe.langkah.map((l) => `<li>${escapeHtml(l)}</li>`).join("");
+      const safeTips = recipe.tips ? `<h3>Tips:</h3><p>${escapeHtml(recipe.tips)}</p>` : "";
+      
       printWindow.document.write(`
         <html>
-          <head><title>${recipe.nama}</title></head>
+          <head><title>${safeNama}</title></head>
           <body style="font-family: sans-serif; padding: 20px;">
-            <h1>${recipe.nama}</h1>
-            <p><em>${recipe.deskripsi}</em></p>
-            <p><strong>Waktu:</strong> ${recipe.waktu}</p>
+            <h1>${safeNama}</h1>
+            <p><em>${safeDeskripsi}</em></p>
+            <p><strong>Waktu:</strong> ${safeWaktu}</p>
             <h2>Bahan:</h2>
-            <ul>${recipe.bahan.map((b) => `<li>${b.jumlah} ${b.item}${b.catatan ? ` (${b.catatan})` : ""}</li>`).join("")}</ul>
+            <ul>${safeBahan}</ul>
             <h2>Langkah:</h2>
-            <ol>${recipe.langkah.map((l) => `<li>${l}</li>`).join("")}</ol>
-            ${recipe.tips ? `<h3>Tips:</h3><p>${recipe.tips}</p>` : ""}
+            <ol>${safeLangkah}</ol>
+            ${safeTips}
           </body>
         </html>
       `);
