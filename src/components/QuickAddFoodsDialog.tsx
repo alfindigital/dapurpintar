@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -45,6 +46,13 @@ interface QuickAddFoodsDialogProps {
   }) => void;
 }
 
+const PORTION_MULTIPLIERS = [
+  { value: "0.5", label: "½", display: "0.5x" },
+  { value: "1", label: "1", display: "1x" },
+  { value: "1.5", label: "1½", display: "1.5x" },
+  { value: "2", label: "2", display: "2x" },
+];
+
 function FoodItem({ 
   food, 
   onAdd,
@@ -56,6 +64,103 @@ function FoodItem({
   onDelete?: (id: string) => void;
   isCustom?: boolean;
 }) {
+  const [showPortion, setShowPortion] = useState(false);
+  const [multiplier, setMultiplier] = useState("1");
+
+  const adjustedNutrition = useMemo(() => {
+    const mult = parseFloat(multiplier);
+    return {
+      kalori: Math.round(food.kalori * mult),
+      protein: Math.round(food.protein * mult * 10) / 10,
+      karbohidrat: Math.round(food.karbohidrat * mult * 10) / 10,
+      lemak: Math.round(food.lemak * mult * 10) / 10,
+    };
+  }, [food, multiplier]);
+
+  const handleQuickAdd = () => {
+    setShowPortion(true);
+  };
+
+  const handleConfirmAdd = () => {
+    const mult = parseFloat(multiplier);
+    const adjustedFood = {
+      ...food,
+      nama: mult !== 1 ? `${food.nama} (${PORTION_MULTIPLIERS.find(p => p.value === multiplier)?.display})` : food.nama,
+      kalori: adjustedNutrition.kalori,
+      protein: adjustedNutrition.protein,
+      karbohidrat: adjustedNutrition.karbohidrat,
+      lemak: adjustedNutrition.lemak,
+    };
+    onAdd(adjustedFood);
+    setShowPortion(false);
+    setMultiplier("1");
+  };
+
+  const handleCancel = () => {
+    setShowPortion(false);
+    setMultiplier("1");
+  };
+
+  if (showPortion) {
+    return (
+      <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="font-medium text-sm flex items-center gap-1.5">
+            <Scale className="h-4 w-4 text-primary" />
+            {isCustom && <Star className="h-3 w-3 text-amber-500 fill-amber-500" />}
+            {food.nama}
+          </div>
+        </div>
+        
+        <div className="text-xs text-muted-foreground">
+          Porsi dasar: {food.porsi}
+        </div>
+
+        <ToggleGroup 
+          type="single" 
+          value={multiplier} 
+          onValueChange={(val) => val && setMultiplier(val)}
+          className="justify-start gap-1"
+        >
+          {PORTION_MULTIPLIERS.map(p => (
+            <ToggleGroupItem 
+              key={p.value} 
+              value={p.value}
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3"
+            >
+              {p.label}x
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+
+        <div className="flex gap-2 flex-wrap">
+          <Badge variant="secondary" className="text-xs">
+            {adjustedNutrition.kalori} kkal
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            P: {adjustedNutrition.protein}g
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            K: {adjustedNutrition.karbohidrat}g
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            L: {adjustedNutrition.lemak}g
+          </Badge>
+        </div>
+
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleCancel} className="flex-1">
+            Batal
+          </Button>
+          <Button size="sm" onClick={handleConfirmAdd} className="flex-1">
+            <Plus className="h-4 w-4 mr-1" />
+            Tambah
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
       <div className="flex-1 min-w-0">
@@ -93,7 +198,8 @@ function FoodItem({
           size="sm"
           variant="secondary"
           className="h-8 w-8 p-0"
-          onClick={() => onAdd(food)}
+          onClick={handleQuickAdd}
+          title="Klik untuk atur porsi"
         >
           <Plus className="h-4 w-4" />
         </Button>
