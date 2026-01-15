@@ -68,26 +68,38 @@ function FoodItem({
 }) {
   const [showPortion, setShowPortion] = useState(false);
   const [multiplier, setMultiplier] = useState("1");
+  const [customMultiplier, setCustomMultiplier] = useState("");
+  const [useCustom, setUseCustom] = useState(false);
 
+  const effectiveMultiplier = useCustom ? customMultiplier : multiplier;
+  
   const adjustedNutrition = useMemo(() => {
-    const mult = parseFloat(multiplier);
+    const mult = parseFloat(effectiveMultiplier) || 0;
     return {
       kalori: Math.round(food.kalori * mult),
       protein: Math.round(food.protein * mult * 10) / 10,
       karbohidrat: Math.round(food.karbohidrat * mult * 10) / 10,
       lemak: Math.round(food.lemak * mult * 10) / 10,
     };
-  }, [food, multiplier]);
+  }, [food, effectiveMultiplier]);
 
   const handleQuickAdd = () => {
     setShowPortion(true);
   };
 
   const handleConfirmAdd = () => {
-    const mult = parseFloat(multiplier);
+    const mult = parseFloat(effectiveMultiplier) || 0;
+    if (mult <= 0) {
+      return;
+    }
+    
+    const displayMultiplier = useCustom 
+      ? `${mult}x` 
+      : PORTION_MULTIPLIERS.find(p => p.value === multiplier)?.display || `${mult}x`;
+    
     const adjustedFood = {
       ...food,
-      nama: mult !== 1 ? `${food.nama} (${PORTION_MULTIPLIERS.find(p => p.value === multiplier)?.display})` : food.nama,
+      nama: mult !== 1 ? `${food.nama} (${displayMultiplier})` : food.nama,
       kalori: adjustedNutrition.kalori,
       protein: adjustedNutrition.protein,
       karbohidrat: adjustedNutrition.karbohidrat,
@@ -96,11 +108,31 @@ function FoodItem({
     onAdd(adjustedFood);
     setShowPortion(false);
     setMultiplier("1");
+    setCustomMultiplier("");
+    setUseCustom(false);
   };
 
   const handleCancel = () => {
     setShowPortion(false);
     setMultiplier("1");
+    setCustomMultiplier("");
+    setUseCustom(false);
+  };
+  
+  const handlePresetChange = (val: string) => {
+    if (val) {
+      setMultiplier(val);
+      setUseCustom(false);
+      setCustomMultiplier("");
+    }
+  };
+  
+  const handleCustomChange = (val: string) => {
+    // Only allow valid number input
+    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+      setCustomMultiplier(val);
+      setUseCustom(true);
+    }
   };
 
   if (showPortion) {
@@ -118,22 +150,36 @@ function FoodItem({
           Porsi dasar: {food.porsi}
         </div>
 
-        <ToggleGroup 
-          type="single" 
-          value={multiplier} 
-          onValueChange={(val) => val && setMultiplier(val)}
-          className="justify-start gap-1"
-        >
-          {PORTION_MULTIPLIERS.map(p => (
-            <ToggleGroupItem 
-              key={p.value} 
-              value={p.value}
-              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3"
-            >
-              {p.label}x
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <div className="flex items-center gap-2">
+          <ToggleGroup 
+            type="single" 
+            value={useCustom ? "" : multiplier} 
+            onValueChange={handlePresetChange}
+            className="justify-start gap-1"
+          >
+            {PORTION_MULTIPLIERS.map(p => (
+              <ToggleGroupItem 
+                key={p.value} 
+                value={p.value}
+                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3"
+              >
+                {p.label}x
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          
+          <div className="flex items-center gap-1">
+            <Input
+              type="text"
+              inputMode="decimal"
+              placeholder="..."
+              value={customMultiplier}
+              onChange={(e) => handleCustomChange(e.target.value)}
+              className={`w-14 h-8 text-center text-sm px-1 ${useCustom ? 'ring-2 ring-primary' : ''}`}
+            />
+            <span className="text-xs text-muted-foreground">x</span>
+          </div>
+        </div>
 
         <div className="flex gap-2 flex-wrap">
           <Badge variant="secondary" className="text-xs">
