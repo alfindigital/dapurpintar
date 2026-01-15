@@ -93,7 +93,8 @@ const Index = () => {
   }, [isAutoMode]);
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("openrouter_api_key");
+    // Use sessionStorage for better security (clears when tab closes)
+    const savedKey = sessionStorage.getItem("openrouter_api_key");
     if (savedKey) {
       setApiKey(savedKey);
     }
