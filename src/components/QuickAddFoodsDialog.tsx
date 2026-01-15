@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,11 +57,13 @@ function FoodItem({
   food, 
   onAdd,
   onDelete,
+  onEdit,
   isCustom = false,
 }: { 
   food: QuickFood | CustomFood; 
   onAdd: (food: QuickFood | CustomFood) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (food: CustomFood) => void;
   isCustom?: boolean;
 }) {
   const [showPortion, setShowPortion] = useState(false);
@@ -184,6 +186,17 @@ function FoodItem({
         </div>
       </div>
       <div className="flex gap-1 shrink-0">
+        {isCustom && onEdit && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+            onClick={() => onEdit(food as CustomFood)}
+            title="Edit makanan"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        )}
         {isCustom && onDelete && (
           <Button
             size="sm"
@@ -213,12 +226,13 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [search, setSearch] = useState("");
   const [activeKategori, setActiveKategori] = useState<string>("semua");
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [editingFood, setEditingFood] = useState<CustomFood | null>(null);
   const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { customFoods, addCustomFood, removeCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
+  const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
   // Combine quick foods with custom foods
   const allFoods = useMemo(() => {
@@ -292,9 +306,26 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   };
 
   const handleAddCustomFood = (food: Omit<QuickFood, 'id'>) => {
-    addCustomFood(food);
+    if (editingFood) {
+      updateCustomFood(editingFood.id, food);
+      setEditingFood(null);
+      setShowCustomForm(false);
+      toast.success(`${food.nama} berhasil diupdate`);
+    } else {
+      addCustomFood(food);
+      setShowCustomForm(false);
+      toast.success(`${food.nama} berhasil disimpan`);
+    }
+  };
+
+  const handleEditCustomFood = (food: CustomFood) => {
+    setEditingFood(food);
+    setShowCustomForm(true);
+  };
+
+  const handleCancelForm = () => {
     setShowCustomForm(false);
-    toast.success(`${food.nama} berhasil disimpan`);
+    setEditingFood(null);
   };
 
   const handleDeleteCustomFood = (id: string) => {
@@ -395,12 +426,23 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         {showCustomForm ? (
           <div className="py-2">
             <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Tambah Makanan Custom
+              {editingFood ? (
+                <>
+                  <Pencil className="h-4 w-4" />
+                  Edit Makanan Custom
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="h-4 w-4" />
+                  Tambah Makanan Custom
+                </>
+              )}
             </h3>
             <CustomFoodForm 
               onSubmit={handleAddCustomFood}
-              onCancel={() => setShowCustomForm(false)}
+              onCancel={handleCancelForm}
+              initialData={editingFood}
+              isEditMode={!!editingFood}
             />
           </div>
         ) : (
@@ -523,6 +565,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                                 food={food} 
                                 onAdd={handleAddFood}
                                 onDelete={handleDeleteCustomFood}
+                                onEdit={handleEditCustomFood}
                                 isCustom={'isCustom' in food && food.isCustom}
                               />
                             ))}
