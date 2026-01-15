@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil } from "lucide-react";
 import {
   Dialog,
@@ -53,6 +53,32 @@ const PORTION_MULTIPLIERS = [
   { value: "2", label: "2", display: "2x" },
 ];
 
+const PORTION_PREFS_KEY = 'portion_preferences';
+
+interface PortionPreference {
+  multiplier: string;
+  isCustom: boolean;
+}
+
+function getPortionPreferences(): Record<string, PortionPreference> {
+  try {
+    const saved = localStorage.getItem(PORTION_PREFS_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePortionPreference(foodId: string, multiplier: string, isCustom: boolean) {
+  try {
+    const prefs = getPortionPreferences();
+    prefs[foodId] = { multiplier, isCustom };
+    localStorage.setItem(PORTION_PREFS_KEY, JSON.stringify(prefs));
+  } catch {
+    // ignore
+  }
+}
+
 function FoodItem({ 
   food, 
   onAdd,
@@ -71,6 +97,23 @@ function FoodItem({
   const [customMultiplier, setCustomMultiplier] = useState("");
   const [useCustom, setUseCustom] = useState(false);
 
+  // Load saved portion preference when showing portion selector
+  const loadSavedPreference = useCallback(() => {
+    const prefs = getPortionPreferences();
+    const pref = prefs[food.id];
+    if (pref) {
+      if (pref.isCustom) {
+        setCustomMultiplier(pref.multiplier);
+        setUseCustom(true);
+        setMultiplier("1");
+      } else {
+        setMultiplier(pref.multiplier);
+        setUseCustom(false);
+        setCustomMultiplier("");
+      }
+    }
+  }, [food.id]);
+
   const effectiveMultiplier = useCustom ? customMultiplier : multiplier;
   
   const adjustedNutrition = useMemo(() => {
@@ -84,6 +127,7 @@ function FoodItem({
   }, [food, effectiveMultiplier]);
 
   const handleQuickAdd = () => {
+    loadSavedPreference();
     setShowPortion(true);
   };
 
@@ -92,6 +136,9 @@ function FoodItem({
     if (mult <= 0) {
       return;
     }
+    
+    // Save portion preference
+    savePortionPreference(food.id, effectiveMultiplier, useCustom);
     
     const displayMultiplier = useCustom 
       ? `${mult}x` 
