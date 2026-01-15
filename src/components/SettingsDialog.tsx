@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles, UserCircle } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles, UserCircle, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { HelpTooltip } from "./HelpTooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileTab } from "./ProfileTab";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
@@ -65,7 +66,8 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
 
   useEffect(() => {
     if (open) {
-      const savedKey = localStorage.getItem("openrouter_api_key");
+      // Use sessionStorage for better security (clears when tab closes)
+      const savedKey = sessionStorage.getItem("openrouter_api_key");
       if (savedKey) {
         setApiKey(savedKey);
         setIsValid(true);
@@ -85,9 +87,10 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
 
     if (result.ok) {
       setIsValid(true);
-      localStorage.setItem("openrouter_api_key", apiKey.trim());
+      // Use sessionStorage for better security (clears when tab closes)
+      sessionStorage.setItem("openrouter_api_key", apiKey.trim());
       onApiKeyChange?.(apiKey.trim());
-      toast.success("API Key tersimpan!");
+      toast.success("API Key tersimpan untuk sesi ini!");
       onOpenChange(false);
     } else {
       setIsValid(false);
@@ -130,10 +133,18 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
           </TabsList>
 
           <TabsContent value="api" className="space-y-4 mt-4">
+            {/* Security Warning */}
+            <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Keamanan:</strong> API Key disimpan sementara di sesi browser ini dan akan terhapus saat tab ditutup. Jangan gunakan di komputer publik.
+              </AlertDescription>
+            </Alert>
+
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="apiKey">OpenRouter API Key</Label>
-                <HelpTooltip content="API Key disimpan di browser Anda. Gratis $1 credit untuk pengguna baru." />
+                <HelpTooltip content="API Key disimpan sementara di browser. Gratis $1 credit untuk pengguna baru." />
                 {isValid === true && (
                   <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
                 )}
@@ -147,6 +158,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
                   setApiKey(e.target.value);
                   setIsValid(null);
                 }}
+                autoComplete="off"
               />
             </div>
 
