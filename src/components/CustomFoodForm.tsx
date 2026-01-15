@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Sparkles, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,11 @@ import { toast } from "sonner";
 interface CustomFoodFormProps {
   onSubmit: (food: Omit<QuickFood, 'id'>) => void;
   onCancel: () => void;
+  initialData?: QuickFood | null;
+  isEditMode?: boolean;
 }
 
-export function CustomFoodForm({ onSubmit, onCancel }: CustomFoodFormProps) {
+export function CustomFoodForm({ onSubmit, onCancel, initialData, isEditMode = false }: CustomFoodFormProps) {
   const [nama, setNama] = useState("");
   const [kategori, setKategori] = useState<QuickFood['kategori']>("lauk");
   const [kalori, setKalori] = useState("");
@@ -26,6 +28,19 @@ export function CustomFoodForm({ onSubmit, onCancel }: CustomFoodFormProps) {
   const [karbohidrat, setKarbohidrat] = useState("");
   const [lemak, setLemak] = useState("");
   const [porsi, setPorsi] = useState("1 porsi");
+
+  // Populate form when editing
+  useEffect(() => {
+    if (initialData) {
+      setNama(initialData.nama);
+      setKategori(initialData.kategori);
+      setKalori(initialData.kalori.toString());
+      setProtein(initialData.protein.toString());
+      setKarbohidrat(initialData.karbohidrat.toString());
+      setLemak(initialData.lemak.toString());
+      setPorsi(initialData.porsi);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,8 +173,17 @@ export function CustomFoodForm({ onSubmit, onCancel }: CustomFoodFormProps) {
           Batal
         </Button>
         <Button type="submit" className="flex-1 gap-1.5">
-          <Plus className="h-4 w-4" />
-          Simpan
+          {isEditMode ? (
+            <>
+              <Save className="h-4 w-4" />
+              Update
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4" />
+              Simpan
+            </>
+          )}
         </Button>
       </div>
 
