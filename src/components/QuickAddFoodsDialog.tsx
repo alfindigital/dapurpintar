@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -66,6 +66,17 @@ function getPortionPreferences(): Record<string, PortionPreference> {
     return saved ? JSON.parse(saved) : {};
   } catch {
     return {};
+  }
+}
+
+function clearAllPortionPreferences(): number {
+  try {
+    const prefs = getPortionPreferences();
+    const count = Object.keys(prefs).length;
+    localStorage.removeItem(PORTION_PREFS_KEY);
+    return count;
+  } catch {
+    return 0;
   }
 }
 
@@ -481,6 +492,15 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     setShowReplaceConfirm(false);
   };
 
+  const handleResetPortionPreferences = () => {
+    const count = clearAllPortionPreferences();
+    if (count > 0) {
+      toast.success(`${count} preferensi porsi berhasil dihapus`);
+    } else {
+      toast.info("Tidak ada preferensi porsi yang tersimpan");
+    }
+  };
+
   return (
     <>
     <AlertDialog open={showReplaceConfirm} onOpenChange={setShowReplaceConfirm}>
@@ -591,6 +611,11 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   <DropdownMenuItem onClick={() => handleImportClick('replace')}>
                     <Upload className="h-4 w-4 mr-2" />
                     Import (Ganti Semua)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleResetPortionPreferences}>
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset Preferensi Porsi
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
