@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets, Sparkles } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets, Sparkles, Save, BookmarkPlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -488,21 +488,31 @@ const FAT_RANGES: { value: FatRange; label: string; min: number; max: number }[]
 ];
 
 const FAT_FILTER_KEY = 'quick_add_fat_filter';
+const CUSTOM_PRESETS_KEY = 'quick_add_custom_presets';
 
 // Filter Presets
 type FilterPreset = 'none' | 'high-protein' | 'low-carb' | 'low-fat' | 'low-calorie' | 'bulking';
+
+interface FilterSettings {
+  calorie?: CalorieRange;
+  protein?: ProteinRange;
+  carb?: CarbRange;
+  fat?: FatRange;
+}
 
 interface PresetConfig {
   value: FilterPreset;
   label: string;
   description: string;
   icon: string;
-  filters: {
-    calorie?: CalorieRange;
-    protein?: ProteinRange;
-    carb?: CarbRange;
-    fat?: FatRange;
-  };
+  filters: FilterSettings;
+}
+
+interface CustomPreset {
+  id: string;
+  name: string;
+  filters: FilterSettings;
+  createdAt: number;
 }
 
 const FILTER_PRESETS: PresetConfig[] = [
@@ -549,6 +559,40 @@ const FILTER_PRESETS: PresetConfig[] = [
     filters: { protein: 'high', calorie: '300-500' } 
   },
 ];
+
+function getCustomPresets(): CustomPreset[] {
+  try {
+    const saved = localStorage.getItem(CUSTOM_PRESETS_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomPresets(presets: CustomPreset[]) {
+  try {
+    localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(presets));
+  } catch {
+    // ignore
+  }
+}
+
+function generatePresetDescription(filters: FilterSettings): string {
+  const parts: string[] = [];
+  if (filters.calorie && filters.calorie !== 'all') {
+    parts.push(CALORIE_RANGES.find(r => r.value === filters.calorie)?.label || '');
+  }
+  if (filters.protein && filters.protein !== 'all') {
+    parts.push(PROTEIN_RANGES.find(r => r.value === filters.protein)?.label || '');
+  }
+  if (filters.carb && filters.carb !== 'all') {
+    parts.push(CARB_RANGES.find(r => r.value === filters.carb)?.label || '');
+  }
+  if (filters.fat && filters.fat !== 'all') {
+    parts.push(FAT_RANGES.find(r => r.value === filters.fat)?.label || '');
+  }
+  return parts.filter(Boolean).join(', ') || 'Tidak ada filter';
+}
 
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
@@ -606,6 +650,9 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     } catch {}
     return 'all';
   });
+  const [customPresets, setCustomPresets] = useState<CustomPreset[]>(() => getCustomPresets());
+  const [showSavePreset, setShowSavePreset] = useState(false);
+  const [newPresetName, setNewPresetName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -930,6 +977,61 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     toast.success(isNowFavorite ? "Ditambahkan ke favorit" : "Dihapus dari favorit");
   };
 
+  const hasActiveFilters = calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all';
+
+  const handleSaveCustomPreset = () => {
+    if (!newPresetName.trim()) {
+      toast.error("Nama preset tidak boleh kosong");
+      return;
+    }
+    if (!hasActiveFilters) {
+      toast.error("Pilih minimal satu filter untuk disimpan");
+      return;
+    }
+
+    const newPreset: CustomPreset = {
+      id: `custom_${Date.now()}`,
+      name: newPresetName.trim(),
+      filters: {
+        calorie: calorieFilter !== 'all' ? calorieFilter : undefined,
+        protein: proteinFilter !== 'all' ? proteinFilter : undefined,
+        carb: carbFilter !== 'all' ? carbFilter : undefined,
+        fat: fatFilter !== 'all' ? fatFilter : undefined,
+      },
+      createdAt: Date.now(),
+    };
+
+    const updatedPresets = [...customPresets, newPreset];
+    setCustomPresets(updatedPresets);
+    saveCustomPresets(updatedPresets);
+    setNewPresetName("");
+    setShowSavePreset(false);
+    toast.success(`Preset "${newPreset.name}" berhasil disimpan`);
+  };
+
+  const handleDeleteCustomPreset = (presetId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const preset = customPresets.find(p => p.id === presetId);
+    const updatedPresets = customPresets.filter(p => p.id !== presetId);
+    setCustomPresets(updatedPresets);
+    saveCustomPresets(updatedPresets);
+    toast.success(`Preset "${preset?.name}" berhasil dihapus`);
+  };
+
+  const handleApplyCustomPreset = (preset: CustomPreset) => {
+    // Reset all filters first
+    setCalorieFilter('all');
+    setProteinFilter('all');
+    setCarbFilter('all');
+    setFatFilter('all');
+    
+    // Apply preset filters
+    if (preset.filters.calorie) setCalorieFilter(preset.filters.calorie);
+    if (preset.filters.protein) setProteinFilter(preset.filters.protein);
+    if (preset.filters.carb) setCarbFilter(preset.filters.carb);
+    if (preset.filters.fat) setFatFilter(preset.filters.fat);
+  };
+
   // Update portion prefs count when dialog opens
   useEffect(() => {
     if (open) {
@@ -1184,44 +1286,154 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
-                    variant="outline" 
+                    variant={customPresets.length > 0 ? 'secondary' : 'outline'}
                     size="icon" 
                     title="Preset Filter"
                     className="relative"
                   >
                     <Sparkles className="h-4 w-4" />
+                    {customPresets.length > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
+                        {customPresets.length}
+                      </span>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-popover w-56">
-                  <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                    Preset Filter Cepat
-                  </div>
-                  <DropdownMenuSeparator />
-                  {FILTER_PRESETS.map((preset) => (
-                    <DropdownMenuItem 
-                      key={preset.value}
-                      onClick={() => {
-                        // Reset all filters first
-                        setCalorieFilter('all');
-                        setProteinFilter('all');
-                        setCarbFilter('all');
-                        setFatFilter('all');
-                        
-                        // Apply preset filters
-                        if (preset.filters.calorie) setCalorieFilter(preset.filters.calorie);
-                        if (preset.filters.protein) setProteinFilter(preset.filters.protein);
-                        if (preset.filters.carb) setCarbFilter(preset.filters.carb);
-                        if (preset.filters.fat) setFatFilter(preset.filters.fat);
-                      }}
-                      className="flex flex-col items-start py-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>{preset.icon}</span>
-                        <span className="font-medium">{preset.label}</span>
+                <DropdownMenuContent align="end" className="bg-popover w-64">
+                  {/* Custom Presets Section */}
+                  {customPresets.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <BookmarkPlus className="h-3 w-3" />
+                        Preset Saya
                       </div>
-                      <span className="text-xs text-muted-foreground ml-6">{preset.description}</span>
-                    </DropdownMenuItem>
-                  ))}
+                      {customPresets.map((preset) => (
+                        <DropdownMenuItem 
+                          key={preset.id}
+                          onClick={() => handleApplyCustomPreset(preset)}
+                          className="flex items-center justify-between py-2 group"
+                        >
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">⭐ {preset.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {generatePresetDescription(preset.filters)}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive"
+                            onClick={(e) => handleDeleteCustomPreset(preset.id, e)}
+                            title="Hapus preset"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
+                  {/* Save Current Filters */}
+                  {hasActiveFilters && !showSavePreset && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowSavePreset(true);
+                        }}
+                        className="flex items-center gap-2 text-primary"
+                      >
+                        <Save className="h-4 w-4" />
+                        <span>Simpan Filter Saat Ini</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
+                  {/* Save Preset Form */}
+                  {showSavePreset && (
+                    <div className="px-2 py-2 space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Simpan sebagai preset:
+                      </div>
+                      <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                        {generatePresetDescription({
+                          calorie: calorieFilter !== 'all' ? calorieFilter : undefined,
+                          protein: proteinFilter !== 'all' ? proteinFilter : undefined,
+                          carb: carbFilter !== 'all' ? carbFilter : undefined,
+                          fat: fatFilter !== 'all' ? fatFilter : undefined,
+                        })}
+                      </div>
+                      <Input
+                        placeholder="Nama preset..."
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        className="h-8 text-sm"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleSaveCustomPreset();
+                          }
+                        }}
+                        autoFocus
+                      />
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 h-7 text-xs"
+                          onClick={() => {
+                            setShowSavePreset(false);
+                            setNewPresetName("");
+                          }}
+                        >
+                          Batal
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="flex-1 h-7 text-xs"
+                          onClick={handleSaveCustomPreset}
+                        >
+                          <Save className="h-3 w-3 mr-1" />
+                          Simpan
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {!showSavePreset && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                        Preset Bawaan
+                      </div>
+                      {FILTER_PRESETS.map((preset) => (
+                        <DropdownMenuItem 
+                          key={preset.value}
+                          onClick={() => {
+                            // Reset all filters first
+                            setCalorieFilter('all');
+                            setProteinFilter('all');
+                            setCarbFilter('all');
+                            setFatFilter('all');
+                            
+                            // Apply preset filters
+                            if (preset.filters.calorie) setCalorieFilter(preset.filters.calorie);
+                            if (preset.filters.protein) setProteinFilter(preset.filters.protein);
+                            if (preset.filters.carb) setCarbFilter(preset.filters.carb);
+                            if (preset.filters.fat) setFatFilter(preset.filters.fat);
+                          }}
+                          className="flex flex-col items-start py-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{preset.icon}</span>
+                            <span className="font-medium">{preset.label}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground ml-6">{preset.description}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
