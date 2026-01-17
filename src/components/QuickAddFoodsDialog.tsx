@@ -489,6 +489,16 @@ const FAT_RANGES: { value: FatRange; label: string; min: number; max: number }[]
 
 const FAT_FILTER_KEY = 'quick_add_fat_filter';
 const CUSTOM_PRESETS_KEY = 'quick_add_custom_presets';
+const CUSTOM_PRESETS_SORT_KEY = 'quick_add_custom_presets_sort';
+
+type CustomPresetSortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
+
+const CUSTOM_PRESET_SORT_OPTIONS: { value: CustomPresetSortOption; label: string }[] = [
+  { value: 'name-asc', label: 'Nama (A-Z)' },
+  { value: 'name-desc', label: 'Nama (Z-A)' },
+  { value: 'date-desc', label: 'Terbaru' },
+  { value: 'date-asc', label: 'Terlama' },
+];
 
 // Filter Presets
 type FilterPreset = 'none' | 'high-protein' | 'low-carb' | 'low-fat' | 'low-calorie' | 'bulking';
@@ -655,6 +665,40 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [newPresetName, setNewPresetName] = useState("");
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
   const [editingPresetName, setEditingPresetName] = useState("");
+  const [presetSortBy, setPresetSortBy] = useState<CustomPresetSortOption>(() => {
+    try {
+      const saved = localStorage.getItem(CUSTOM_PRESETS_SORT_KEY);
+      if (saved && CUSTOM_PRESET_SORT_OPTIONS.some(o => o.value === saved)) {
+        return saved as CustomPresetSortOption;
+      }
+    } catch {}
+    return 'date-desc';
+  });
+
+  // Save preset sort preference when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(CUSTOM_PRESETS_SORT_KEY, presetSortBy);
+    } catch {}
+  }, [presetSortBy]);
+
+  // Sort custom presets
+  const sortedCustomPresets = useMemo(() => {
+    return [...customPresets].sort((a, b) => {
+      switch (presetSortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name, 'id');
+        case 'name-desc':
+          return b.name.localeCompare(a.name, 'id');
+        case 'date-asc':
+          return a.createdAt - b.createdAt;
+        case 'date-desc':
+          return b.createdAt - a.createdAt;
+        default:
+          return 0;
+      }
+    });
+  }, [customPresets, presetSortBy]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -1333,11 +1377,40 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   {/* Custom Presets Section */}
                   {customPresets.length > 0 && (
                     <>
-                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1">
-                        <BookmarkPlus className="h-3 w-3" />
-                        Preset Saya
+                      <div className="px-2 py-1.5 flex items-center justify-between">
+                        <div className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                          <BookmarkPlus className="h-3 w-3" />
+                          Preset Saya ({customPresets.length})
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ArrowUpDown className="h-3 w-3 mr-1" />
+                              {CUSTOM_PRESET_SORT_OPTIONS.find(o => o.value === presetSortBy)?.label}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover z-50">
+                            {CUSTOM_PRESET_SORT_OPTIONS.map((option) => (
+                              <DropdownMenuItem
+                                key={option.value}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPresetSortBy(option.value);
+                                }}
+                                className={presetSortBy === option.value ? 'bg-accent' : ''}
+                              >
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      {customPresets.map((preset) => (
+                      {sortedCustomPresets.map((preset) => (
                         <div key={preset.id}>
                           {editingPresetId === preset.id ? (
                             <div className="flex items-center gap-2 px-2 py-2" onClick={(e) => e.stopPropagation()}>
