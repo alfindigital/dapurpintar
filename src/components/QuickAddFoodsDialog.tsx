@@ -54,6 +54,7 @@ const PORTION_MULTIPLIERS = [
 ];
 
 const PORTION_PREFS_KEY = 'portion_preferences';
+const SORT_PREF_KEY = 'quick_add_sort_preference';
 
 interface PortionPreference {
   multiplier: string;
@@ -401,8 +402,27 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const [portionPrefsCount, setPortionPrefsCount] = useState(0);
-  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    try {
+      const saved = localStorage.getItem(SORT_PREF_KEY);
+      if (saved && SORT_OPTIONS.some(o => o.value === saved)) {
+        return saved as SortOption;
+      }
+    } catch {}
+    return 'default';
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Save sort preference when it changes
+  useEffect(() => {
+    try {
+      if (sortBy === 'default') {
+        localStorage.removeItem(SORT_PREF_KEY);
+      } else {
+        localStorage.setItem(SORT_PREF_KEY, sortBy);
+      }
+    } catch {}
+  }, [sortBy]);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
