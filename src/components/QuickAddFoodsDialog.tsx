@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -443,6 +443,19 @@ const SORT_OPTIONS: { value: SortOption; label: string; icon?: 'asc' | 'desc' }[
   { value: 'lemak-desc', label: 'Lemak (Tinggi)', icon: 'desc' },
 ];
 
+type CalorieRange = 'all' | '0-100' | '100-200' | '200-300' | '300-500' | '500+';
+
+const CALORIE_RANGES: { value: CalorieRange; label: string; min: number; max: number }[] = [
+  { value: 'all', label: 'Semua Kalori', min: 0, max: Infinity },
+  { value: '0-100', label: '0-100 kkal', min: 0, max: 100 },
+  { value: '100-200', label: '100-200 kkal', min: 100, max: 200 },
+  { value: '200-300', label: '200-300 kkal', min: 200, max: 300 },
+  { value: '300-500', label: '300-500 kkal', min: 300, max: 500 },
+  { value: '500+', label: '500+ kkal', min: 500, max: Infinity },
+];
+
+const CALORIE_FILTER_KEY = 'quick_add_calorie_filter';
+
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -463,6 +476,15 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     } catch {}
     return 'default';
   });
+  const [calorieFilter, setCalorieFilter] = useState<CalorieRange>(() => {
+    try {
+      const saved = localStorage.getItem(CALORIE_FILTER_KEY);
+      if (saved && CALORIE_RANGES.some(r => r.value === saved)) {
+        return saved as CalorieRange;
+      }
+    } catch {}
+    return 'all';
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -475,6 +497,17 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
       }
     } catch {}
   }, [sortBy]);
+
+  // Save calorie filter preference when it changes
+  useEffect(() => {
+    try {
+      if (calorieFilter === 'all') {
+        localStorage.removeItem(CALORIE_FILTER_KEY);
+      } else {
+        localStorage.setItem(CALORIE_FILTER_KEY, calorieFilter);
+      }
+    } catch {}
+  }, [calorieFilter]);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
@@ -500,9 +533,17 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         f.nama.toLowerCase().includes(searchLower)
       );
     }
+
+    // Filter by calorie range
+    if (calorieFilter !== 'all') {
+      const range = CALORIE_RANGES.find(r => r.value === calorieFilter);
+      if (range) {
+        foods = foods.filter(f => f.kalori >= range.min && f.kalori < range.max);
+      }
+    }
     
     return foods;
-  }, [search, activeKategori, allFoods, customFoods]);
+  }, [search, activeKategori, allFoods, customFoods, calorieFilter]);
 
   // Apply sorting with favorites at top
   const sortedFoods = useMemo(() => {
@@ -864,23 +905,63 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Calorie Filter Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={calorieFilter !== 'all' ? 'secondary' : 'outline'} 
+                    size="icon" 
+                    title="Filter Kalori"
+                  >
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  {CALORIE_RANGES.map((range) => (
+                    <DropdownMenuItem 
+                      key={range.value}
+                      onClick={() => setCalorieFilter(range.value)}
+                      className={calorieFilter === range.value ? 'bg-accent' : ''}
+                    >
+                      {range.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
-            {/* Sort indicator */}
-            {sortBy !== 'default' && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-fade-in">
-                <Badge variant="secondary" className="gap-1">
-                  <ArrowUpDown className="h-3 w-3" />
-                  {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
-                    onClick={() => setSortBy('default')}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
+            {/* Active Filters Indicator */}
+            {(sortBy !== 'default' || calorieFilter !== 'all') && (
+              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground animate-fade-in">
+                {sortBy !== 'default' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <ArrowUpDown className="h-3 w-3" />
+                    {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                      onClick={() => setSortBy('default')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {calorieFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Filter className="h-3 w-3" />
+                    {CALORIE_RANGES.find(r => r.value === calorieFilter)?.label}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                      onClick={() => setCalorieFilter('all')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
               </div>
             )}
 
