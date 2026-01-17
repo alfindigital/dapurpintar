@@ -1025,6 +1025,8 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
 
   const hasActiveFilters = calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all';
 
+  const MAX_CUSTOM_PRESETS = 10;
+
   const handleSaveCustomPreset = () => {
     if (!newPresetName.trim()) {
       toast.error("Nama preset tidak boleh kosong");
@@ -1032,6 +1034,10 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     }
     if (!hasActiveFilters) {
       toast.error("Pilih minimal satu filter untuk disimpan");
+      return;
+    }
+    if (customPresets.length >= MAX_CUSTOM_PRESETS) {
+      toast.error(`Maksimal ${MAX_CUSTOM_PRESETS} preset. Hapus preset lama untuk menambah yang baru.`);
       return;
     }
 
@@ -1509,7 +1515,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   )}
 
                   {/* Save Current Filters */}
-                  {hasActiveFilters && !showSavePreset && (
+                  {hasActiveFilters && !showSavePreset && customPresets.length < MAX_CUSTOM_PRESETS && (
                     <>
                       <DropdownMenuItem
                         onClick={(e) => {
@@ -1521,6 +1527,16 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                         <Save className="h-4 w-4" />
                         <span>Simpan Filter Saat Ini</span>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
+                  {/* Limit Reached Message */}
+                  {customPresets.length >= MAX_CUSTOM_PRESETS && !showSavePreset && (
+                    <>
+                      <div className="px-2 py-2 text-xs text-muted-foreground bg-muted/30 rounded-sm mx-2 my-1">
+                        <span className="font-medium">Batas tercapai:</span> Maksimal {MAX_CUSTOM_PRESETS} preset. Hapus preset lama untuk menambah yang baru.
+                      </div>
                       <DropdownMenuSeparator />
                     </>
                   )}
