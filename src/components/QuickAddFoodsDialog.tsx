@@ -334,6 +334,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
+  const [portionPrefsCount, setPortionPrefsCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
@@ -494,12 +495,21 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
 
   const handleResetPortionPreferences = () => {
     const count = clearAllPortionPreferences();
+    setPortionPrefsCount(0);
     if (count > 0) {
       toast.success(`${count} preferensi porsi berhasil dihapus`);
     } else {
       toast.info("Tidak ada preferensi porsi yang tersimpan");
     }
   };
+
+  // Update portion prefs count when dialog opens
+  useEffect(() => {
+    if (open) {
+      const prefs = getPortionPreferences();
+      setPortionPrefsCount(Object.keys(prefs).length);
+    }
+  }, [open]);
 
   return (
     <>
@@ -613,9 +623,9 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     Import (Ganti Semua)
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleResetPortionPreferences}>
+                  <DropdownMenuItem onClick={handleResetPortionPreferences} disabled={portionPrefsCount === 0}>
                     <RotateCcw className="h-4 w-4 mr-2" />
-                    Reset Preferensi Porsi
+                    Reset Preferensi Porsi {portionPrefsCount > 0 && `(${portionPrefsCount})`}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
