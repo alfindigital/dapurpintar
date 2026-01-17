@@ -1348,22 +1348,59 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                 <ScrollArea className="h-[350px] pr-3">
                   {Object.keys(groupedFoods).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">
-                        {activeKategori === "custom" 
-                          ? "Belum ada makanan custom" 
-                          : "Tidak ada makanan ditemukan"}
-                      </p>
-                      {activeKategori === "custom" && (
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => setShowCustomForm(true)}
-                        >
-                          <PlusCircle className="h-4 w-4 mr-1" />
-                          Tambah sekarang
-                        </Button>
+                      {/* Check if filters are active */}
+                      {(calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all' || search.trim()) ? (
+                        <>
+                          <Filter className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm font-medium">Tidak ada makanan yang cocok</p>
+                          <p className="text-xs mt-1 max-w-[250px] mx-auto">
+                            {search.trim() && `Pencarian "${search.trim()}" `}
+                            {[
+                              calorieFilter !== 'all' && CALORIE_RANGES.find(r => r.value === calorieFilter)?.label,
+                              proteinFilter !== 'all' && PROTEIN_RANGES.find(r => r.value === proteinFilter)?.label,
+                              carbFilter !== 'all' && CARB_RANGES.find(r => r.value === carbFilter)?.label,
+                              fatFilter !== 'all' && FAT_RANGES.find(r => r.value === fatFilter)?.label,
+                            ].filter(Boolean).join(', ')}
+                          </p>
+                          <div className="flex flex-col gap-2 mt-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                setSearch('');
+                                setCalorieFilter('all');
+                                setProteinFilter('all');
+                                setCarbFilter('all');
+                                setFatFilter('all');
+                              }}
+                            >
+                              <RotateCcw className="h-4 w-4 mr-1" />
+                              Reset Semua Filter
+                            </Button>
+                            <p className="text-[10px] text-muted-foreground/70">
+                              Atau coba kurangi kriteria filter
+                            </p>
+                          </div>
+                        </>
+                      ) : activeKategori === "custom" ? (
+                        <>
+                          <Star className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Belum ada makanan custom</p>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => setShowCustomForm(true)}
+                          >
+                            <PlusCircle className="h-4 w-4 mr-1" />
+                            Tambah sekarang
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Tidak ada makanan ditemukan</p>
+                        </>
                       )}
                     </div>
                   ) : (
