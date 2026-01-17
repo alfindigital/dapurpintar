@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -80,6 +80,25 @@ function clearAllPortionPreferences(): number {
   }
 }
 
+function clearPortionPreference(foodId: string): boolean {
+  try {
+    const prefs = getPortionPreferences();
+    if (prefs[foodId]) {
+      delete prefs[foodId];
+      localStorage.setItem(PORTION_PREFS_KEY, JSON.stringify(prefs));
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function hasPortionPreference(foodId: string): boolean {
+  const prefs = getPortionPreferences();
+  return !!prefs[foodId];
+}
+
 function savePortionPreference(foodId: string, multiplier: string, isCustom: boolean) {
   try {
     const prefs = getPortionPreferences();
@@ -95,18 +114,21 @@ function FoodItem({
   onAdd,
   onDelete,
   onEdit,
+  onPortionPrefCleared,
   isCustom = false,
 }: { 
   food: QuickFood | CustomFood; 
   onAdd: (food: QuickFood | CustomFood) => void;
   onDelete?: (id: string) => void;
   onEdit?: (food: CustomFood) => void;
+  onPortionPrefCleared?: () => void;
   isCustom?: boolean;
 }) {
   const [showPortion, setShowPortion] = useState(false);
   const [multiplier, setMultiplier] = useState("1");
   const [customMultiplier, setCustomMultiplier] = useState("");
   const [useCustom, setUseCustom] = useState(false);
+  const [hasSavedPref, setHasSavedPref] = useState(() => hasPortionPreference(food.id));
 
   // Load saved portion preference when showing portion selector
   const loadSavedPreference = useCallback(() => {
@@ -150,6 +172,7 @@ function FoodItem({
     
     // Save portion preference
     savePortionPreference(food.id, effectiveMultiplier, useCustom);
+    setHasSavedPref(true);
     
     const displayMultiplier = useCustom 
       ? `${mult}x` 
@@ -175,6 +198,15 @@ function FoodItem({
     setMultiplier("1");
     setCustomMultiplier("");
     setUseCustom(false);
+  };
+
+  const handleClearPref = () => {
+    clearPortionPreference(food.id);
+    setHasSavedPref(false);
+    setMultiplier("1");
+    setCustomMultiplier("");
+    setUseCustom(false);
+    onPortionPrefCleared?.();
   };
   
   const handlePresetChange = (val: string) => {
@@ -204,8 +236,22 @@ function FoodItem({
           </div>
         </div>
         
-        <div className="text-xs text-muted-foreground">
-          Porsi dasar: {food.porsi}
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground">
+            Porsi dasar: {food.porsi}
+          </div>
+          {hasSavedPref && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+              onClick={handleClearPref}
+              title="Hapus preferensi porsi tersimpan"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Reset
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -273,6 +319,11 @@ function FoodItem({
         <div className="font-medium text-sm flex items-center gap-1.5">
           {isCustom && <Star className="h-3 w-3 text-amber-500 fill-amber-500" />}
           {food.nama}
+          {hasSavedPref && (
+            <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-1">
+              porsi tersimpan
+            </Badge>
+          )}
         </div>
         <div className="text-xs text-muted-foreground mt-0.5">
           {food.porsi} • {food.kalori} kkal
@@ -496,11 +547,18 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const handleResetPortionPreferences = () => {
     const count = clearAllPortionPreferences();
     setPortionPrefsCount(0);
+    // Force re-render of FoodItems
+    setSearch(prev => prev + ' ');
+    setTimeout(() => setSearch(prev => prev.trim()), 0);
     if (count > 0) {
       toast.success(`${count} preferensi porsi berhasil dihapus`);
     } else {
       toast.info("Tidak ada preferensi porsi yang tersimpan");
     }
+  };
+
+  const handlePortionPrefCleared = () => {
+    setPortionPrefsCount(prev => Math.max(0, prev - 1));
   };
 
   // Update portion prefs count when dialog opens
@@ -694,6 +752,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                                 onAdd={handleAddFood}
                                 onDelete={handleDeleteCustomFood}
                                 onEdit={handleEditCustomFood}
+                                onPortionPrefCleared={handlePortionPrefCleared}
                                 isCustom={'isCustom' in food && food.isCustom}
                               />
                             ))}
