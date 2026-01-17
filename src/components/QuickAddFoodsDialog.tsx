@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -379,6 +379,18 @@ function FoodItem({
   );
 }
 
+type SortOption = 'default' | 'nama-asc' | 'nama-desc' | 'kalori-asc' | 'kalori-desc' | 'protein-asc' | 'protein-desc';
+
+const SORT_OPTIONS: { value: SortOption; label: string; icon?: 'asc' | 'desc' }[] = [
+  { value: 'default', label: 'Default' },
+  { value: 'nama-asc', label: 'Nama (A-Z)', icon: 'asc' },
+  { value: 'nama-desc', label: 'Nama (Z-A)', icon: 'desc' },
+  { value: 'kalori-asc', label: 'Kalori (Rendah)', icon: 'asc' },
+  { value: 'kalori-desc', label: 'Kalori (Tinggi)', icon: 'desc' },
+  { value: 'protein-asc', label: 'Protein (Rendah)', icon: 'asc' },
+  { value: 'protein-desc', label: 'Protein (Tinggi)', icon: 'desc' },
+];
+
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -389,6 +401,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const [portionPrefsCount, setPortionPrefsCount] = useState(0);
+  const [sortBy, setSortBy] = useState<SortOption>('default');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
@@ -419,26 +432,55 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     return foods;
   }, [search, activeKategori, allFoods, customFoods]);
 
+  // Apply sorting
+  const sortedFoods = useMemo(() => {
+    if (sortBy === 'default') return filteredFoods;
+    
+    return [...filteredFoods].sort((a, b) => {
+      switch (sortBy) {
+        case 'nama-asc':
+          return a.nama.localeCompare(b.nama, 'id');
+        case 'nama-desc':
+          return b.nama.localeCompare(a.nama, 'id');
+        case 'kalori-asc':
+          return a.kalori - b.kalori;
+        case 'kalori-desc':
+          return b.kalori - a.kalori;
+        case 'protein-asc':
+          return a.protein - b.protein;
+        case 'protein-desc':
+          return b.protein - a.protein;
+        default:
+          return 0;
+      }
+    });
+  }, [filteredFoods, sortBy]);
+
   const groupedFoods = useMemo(() => {
+    // When sorting is active, show as flat list
+    if (sortBy !== 'default') {
+      return { sorted: sortedFoods };
+    }
+
     if (activeKategori === "custom") {
-      return { custom: filteredFoods };
+      return { custom: sortedFoods };
     }
     
     if (activeKategori !== "semua") {
-      return { [activeKategori]: filteredFoods };
+      return { [activeKategori]: sortedFoods };
     }
     
     const grouped: Record<string, (QuickFood | CustomFood)[]> = {};
     
     // Add custom foods first if any
-    const customItems = filteredFoods.filter(f => 'isCustom' in f && f.isCustom);
+    const customItems = sortedFoods.filter(f => 'isCustom' in f && f.isCustom);
     if (customItems.length > 0) {
       grouped['custom'] = customItems;
     }
     
     // Then add regular foods by category
     KATEGORI_ORDER.forEach(kategori => {
-      const foods = filteredFoods.filter(f => 
+      const foods = sortedFoods.filter(f => 
         f.kategori === kategori && !('isCustom' in f && f.isCustom)
       );
       if (foods.length > 0) {
@@ -446,7 +488,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
       }
     });
     return grouped;
-  }, [filteredFoods, activeKategori]);
+  }, [sortedFoods, activeKategori, sortBy]);
 
   const handleAddFood = (food: QuickFood | CustomFood) => {
     const now = new Date();
@@ -690,7 +732,52 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={sortBy !== 'default' ? 'secondary' : 'outline'} 
+                    size="icon" 
+                    title="Urutkan"
+                  >
+                    <ArrowUpDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  {SORT_OPTIONS.map((option) => (
+                    <DropdownMenuItem 
+                      key={option.value}
+                      onClick={() => setSortBy(option.value)}
+                      className={sortBy === option.value ? 'bg-accent' : ''}
+                    >
+                      {option.icon === 'asc' && <ArrowUp className="h-3 w-3 mr-2" />}
+                      {option.icon === 'desc' && <ArrowDown className="h-3 w-3 mr-2" />}
+                      {!option.icon && <span className="w-5" />}
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+
+            {/* Sort indicator */}
+            {sortBy !== 'default' && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-fade-in">
+                <Badge variant="secondary" className="gap-1">
+                  <ArrowUpDown className="h-3 w-3" />
+                  {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                    onClick={() => setSortBy('default')}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              </div>
+            )}
 
             {/* Kategori Tabs */}
             <Tabs value={activeKategori} onValueChange={setActiveKategori} className="flex-1 flex flex-col min-h-0">
@@ -735,13 +822,15 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     <div className="space-y-4">
                       {Object.entries(groupedFoods).map(([kategori, foods]) => (
                         <div key={kategori}>
-                          {activeKategori === "semua" && (
+                          {activeKategori === "semua" && sortBy === 'default' && (
                             <h3 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
                               {kategori === 'custom' ? (
                                 <>
                                   <Star className="h-3 w-3 text-amber-500" />
                                   Makanan Custom
                                 </>
+                              ) : kategori === 'sorted' ? (
+                                'Hasil Pengurutan'
                               ) : (
                                 KATEGORI_LABELS[kategori as QuickFood['kategori']]
                               )}
