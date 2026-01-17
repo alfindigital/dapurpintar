@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -456,6 +456,17 @@ const CALORIE_RANGES: { value: CalorieRange; label: string; min: number; max: nu
 
 const CALORIE_FILTER_KEY = 'quick_add_calorie_filter';
 
+type ProteinRange = 'all' | 'low' | 'medium' | 'high';
+
+const PROTEIN_RANGES: { value: ProteinRange; label: string; min: number; max: number }[] = [
+  { value: 'all', label: 'Semua Protein', min: 0, max: Infinity },
+  { value: 'low', label: 'Rendah (<10g)', min: 0, max: 10 },
+  { value: 'medium', label: 'Sedang (10-20g)', min: 10, max: 20 },
+  { value: 'high', label: 'Tinggi (>20g)', min: 20, max: Infinity },
+];
+
+const PROTEIN_FILTER_KEY = 'quick_add_protein_filter';
+
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -485,6 +496,15 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     } catch {}
     return 'all';
   });
+  const [proteinFilter, setProteinFilter] = useState<ProteinRange>(() => {
+    try {
+      const saved = localStorage.getItem(PROTEIN_FILTER_KEY);
+      if (saved && PROTEIN_RANGES.some(r => r.value === saved)) {
+        return saved as ProteinRange;
+      }
+    } catch {}
+    return 'all';
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -508,6 +528,17 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
       }
     } catch {}
   }, [calorieFilter]);
+
+  // Save protein filter preference when it changes
+  useEffect(() => {
+    try {
+      if (proteinFilter === 'all') {
+        localStorage.removeItem(PROTEIN_FILTER_KEY);
+      } else {
+        localStorage.setItem(PROTEIN_FILTER_KEY, proteinFilter);
+      }
+    } catch {}
+  }, [proteinFilter]);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
@@ -541,9 +572,17 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         foods = foods.filter(f => f.kalori >= range.min && f.kalori < range.max);
       }
     }
+
+    // Filter by protein range
+    if (proteinFilter !== 'all') {
+      const range = PROTEIN_RANGES.find(r => r.value === proteinFilter);
+      if (range) {
+        foods = foods.filter(f => f.protein >= range.min && f.protein < range.max);
+      }
+    }
     
     return foods;
-  }, [search, activeKategori, allFoods, customFoods, calorieFilter]);
+  }, [search, activeKategori, allFoods, customFoods, calorieFilter, proteinFilter]);
 
   // Apply sorting with favorites at top
   const sortedFoods = useMemo(() => {
@@ -929,10 +968,34 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Protein Filter Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={proteinFilter !== 'all' ? 'secondary' : 'outline'} 
+                    size="icon" 
+                    title="Filter Protein"
+                  >
+                    <Beef className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  {PROTEIN_RANGES.map((range) => (
+                    <DropdownMenuItem 
+                      key={range.value}
+                      onClick={() => setProteinFilter(range.value)}
+                      className={proteinFilter === range.value ? 'bg-accent' : ''}
+                    >
+                      {range.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Active Filters Indicator */}
-            {(sortBy !== 'default' || calorieFilter !== 'all') && (
+            {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all') && (
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground animate-fade-in">
                 {sortBy !== 'default' && (
                   <Badge variant="secondary" className="gap-1">
@@ -962,12 +1025,26 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     </Button>
                   </Badge>
                 )}
-                {(sortBy !== 'default' || calorieFilter !== 'all') && (
+                {proteinFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Beef className="h-3 w-3" />
+                    {PROTEIN_RANGES.find(r => r.value === proteinFilter)?.label}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                      onClick={() => setProteinFilter('all')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all') && (
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
                       {sortedFoods.length} hasil
                     </Badge>
-                    {(sortBy !== 'default' && calorieFilter !== 'all') && (
+                    {([sortBy !== 'default', calorieFilter !== 'all', proteinFilter !== 'all'].filter(Boolean).length >= 2) && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -975,6 +1052,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                         onClick={() => {
                           setSortBy('default');
                           setCalorieFilter('all');
+                          setProteinFilter('all');
                         }}
                       >
                         <RotateCcw className="h-3 w-3 mr-1" />
