@@ -962,19 +962,26 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     </Button>
                   </Badge>
                 )}
-                {(sortBy !== 'default' && calorieFilter !== 'all') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    onClick={() => {
-                      setSortBy('default');
-                      setCalorieFilter('all');
-                    }}
-                  >
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Reset Semua
-                  </Button>
+                {(sortBy !== 'default' || calorieFilter !== 'all') && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {sortedFoods.length} hasil
+                    </Badge>
+                    {(sortBy !== 'default' && calorieFilter !== 'all') && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                        onClick={() => {
+                          setSortBy('default');
+                          setCalorieFilter('all');
+                        }}
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        Reset Semua
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
