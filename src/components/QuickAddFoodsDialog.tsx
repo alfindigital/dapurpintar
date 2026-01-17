@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +55,40 @@ const PORTION_MULTIPLIERS = [
 
 const PORTION_PREFS_KEY = 'portion_preferences';
 const SORT_PREF_KEY = 'quick_add_sort_preference';
+const FOOD_FAVORITES_KEY = 'quick_add_food_favorites';
+
+function getFoodFavorites(): Set<string> {
+  try {
+    const saved = localStorage.getItem(FOOD_FAVORITES_KEY);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveFoodFavorites(favorites: Set<string>) {
+  try {
+    localStorage.setItem(FOOD_FAVORITES_KEY, JSON.stringify([...favorites]));
+  } catch {
+    // ignore
+  }
+}
+
+function isFoodFavorite(foodId: string): boolean {
+  return getFoodFavorites().has(foodId);
+}
+
+function toggleFoodFavorite(foodId: string): boolean {
+  const favorites = getFoodFavorites();
+  const isNowFavorite = !favorites.has(foodId);
+  if (isNowFavorite) {
+    favorites.add(foodId);
+  } else {
+    favorites.delete(foodId);
+  }
+  saveFoodFavorites(favorites);
+  return isNowFavorite;
+}
 
 interface PortionPreference {
   multiplier: string;
@@ -116,14 +150,18 @@ function FoodItem({
   onDelete,
   onEdit,
   onPortionPrefCleared,
+  onFavoriteToggle,
   isCustom = false,
+  isFavorite = false,
 }: { 
   food: QuickFood | CustomFood; 
   onAdd: (food: QuickFood | CustomFood) => void;
   onDelete?: (id: string) => void;
   onEdit?: (food: CustomFood) => void;
   onPortionPrefCleared?: () => void;
+  onFavoriteToggle?: (foodId: string) => void;
   isCustom?: boolean;
+  isFavorite?: boolean;
 }) {
   const [showPortion, setShowPortion] = useState(false);
   const [multiplier, setMultiplier] = useState("1");
@@ -345,6 +383,15 @@ function FoodItem({
         </div>
       </div>
       <div className="flex gap-1 shrink-0">
+        <Button
+          size="sm"
+          variant="ghost"
+          className={`h-8 w-8 p-0 ${isFavorite ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+          onClick={() => onFavoriteToggle?.(food.id)}
+          title={isFavorite ? "Hapus dari favorit" : "Tambah ke favorit"}
+        >
+          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </Button>
         {isCustom && onEdit && (
           <Button
             size="sm"
@@ -402,6 +449,7 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
   const [portionPrefsCount, setPortionPrefsCount] = useState(0);
+  const [foodFavorites, setFoodFavorites] = useState<Set<string>>(() => getFoodFavorites());
   const [sortBy, setSortBy] = useState<SortOption>(() => {
     try {
       const saved = localStorage.getItem(SORT_PREF_KEY);
@@ -452,11 +500,18 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     return foods;
   }, [search, activeKategori, allFoods, customFoods]);
 
-  // Apply sorting
+  // Apply sorting with favorites at top
   const sortedFoods = useMemo(() => {
-    if (sortBy === 'default') return filteredFoods;
-    
-    return [...filteredFoods].sort((a, b) => {
+    const sortFunction = (a: QuickFood | CustomFood, b: QuickFood | CustomFood) => {
+      // Favorites always come first
+      const aIsFav = foodFavorites.has(a.id);
+      const bIsFav = foodFavorites.has(b.id);
+      if (aIsFav && !bIsFav) return -1;
+      if (!aIsFav && bIsFav) return 1;
+      
+      // Then apply the selected sort
+      if (sortBy === 'default') return 0;
+      
       switch (sortBy) {
         case 'nama-asc':
           return a.nama.localeCompare(b.nama, 'id');
@@ -473,8 +528,10 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         default:
           return 0;
       }
-    });
-  }, [filteredFoods, sortBy]);
+    };
+
+    return [...filteredFoods].sort(sortFunction);
+  }, [filteredFoods, sortBy, foodFavorites]);
 
   const groupedFoods = useMemo(() => {
     // When sorting is active, show as flat list
@@ -492,23 +549,33 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     
     const grouped: Record<string, (QuickFood | CustomFood)[]> = {};
     
-    // Add custom foods first if any
-    const customItems = sortedFoods.filter(f => 'isCustom' in f && f.isCustom);
+    // Add favorites first
+    const favoriteItems = sortedFoods.filter(f => foodFavorites.has(f.id));
+    if (favoriteItems.length > 0) {
+      grouped['favorites'] = favoriteItems;
+    }
+    
+    // Add custom foods (non-favorite)
+    const customItems = sortedFoods.filter(f => 
+      'isCustom' in f && f.isCustom && !foodFavorites.has(f.id)
+    );
     if (customItems.length > 0) {
       grouped['custom'] = customItems;
     }
     
-    // Then add regular foods by category
+    // Then add regular foods by category (non-favorite)
     KATEGORI_ORDER.forEach(kategori => {
       const foods = sortedFoods.filter(f => 
-        f.kategori === kategori && !('isCustom' in f && f.isCustom)
+        f.kategori === kategori && 
+        !('isCustom' in f && f.isCustom) && 
+        !foodFavorites.has(f.id)
       );
       if (foods.length > 0) {
         grouped[kategori] = foods;
       }
     });
     return grouped;
-  }, [sortedFoods, activeKategori, sortBy]);
+  }, [sortedFoods, activeKategori, sortBy, foodFavorites]);
 
   const handleAddFood = (food: QuickFood | CustomFood) => {
     const now = new Date();
@@ -624,6 +691,12 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
 
   const handlePortionPrefCleared = () => {
     setPortionPrefsCount(prev => Math.max(0, prev - 1));
+  };
+
+  const handleFavoriteToggle = (foodId: string) => {
+    const isNowFavorite = toggleFoodFavorite(foodId);
+    setFoodFavorites(getFoodFavorites());
+    toast.success(isNowFavorite ? "Ditambahkan ke favorit" : "Dihapus dari favorit");
   };
 
   // Update portion prefs count when dialog opens
@@ -844,7 +917,12 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                         <div key={kategori}>
                           {activeKategori === "semua" && sortBy === 'default' && (
                             <h3 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
-                              {kategori === 'custom' ? (
+                              {kategori === 'favorites' ? (
+                                <>
+                                  <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
+                                  Favorit
+                                </>
+                              ) : kategori === 'custom' ? (
                                 <>
                                   <Star className="h-3 w-3 text-amber-500" />
                                   Makanan Custom
@@ -865,7 +943,9 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                                 onDelete={handleDeleteCustomFood}
                                 onEdit={handleEditCustomFood}
                                 onPortionPrefCleared={handlePortionPrefCleared}
+                                onFavoriteToggle={handleFavoriteToggle}
                                 isCustom={'isCustom' in food && food.isCustom}
+                                isFavorite={foodFavorites.has(food.id)}
                               />
                             ))}
                           </div>
