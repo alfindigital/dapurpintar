@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -467,6 +467,28 @@ const PROTEIN_RANGES: { value: ProteinRange; label: string; min: number; max: nu
 
 const PROTEIN_FILTER_KEY = 'quick_add_protein_filter';
 
+type CarbRange = 'all' | 'low' | 'medium' | 'high';
+
+const CARB_RANGES: { value: CarbRange; label: string; min: number; max: number }[] = [
+  { value: 'all', label: 'Semua Karbo', min: 0, max: Infinity },
+  { value: 'low', label: 'Rendah (<15g)', min: 0, max: 15 },
+  { value: 'medium', label: 'Sedang (15-30g)', min: 15, max: 30 },
+  { value: 'high', label: 'Tinggi (>30g)', min: 30, max: Infinity },
+];
+
+const CARB_FILTER_KEY = 'quick_add_carb_filter';
+
+type FatRange = 'all' | 'low' | 'medium' | 'high';
+
+const FAT_RANGES: { value: FatRange; label: string; min: number; max: number }[] = [
+  { value: 'all', label: 'Semua Lemak', min: 0, max: Infinity },
+  { value: 'low', label: 'Rendah (<5g)', min: 0, max: 5 },
+  { value: 'medium', label: 'Sedang (5-15g)', min: 5, max: 15 },
+  { value: 'high', label: 'Tinggi (>15g)', min: 15, max: Infinity },
+];
+
+const FAT_FILTER_KEY = 'quick_add_fat_filter';
+
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -505,6 +527,24 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     } catch {}
     return 'all';
   });
+  const [carbFilter, setCarbFilter] = useState<CarbRange>(() => {
+    try {
+      const saved = localStorage.getItem(CARB_FILTER_KEY);
+      if (saved && CARB_RANGES.some(r => r.value === saved)) {
+        return saved as CarbRange;
+      }
+    } catch {}
+    return 'all';
+  });
+  const [fatFilter, setFatFilter] = useState<FatRange>(() => {
+    try {
+      const saved = localStorage.getItem(FAT_FILTER_KEY);
+      if (saved && FAT_RANGES.some(r => r.value === saved)) {
+        return saved as FatRange;
+      }
+    } catch {}
+    return 'all';
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -539,6 +579,28 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
       }
     } catch {}
   }, [proteinFilter]);
+
+  // Save carb filter preference when it changes
+  useEffect(() => {
+    try {
+      if (carbFilter === 'all') {
+        localStorage.removeItem(CARB_FILTER_KEY);
+      } else {
+        localStorage.setItem(CARB_FILTER_KEY, carbFilter);
+      }
+    } catch {}
+  }, [carbFilter]);
+
+  // Save fat filter preference when it changes
+  useEffect(() => {
+    try {
+      if (fatFilter === 'all') {
+        localStorage.removeItem(FAT_FILTER_KEY);
+      } else {
+        localStorage.setItem(FAT_FILTER_KEY, fatFilter);
+      }
+    } catch {}
+  }, [fatFilter]);
   
   const { customFoods, addCustomFood, removeCustomFood, updateCustomFood, exportCustomFoods, importCustomFoods } = useCustomFoods();
 
@@ -580,9 +642,25 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
         foods = foods.filter(f => f.protein >= range.min && f.protein < range.max);
       }
     }
+
+    // Filter by carb range
+    if (carbFilter !== 'all') {
+      const range = CARB_RANGES.find(r => r.value === carbFilter);
+      if (range) {
+        foods = foods.filter(f => f.karbohidrat >= range.min && f.karbohidrat < range.max);
+      }
+    }
+
+    // Filter by fat range
+    if (fatFilter !== 'all') {
+      const range = FAT_RANGES.find(r => r.value === fatFilter);
+      if (range) {
+        foods = foods.filter(f => f.lemak >= range.min && f.lemak < range.max);
+      }
+    }
     
     return foods;
-  }, [search, activeKategori, allFoods, customFoods, calorieFilter, proteinFilter]);
+  }, [search, activeKategori, allFoods, customFoods, calorieFilter, proteinFilter, carbFilter, fatFilter]);
 
   // Apply sorting with favorites at top
   const sortedFoods = useMemo(() => {
@@ -992,10 +1070,58 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Carb Filter Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={carbFilter !== 'all' ? 'secondary' : 'outline'} 
+                    size="icon" 
+                    title="Filter Karbohidrat"
+                  >
+                    <Wheat className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  {CARB_RANGES.map((range) => (
+                    <DropdownMenuItem 
+                      key={range.value}
+                      onClick={() => setCarbFilter(range.value)}
+                      className={carbFilter === range.value ? 'bg-accent' : ''}
+                    >
+                      {range.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Fat Filter Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={fatFilter !== 'all' ? 'secondary' : 'outline'} 
+                    size="icon" 
+                    title="Filter Lemak"
+                  >
+                    <Droplets className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  {FAT_RANGES.map((range) => (
+                    <DropdownMenuItem 
+                      key={range.value}
+                      onClick={() => setFatFilter(range.value)}
+                      className={fatFilter === range.value ? 'bg-accent' : ''}
+                    >
+                      {range.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Active Filters Indicator */}
-            {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all') && (
+            {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all') && (
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground animate-fade-in">
                 {sortBy !== 'default' && (
                   <Badge variant="secondary" className="gap-1">
@@ -1039,12 +1165,40 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                     </Button>
                   </Badge>
                 )}
-                {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all') && (
+                {carbFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Wheat className="h-3 w-3" />
+                    {CARB_RANGES.find(r => r.value === carbFilter)?.label}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                      onClick={() => setCarbFilter('all')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {fatFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Droplets className="h-3 w-3" />
+                    {FAT_RANGES.find(r => r.value === fatFilter)?.label}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                      onClick={() => setFatFilter('all')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all') && (
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
                       {sortedFoods.length} hasil
                     </Badge>
-                    {([sortBy !== 'default', calorieFilter !== 'all', proteinFilter !== 'all'].filter(Boolean).length >= 2) && (
+                    {([sortBy !== 'default', calorieFilter !== 'all', proteinFilter !== 'all', carbFilter !== 'all', fatFilter !== 'all'].filter(Boolean).length >= 2) && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1053,6 +1207,8 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                           setSortBy('default');
                           setCalorieFilter('all');
                           setProteinFilter('all');
+                          setCarbFilter('all');
+                          setFatFilter('all');
                         }}
                       >
                         <RotateCcw className="h-3 w-3 mr-1" />
