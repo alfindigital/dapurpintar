@@ -427,7 +427,7 @@ function FoodItem({
   );
 }
 
-type SortOption = 'default' | 'nama-asc' | 'nama-desc' | 'kalori-asc' | 'kalori-desc' | 'protein-asc' | 'protein-desc';
+type SortOption = 'default' | 'nama-asc' | 'nama-desc' | 'kalori-asc' | 'kalori-desc' | 'protein-asc' | 'protein-desc' | 'karbohidrat-asc' | 'karbohidrat-desc' | 'lemak-asc' | 'lemak-desc';
 
 const SORT_OPTIONS: { value: SortOption; label: string; icon?: 'asc' | 'desc' }[] = [
   { value: 'default', label: 'Default' },
@@ -437,6 +437,10 @@ const SORT_OPTIONS: { value: SortOption; label: string; icon?: 'asc' | 'desc' }[
   { value: 'kalori-desc', label: 'Kalori (Tinggi)', icon: 'desc' },
   { value: 'protein-asc', label: 'Protein (Rendah)', icon: 'asc' },
   { value: 'protein-desc', label: 'Protein (Tinggi)', icon: 'desc' },
+  { value: 'karbohidrat-asc', label: 'Karbo (Rendah)', icon: 'asc' },
+  { value: 'karbohidrat-desc', label: 'Karbo (Tinggi)', icon: 'desc' },
+  { value: 'lemak-asc', label: 'Lemak (Rendah)', icon: 'asc' },
+  { value: 'lemak-desc', label: 'Lemak (Tinggi)', icon: 'desc' },
 ];
 
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
@@ -525,6 +529,14 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
           return a.protein - b.protein;
         case 'protein-desc':
           return b.protein - a.protein;
+        case 'karbohidrat-asc':
+          return a.karbohidrat - b.karbohidrat;
+        case 'karbohidrat-desc':
+          return b.karbohidrat - a.karbohidrat;
+        case 'lemak-asc':
+          return a.lemak - b.lemak;
+        case 'lemak-desc':
+          return b.lemak - a.lemak;
         default:
           return 0;
       }
