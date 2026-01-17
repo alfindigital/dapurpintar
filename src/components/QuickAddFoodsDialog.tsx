@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets, Sparkles, Save, BookmarkPlus } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets, Sparkles, Save, BookmarkPlus, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -1092,6 +1092,20 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     setEditingPresetName("");
   };
 
+  const handleDuplicatePreset = (preset: CustomPreset, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newPreset: CustomPreset = {
+      id: `custom_${Date.now()}`,
+      name: `${preset.name} (Salinan)`,
+      filters: { ...preset.filters },
+      createdAt: Date.now(),
+    };
+    const updatedPresets = [...customPresets, newPreset];
+    setCustomPresets(updatedPresets);
+    saveCustomPresets(updatedPresets);
+    toast.success(`Preset "${preset.name}" berhasil diduplikasi`);
+  };
+
   const handleApplyCustomPreset = (preset: CustomPreset) => {
     // Reset all filters first
     setCalorieFilter('all');
@@ -1458,6 +1472,15 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                                 </span>
                               </div>
                               <div className="flex gap-0.5 opacity-0 group-hover:opacity-100">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-primary/20 hover:text-primary"
+                                  onClick={(e) => handleDuplicatePreset(preset, e)}
+                                  title="Duplikasi preset"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
