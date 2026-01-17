@@ -653,6 +653,8 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [customPresets, setCustomPresets] = useState<CustomPreset[]>(() => getCustomPresets());
   const [showSavePreset, setShowSavePreset] = useState(false);
   const [newPresetName, setNewPresetName] = useState("");
+  const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
+  const [editingPresetName, setEditingPresetName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save sort preference when it changes
@@ -1018,6 +1020,34 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
     toast.success(`Preset "${preset?.name}" berhasil dihapus`);
   };
 
+  const handleStartEditPreset = (preset: CustomPreset, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingPresetId(preset.id);
+    setEditingPresetName(preset.name);
+  };
+
+  const handleSaveEditPreset = (presetId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editingPresetName.trim()) {
+      toast.error("Nama preset tidak boleh kosong");
+      return;
+    }
+    const updatedPresets = customPresets.map(p => 
+      p.id === presetId ? { ...p, name: editingPresetName.trim() } : p
+    );
+    setCustomPresets(updatedPresets);
+    saveCustomPresets(updatedPresets);
+    setEditingPresetId(null);
+    setEditingPresetName("");
+    toast.success("Nama preset berhasil diubah");
+  };
+
+  const handleCancelEditPreset = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingPresetId(null);
+    setEditingPresetName("");
+  };
+
   const handleApplyCustomPreset = (preset: CustomPreset) => {
     // Reset all filters first
     setCalorieFilter('all');
@@ -1308,27 +1338,75 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                         Preset Saya
                       </div>
                       {customPresets.map((preset) => (
-                        <DropdownMenuItem 
-                          key={preset.id}
-                          onClick={() => handleApplyCustomPreset(preset)}
-                          className="flex items-center justify-between py-2 group"
-                        >
-                          <div className="flex flex-col items-start">
-                            <span className="font-medium">⭐ {preset.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {generatePresetDescription(preset.filters)}
-                            </span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive"
-                            onClick={(e) => handleDeleteCustomPreset(preset.id, e)}
-                            title="Hapus preset"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuItem>
+                        <div key={preset.id}>
+                          {editingPresetId === preset.id ? (
+                            <div className="flex items-center gap-2 px-2 py-2" onClick={(e) => e.stopPropagation()}>
+                              <Input
+                                value={editingPresetName}
+                                onChange={(e) => setEditingPresetName(e.target.value)}
+                                className="h-8 text-sm flex-1"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveEditPreset(preset.id, e as any);
+                                  } else if (e.key === 'Escape') {
+                                    handleCancelEditPreset(e as any);
+                                  }
+                                }}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-primary hover:text-primary"
+                                onClick={(e) => handleSaveEditPreset(preset.id, e)}
+                                title="Simpan"
+                              >
+                                <Save className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
+                                onClick={handleCancelEditPreset}
+                                title="Batal"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <DropdownMenuItem 
+                              onClick={() => handleApplyCustomPreset(preset)}
+                              className="flex items-center justify-between py-2 group"
+                            >
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">⭐ {preset.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {generatePresetDescription(preset.filters)}
+                                </span>
+                              </div>
+                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-primary/20 hover:text-primary"
+                                  onClick={(e) => handleStartEditPreset(preset, e)}
+                                  title="Edit nama preset"
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
+                                  onClick={(e) => handleDeleteCustomPreset(preset.id, e)}
+                                  title="Hapus preset"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </DropdownMenuItem>
+                          )}
+                        </div>
                       ))}
                       <DropdownMenuSeparator />
                     </>
