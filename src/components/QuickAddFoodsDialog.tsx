@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets } from "lucide-react";
+import { Plus, Search, Utensils, Zap, PlusCircle, Trash2, Star, Download, Upload, Scale, Pencil, RotateCcw, X, ArrowUpDown, ArrowUp, ArrowDown, Heart, Filter, Beef, Wheat, Droplets, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -488,6 +488,67 @@ const FAT_RANGES: { value: FatRange; label: string; min: number; max: number }[]
 ];
 
 const FAT_FILTER_KEY = 'quick_add_fat_filter';
+
+// Filter Presets
+type FilterPreset = 'none' | 'high-protein' | 'low-carb' | 'low-fat' | 'low-calorie' | 'bulking';
+
+interface PresetConfig {
+  value: FilterPreset;
+  label: string;
+  description: string;
+  icon: string;
+  filters: {
+    calorie?: CalorieRange;
+    protein?: ProteinRange;
+    carb?: CarbRange;
+    fat?: FatRange;
+  };
+}
+
+const FILTER_PRESETS: PresetConfig[] = [
+  { 
+    value: 'none', 
+    label: 'Tanpa Preset', 
+    description: 'Reset ke filter default',
+    icon: '🔄',
+    filters: {} 
+  },
+  { 
+    value: 'high-protein', 
+    label: 'Tinggi Protein', 
+    description: 'Protein >20g, cocok untuk muscle building',
+    icon: '💪',
+    filters: { protein: 'high' } 
+  },
+  { 
+    value: 'low-carb', 
+    label: 'Rendah Karbo', 
+    description: 'Karbo <15g, cocok untuk diet keto',
+    icon: '🥗',
+    filters: { carb: 'low' } 
+  },
+  { 
+    value: 'low-fat', 
+    label: 'Rendah Lemak', 
+    description: 'Lemak <5g, cocok untuk cutting',
+    icon: '🏃',
+    filters: { fat: 'low' } 
+  },
+  { 
+    value: 'low-calorie', 
+    label: 'Rendah Kalori', 
+    description: 'Kalori <200, cocok untuk diet',
+    icon: '🎯',
+    filters: { calorie: '0-100' } 
+  },
+  { 
+    value: 'bulking', 
+    label: 'Diet Bulking', 
+    description: 'Tinggi protein & kalori untuk bulking',
+    icon: '🔥',
+    filters: { protein: 'high', calorie: '300-500' } 
+  },
+];
 
 export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
   const [open, setOpen] = useState(false);
@@ -1118,7 +1179,53 @@ export function QuickAddFoodsDialog({ onAddFood }: QuickAddFoodsDialogProps) {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Filter Preset Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    title="Preset Filter"
+                    className="relative"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover w-56">
+                  <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    Preset Filter Cepat
+                  </div>
+                  <DropdownMenuSeparator />
+                  {FILTER_PRESETS.map((preset) => (
+                    <DropdownMenuItem 
+                      key={preset.value}
+                      onClick={() => {
+                        // Reset all filters first
+                        setCalorieFilter('all');
+                        setProteinFilter('all');
+                        setCarbFilter('all');
+                        setFatFilter('all');
+                        
+                        // Apply preset filters
+                        if (preset.filters.calorie) setCalorieFilter(preset.filters.calorie);
+                        if (preset.filters.protein) setProteinFilter(preset.filters.protein);
+                        if (preset.filters.carb) setCarbFilter(preset.filters.carb);
+                        if (preset.filters.fat) setFatFilter(preset.filters.fat);
+                      }}
+                      className="flex flex-col items-start py-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{preset.icon}</span>
+                        <span className="font-medium">{preset.label}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-6">{preset.description}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+
 
             {/* Active Filters Indicator */}
             {(sortBy !== 'default' || calorieFilter !== 'all' || proteinFilter !== 'all' || carbFilter !== 'all' || fatFilter !== 'all') && (
