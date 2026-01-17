@@ -320,7 +320,10 @@ function FoodItem({
           {isCustom && <Star className="h-3 w-3 text-amber-500 fill-amber-500" />}
           {food.nama}
           {hasSavedPref && (
-            <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-1">
+            <Badge 
+              variant="secondary" 
+              className="text-[9px] px-1 py-0 ml-1 animate-scale-in"
+            >
               porsi tersimpan
             </Badge>
           )}
