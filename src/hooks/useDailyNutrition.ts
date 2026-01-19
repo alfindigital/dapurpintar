@@ -26,6 +26,64 @@ function getTodayKey(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+// Validate a single nutrition entry
+function isValidNutritionEntry(entry: unknown): entry is NutritionEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  return (
+    typeof e.id === 'string' &&
+    typeof e.nama === 'string' &&
+    typeof e.kalori === 'number' &&
+    typeof e.protein === 'number' &&
+    typeof e.karbohidrat === 'number' &&
+    typeof e.lemak === 'number' &&
+    typeof e.waktu === 'string' &&
+    typeof e.timestamp === 'number'
+  );
+}
+
+// Validate daily nutrition data
+function isValidDailyNutrition(data: unknown): data is DailyNutrition {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.date === 'string' &&
+    Array.isArray(d.entries) &&
+    typeof d.totalKalori === 'number' &&
+    typeof d.totalProtein === 'number' &&
+    typeof d.totalKarbohidrat === 'number' &&
+    typeof d.totalLemak === 'number'
+  );
+}
+
+// Safe parse with validation
+function safeLoadWeeklyData(): Record<string, DailyNutrition> {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return {};
+    
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== 'object') return {};
+    
+    const result: Record<string, DailyNutrition> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (isValidDailyNutrition(value)) {
+        // Also validate entries
+        const validEntries = value.entries.filter(isValidNutritionEntry);
+        result[key] = {
+          ...value,
+          entries: validEntries,
+        };
+      }
+    }
+    
+    return result;
+  } catch {
+    console.warn('Failed to parse nutrition data from localStorage');
+    return {};
+  }
+}
+
 export function useDailyNutrition() {
   const [dailyData, setDailyData] = useState<DailyNutrition>({
     date: getTodayKey(),
@@ -38,20 +96,14 @@ export function useDailyNutrition() {
 
   const [weeklyData, setWeeklyData] = useState<Record<string, DailyNutrition>>({});
 
-  // Load from localStorage
+  // Load from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Record<string, DailyNutrition>;
-        setWeeklyData(parsed);
-        const today = getTodayKey();
-        if (parsed[today]) {
-          setDailyData(parsed[today]);
-        }
-      } catch {
-        // ignore
-      }
+    const allData = safeLoadWeeklyData();
+    setWeeklyData(allData);
+    
+    const today = getTodayKey();
+    if (allData[today]) {
+      setDailyData(allData[today]);
     }
   }, []);
 
@@ -68,7 +120,7 @@ export function useDailyNutrition() {
     }
     allData[data.date] = data;
     
-    // Keep only last 7 days
+    // Keep only last 30 days
     const dates = Object.keys(allData).sort().reverse().slice(0, 30);
     const filtered: Record<string, DailyNutrition> = {};
     dates.forEach(d => {

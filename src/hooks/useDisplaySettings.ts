@@ -39,18 +39,40 @@ const PROFILE_PRESETS: Record<AccessibilityProfile, Omit<DisplaySettings, "profi
 
 const STORAGE_KEY = "display_settings";
 
-export function useDisplaySettings() {
-  const [settings, setSettings] = useState<DisplaySettings>(() => {
+const VALID_FONT_SIZES: FontSize[] = ["small", "normal", "large"];
+const VALID_COLOR_THEMES: ColorTheme[] = ["green", "blue", "orange", "purple"];
+const VALID_PROFILES: AccessibilityProfile[] = ["default", "lansia", "low-vision"];
+
+// Validate display settings
+function isValidDisplaySettings(data: unknown): data is DisplaySettings {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    VALID_FONT_SIZES.includes(d.fontSize as FontSize) &&
+    typeof d.highContrast === 'boolean' &&
+    VALID_COLOR_THEMES.includes(d.colorTheme as ColorTheme) &&
+    VALID_PROFILES.includes(d.profile as AccessibilityProfile)
+  );
+}
+
+// Safe parse with validation
+function safeLoadDisplaySettings(): DisplaySettings {
+  try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-      } catch {
-        return DEFAULT_SETTINGS;
-      }
-    }
+    if (!saved) return DEFAULT_SETTINGS;
+    
+    const parsed = JSON.parse(saved);
+    if (!isValidDisplaySettings(parsed)) return DEFAULT_SETTINGS;
+    
+    return parsed;
+  } catch {
+    console.warn('Failed to parse display settings from localStorage');
     return DEFAULT_SETTINGS;
-  });
+  }
+}
+
+export function useDisplaySettings() {
+  const [settings, setSettings] = useState<DisplaySettings>(() => safeLoadDisplaySettings());
 
   const applySettings = useCallback((s: DisplaySettings) => {
     const html = document.documentElement;

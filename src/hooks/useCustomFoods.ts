@@ -8,20 +8,48 @@ export interface CustomFood extends QuickFood {
   createdAt: number;
 }
 
+// Validate a single custom food entry
+function isValidCustomFood(food: unknown): food is CustomFood {
+  if (!food || typeof food !== 'object') return false;
+  const f = food as Record<string, unknown>;
+  return (
+    typeof f.id === 'string' &&
+    typeof f.nama === 'string' &&
+    typeof f.kategori === 'string' &&
+    typeof f.kalori === 'number' &&
+    typeof f.protein === 'number' &&
+    typeof f.karbohidrat === 'number' &&
+    typeof f.lemak === 'number' &&
+    typeof f.porsi === 'string' &&
+    f.isCustom === true &&
+    typeof f.createdAt === 'number'
+  );
+}
+
+// Safe parse with validation
+function safeLoadCustomFoods(): CustomFood[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    
+    // Filter only valid entries
+    return parsed.filter(isValidCustomFood);
+  } catch {
+    console.warn('Failed to parse custom foods from localStorage');
+    return [];
+  }
+}
+
 export function useCustomFoods() {
   const [customFoods, setCustomFoods] = useState<CustomFood[]>([]);
 
-  // Load from localStorage
+  // Load from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as CustomFood[];
-        setCustomFoods(parsed);
-      } catch {
-        // ignore
-      }
-    }
+    const loaded = safeLoadCustomFoods();
+    setCustomFoods(loaded);
   }, []);
 
   // Save to localStorage
