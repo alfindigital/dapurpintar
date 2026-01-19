@@ -18,11 +18,35 @@ const defaultSettings: ReminderSettings = {
   sound: true,
 };
 
-export const useWaterReminder = () => {
-  const [settings, setSettings] = useState<ReminderSettings>(() => {
+// Validation function
+function isValidReminderSettings(data: unknown): data is ReminderSettings {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.enabled === 'boolean' &&
+    typeof d.intervalMinutes === 'number' &&
+    typeof d.startHour === 'number' &&
+    typeof d.endHour === 'number' &&
+    typeof d.sound === 'boolean'
+  );
+}
+
+// Safe loader
+function safeLoadReminderSettings(): ReminderSettings {
+  try {
     const saved = localStorage.getItem(REMINDER_SETTINGS_KEY);
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
-  });
+    if (!saved) return defaultSettings;
+    const parsed = JSON.parse(saved);
+    if (!isValidReminderSettings(parsed)) return defaultSettings;
+    return { ...defaultSettings, ...parsed };
+  } catch {
+    console.warn('Failed to parse reminder settings');
+    return defaultSettings;
+  }
+}
+
+export const useWaterReminder = () => {
+  const [settings, setSettings] = useState<ReminderSettings>(() => safeLoadReminderSettings());
   
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const [lastReminder, setLastReminder] = useState<Date | null>(null);
