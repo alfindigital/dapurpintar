@@ -37,6 +37,72 @@ const getWeekStart = (): string => {
   return monday.toISOString();
 };
 
+// Validation functions
+const VALID_MEAL_TIMES: MealTime[] = ["sarapan", "makan_siang", "makan_malam"];
+
+function isValidMealSlot(slot: unknown): slot is MealSlot {
+  if (!slot || typeof slot !== 'object') return false;
+  const s = slot as Record<string, unknown>;
+  return (
+    typeof s.id === 'string' &&
+    typeof s.dayIndex === 'number' &&
+    VALID_MEAL_TIMES.includes(s.mealTime as MealTime) &&
+    (s.recipe === null || (typeof s.recipe === 'object' && s.recipe !== null)) &&
+    typeof s.isLocked === 'boolean' &&
+    typeof s.isSkipped === 'boolean'
+  );
+}
+
+function isValidWeeklyMealPlan(data: unknown): data is WeeklyMealPlan {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.id === 'string' &&
+    typeof d.weekStart === 'string' &&
+    Array.isArray(d.slots) &&
+    d.slots.every(isValidMealSlot) &&
+    typeof d.generatedAt === 'string'
+  );
+}
+
+function isValidMealPlanTemplate(template: unknown): template is MealPlanTemplate {
+  if (!template || typeof template !== 'object') return false;
+  const t = template as Record<string, unknown>;
+  return (
+    typeof t.id === 'string' &&
+    typeof t.name === 'string' &&
+    Array.isArray(t.slots) &&
+    t.slots.every(isValidMealSlot) &&
+    typeof t.createdAt === 'string'
+  );
+}
+
+// Safe loaders
+function safeLoadMealPlan(): WeeklyMealPlan | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    return isValidWeeklyMealPlan(parsed) ? parsed : null;
+  } catch {
+    console.warn('Failed to parse meal plan');
+    return null;
+  }
+}
+
+function safeLoadTemplates(): MealPlanTemplate[] {
+  try {
+    const saved = localStorage.getItem(TEMPLATES_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidMealPlanTemplate);
+  } catch {
+    console.warn('Failed to parse meal plan templates');
+    return [];
+  }
+}
+
 export const useMealPlan = () => {
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
   const [templates, setTemplates] = useState<MealPlanTemplate[]>([]);
@@ -51,21 +117,15 @@ export const useMealPlan = () => {
   // Load last saved timestamp
   useEffect(() => {
     const savedTimestamp = localStorage.getItem(LAST_SAVED_KEY);
-    if (savedTimestamp) {
+    if (savedTimestamp && typeof savedTimestamp === 'string') {
       setLastSavedAt(savedTimestamp);
     }
   }, []);
 
-  // Load templates from localStorage
+  // Load templates from localStorage with validation
   useEffect(() => {
-    const savedTemplates = localStorage.getItem(TEMPLATES_KEY);
-    if (savedTemplates) {
-      try {
-        setTemplates(JSON.parse(savedTemplates));
-      } catch {
-        setTemplates([]);
-      }
-    }
+    const loadedTemplates = safeLoadTemplates();
+    setTemplates(loadedTemplates);
   }, []);
 
   // Save templates to localStorage
@@ -73,36 +133,21 @@ export const useMealPlan = () => {
     localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
   }, [templates]);
 
-  // Load from localStorage
+  // Load from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as WeeklyMealPlan;
-        // Check if it's still current week
-        const currentWeekStart = getWeekStart();
-        if (parsed.weekStart === currentWeekStart) {
-          setMealPlan(parsed);
-          // Initialize history with current state
-          setHistory([parsed.slots]);
-          setHistoryIndex(0);
-        } else {
-          // Old week, create new empty plan
-          const newPlan: WeeklyMealPlan = {
-            id: crypto.randomUUID(),
-            weekStart: currentWeekStart,
-            slots: createEmptySlots(),
-            generatedAt: "",
-          };
-          setMealPlan(newPlan);
-          setHistory([newPlan.slots]);
-          setHistoryIndex(0);
-        }
-      } catch {
-        // Invalid data, create new
+    const parsed = safeLoadMealPlan();
+    if (parsed) {
+      // Check if it's still current week
+      const currentWeekStart = getWeekStart();
+      if (parsed.weekStart === currentWeekStart) {
+        setMealPlan(parsed);
+        setHistory([parsed.slots]);
+        setHistoryIndex(0);
+      } else {
+        // Old week, create new empty plan
         const newPlan: WeeklyMealPlan = {
           id: crypto.randomUUID(),
-          weekStart: getWeekStart(),
+          weekStart: currentWeekStart,
           slots: createEmptySlots(),
           generatedAt: "",
         };
@@ -111,7 +156,7 @@ export const useMealPlan = () => {
         setHistoryIndex(0);
       }
     } else {
-      // No saved plan
+      // No saved plan or invalid data
       const newPlan: WeeklyMealPlan = {
         id: crypto.randomUUID(),
         weekStart: getWeekStart(),

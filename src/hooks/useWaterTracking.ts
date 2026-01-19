@@ -33,6 +33,81 @@ function getLast7Days(): string[] {
   return days;
 }
 
+// Validation functions
+function isValidWaterTrackingData(data: unknown): data is WaterTrackingData {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.date === 'string' &&
+    typeof d.glasses === 'number' &&
+    Array.isArray(d.timestamps) &&
+    d.timestamps.every(t => typeof t === 'string')
+  );
+}
+
+function isValidDailyWaterRecord(record: unknown): record is DailyWaterRecord {
+  if (!record || typeof record !== 'object') return false;
+  const r = record as Record<string, unknown>;
+  return (
+    typeof r.date === 'string' &&
+    typeof r.glasses === 'number' &&
+    typeof r.target === 'number'
+  );
+}
+
+function isValidStringArray(arr: unknown): arr is string[] {
+  return Array.isArray(arr) && arr.every(item => typeof item === 'string');
+}
+
+// Safe loaders
+function safeLoadWaterData(): WaterTrackingData | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    return isValidWaterTrackingData(parsed) ? parsed : null;
+  } catch {
+    console.warn('Failed to parse water tracking data');
+    return null;
+  }
+}
+
+function safeLoadHistory(): DailyWaterRecord[] {
+  try {
+    const saved = localStorage.getItem(HISTORY_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidDailyWaterRecord);
+  } catch {
+    console.warn('Failed to parse water history');
+    return [];
+  }
+}
+
+function safeLoadAchievements(): string[] {
+  try {
+    const saved = localStorage.getItem(ACHIEVEMENTS_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    return isValidStringArray(parsed) ? parsed : [];
+  } catch {
+    console.warn('Failed to parse water achievements');
+    return [];
+  }
+}
+
+function safeLoadTotalGlasses(): number {
+  try {
+    const saved = localStorage.getItem(TOTAL_GLASSES_KEY);
+    if (!saved) return 0;
+    const num = parseInt(saved, 10);
+    return isNaN(num) ? 0 : num;
+  } catch {
+    return 0;
+  }
+}
+
 export function useWaterTracking(dailyTarget: number = 8) {
   const [data, setData] = useState<WaterTrackingData>({
     date: getTodayDate(),
@@ -43,66 +118,44 @@ export function useWaterTracking(dailyTarget: number = 8) {
   const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
   const [totalGlassesAllTime, setTotalGlassesAllTime] = useState(0);
 
-  // Load from localStorage
+  // Load from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const savedHistory = localStorage.getItem(HISTORY_KEY);
-    const savedAchievements = localStorage.getItem(ACHIEVEMENTS_KEY);
-    const savedTotal = localStorage.getItem(TOTAL_GLASSES_KEY);
+    const savedAchievements = safeLoadAchievements();
+    setUnlockedAchievements(savedAchievements);
     
-    if (savedAchievements) {
-      try {
-        setUnlockedAchievements(JSON.parse(savedAchievements));
-      } catch {
-        // Invalid data
-      }
-    }
+    const savedTotal = safeLoadTotalGlasses();
+    setTotalGlassesAllTime(savedTotal);
     
-    if (savedTotal) {
-      setTotalGlassesAllTime(parseInt(savedTotal, 10) || 0);
-    }
+    const savedHistory = safeLoadHistory();
+    setHistory(savedHistory);
     
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch {
-        // Invalid data
-      }
-    }
-    
-    if (saved) {
-      try {
-        const parsed: WaterTrackingData = JSON.parse(saved);
-        const today = getTodayDate();
+    const savedData = safeLoadWaterData();
+    if (savedData) {
+      const today = getTodayDate();
+      
+      // If it's a new day, save yesterday's data to history and reset
+      if (savedData.date !== today) {
+        const newRecord: DailyWaterRecord = {
+          date: savedData.date,
+          glasses: savedData.glasses,
+          target: dailyTarget,
+        };
         
-        // If it's a new day, save yesterday's data to history and reset
-        if (parsed.date !== today) {
-          // Save previous day to history
-          const newRecord: DailyWaterRecord = {
-            date: parsed.date,
-            glasses: parsed.glasses,
-            target: dailyTarget,
-          };
-          
-          setHistory(prev => {
-            // Keep only last 30 days
-            const updated = [...prev.filter(r => r.date !== parsed.date), newRecord]
-              .sort((a, b) => a.date.localeCompare(b.date))
-              .slice(-30);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-            return updated;
-          });
-          
-          setData({
-            date: today,
-            glasses: 0,
-            timestamps: [],
-          });
-        } else {
-          setData(parsed);
-        }
-      } catch {
-        // Invalid data, reset
+        setHistory(prev => {
+          const updated = [...prev.filter(r => r.date !== savedData.date), newRecord]
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .slice(-30);
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+          return updated;
+        });
+        
+        setData({
+          date: today,
+          glasses: 0,
+          timestamps: [],
+        });
+      } else {
+        setData(savedData);
       }
     }
   }, [dailyTarget]);

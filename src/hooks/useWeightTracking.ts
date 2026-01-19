@@ -9,20 +9,40 @@ export interface WeightEntry {
 
 const STORAGE_KEY = 'weight_tracking';
 
+// Validation function
+function isValidWeightEntry(entry: unknown): entry is WeightEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  return (
+    typeof e.id === 'string' &&
+    typeof e.date === 'string' &&
+    typeof e.weight === 'number' &&
+    (e.note === undefined || typeof e.note === 'string')
+  );
+}
+
+// Safe loader
+function safeLoadWeightEntries(): WeightEntry[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isValidWeightEntry);
+  } catch {
+    console.warn('Failed to parse weight tracking data');
+    return [];
+  }
+}
+
 export function useWeightTracking() {
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage
+  // Load from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setEntries(JSON.parse(saved));
-      } catch {
-        setEntries([]);
-      }
-    }
+    const loaded = safeLoadWeightEntries();
+    setEntries(loaded);
     setIsLoaded(true);
   }, []);
 
