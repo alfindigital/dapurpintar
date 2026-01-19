@@ -3,21 +3,63 @@ import { UserProfile, FamilyMember, DEFAULT_PROFILE, getKategoriUsia } from '@/t
 
 const STORAGE_KEY = 'user_profile';
 
+// Validate a family member
+function isValidFamilyMember(member: unknown): member is FamilyMember {
+  if (!member || typeof member !== 'object') return false;
+  const m = member as Record<string, unknown>;
+  return (
+    typeof m.id === 'string' &&
+    typeof m.nama === 'string' &&
+    typeof m.hubungan === 'string' &&
+    typeof m.usia === 'number' &&
+    typeof m.kategoriUsia === 'string' &&
+    Array.isArray(m.kondisiKhusus)
+  );
+}
+
+// Validate user profile data
+function isValidUserProfile(data: unknown): data is UserProfile {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.nama === 'string' &&
+    typeof d.usia === 'number' &&
+    typeof d.status === 'string' &&
+    Array.isArray(d.anggotaKeluarga)
+  );
+}
+
+// Safe parse with validation
+function safeLoadProfile(): UserProfile {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return DEFAULT_PROFILE;
+    
+    const parsed = JSON.parse(saved);
+    if (!isValidUserProfile(parsed)) return DEFAULT_PROFILE;
+    
+    // Validate family members
+    const validMembers = parsed.anggotaKeluarga.filter(isValidFamilyMember);
+    
+    return {
+      ...DEFAULT_PROFILE,
+      ...parsed,
+      anggotaKeluarga: validMembers,
+    };
+  } catch {
+    console.warn('Failed to parse user profile from localStorage');
+    return DEFAULT_PROFILE;
+  }
+}
+
 export function useUserProfile() {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load profile from localStorage
+  // Load profile from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setProfile({ ...DEFAULT_PROFILE, ...parsed });
-      } catch {
-        setProfile(DEFAULT_PROFILE);
-      }
-    }
+    const loaded = safeLoadProfile();
+    setProfile(loaded);
     setIsLoaded(true);
   }, []);
 

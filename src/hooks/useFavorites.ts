@@ -9,18 +9,42 @@ export interface FavoriteEntry {
 
 const STORAGE_KEY = "favorite_recipes_data";
 
+// Validate a single favorite entry
+function isValidFavoriteEntry(entry: unknown): entry is FavoriteEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  return (
+    typeof e.id === 'string' &&
+    typeof e.timestamp === 'number' &&
+    e.recipe !== null &&
+    typeof e.recipe === 'object' &&
+    typeof (e.recipe as Record<string, unknown>).nama === 'string'
+  );
+}
+
+// Safe parse with validation
+function safeLoadFavorites(): FavoriteEntry[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    
+    // Filter only valid entries
+    return parsed.filter(isValidFavoriteEntry);
+  } catch {
+    console.warn('Failed to parse favorites from localStorage');
+    return [];
+  }
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setFavorites(JSON.parse(saved));
-      } catch {
-        // ignore
-      }
-    }
+    const loaded = safeLoadFavorites();
+    setFavorites(loaded);
   }, []);
 
   const addFavorite = useCallback((recipe: Recipe) => {

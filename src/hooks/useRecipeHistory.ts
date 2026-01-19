@@ -11,18 +11,41 @@ export interface HistoryEntry {
 const STORAGE_KEY = "recipe_history";
 const MAX_HISTORY = 20;
 
+// Validate a single history entry
+function isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  return (
+    typeof e.id === 'string' &&
+    typeof e.timestamp === 'number' &&
+    e.data !== null &&
+    typeof e.data === 'object'
+  );
+}
+
+// Safe parse with validation
+function safeLoadHistory(): HistoryEntry[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return [];
+    
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    
+    // Filter only valid entries
+    return parsed.filter(isValidHistoryEntry);
+  } catch {
+    console.warn('Failed to parse history from localStorage');
+    return [];
+  }
+}
+
 export function useRecipeHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setHistory(JSON.parse(saved));
-      } catch {
-        // ignore
-      }
-    }
+    const loaded = safeLoadHistory();
+    setHistory(loaded);
   }, []);
 
   const saveToHistory = useCallback((data: RecipeResponse, query?: string) => {
