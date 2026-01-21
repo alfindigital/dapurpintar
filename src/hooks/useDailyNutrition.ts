@@ -1,59 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  isValidNutritionEntry, 
+  isValidDailyNutrition,
+  NutritionEntry,
+  DailyNutrition
+} from '@/lib/validation';
 
-export interface NutritionEntry {
-  id: string;
-  nama: string;
-  kalori: number;
-  protein: number;
-  karbohidrat: number;
-  lemak: number;
-  waktu: string;
-  timestamp: number;
-}
-
-export interface DailyNutrition {
-  date: string;
-  entries: NutritionEntry[];
-  totalKalori: number;
-  totalProtein: number;
-  totalKarbohidrat: number;
-  totalLemak: number;
-}
+export type { NutritionEntry, DailyNutrition };
 
 const STORAGE_KEY = 'daily_nutrition';
 
 function getTodayKey(): string {
   return new Date().toISOString().split('T')[0];
-}
-
-// Validate a single nutrition entry
-function isValidNutritionEntry(entry: unknown): entry is NutritionEntry {
-  if (!entry || typeof entry !== 'object') return false;
-  const e = entry as Record<string, unknown>;
-  return (
-    typeof e.id === 'string' &&
-    typeof e.nama === 'string' &&
-    typeof e.kalori === 'number' &&
-    typeof e.protein === 'number' &&
-    typeof e.karbohidrat === 'number' &&
-    typeof e.lemak === 'number' &&
-    typeof e.waktu === 'string' &&
-    typeof e.timestamp === 'number'
-  );
-}
-
-// Validate daily nutrition data
-function isValidDailyNutrition(data: unknown): data is DailyNutrition {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d.date === 'string' &&
-    Array.isArray(d.entries) &&
-    typeof d.totalKalori === 'number' &&
-    typeof d.totalProtein === 'number' &&
-    typeof d.totalKarbohidrat === 'number' &&
-    typeof d.totalLemak === 'number'
-  );
 }
 
 // Safe parse with validation

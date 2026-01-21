@@ -1,14 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { isValidReminderSettings, ReminderSettings } from '@/lib/validation';
+
+export type { ReminderSettings };
 
 const REMINDER_SETTINGS_KEY = 'water_reminder_settings';
-
-export interface ReminderSettings {
-  enabled: boolean;
-  intervalMinutes: number;
-  startHour: number;
-  endHour: number;
-  sound: boolean;
-}
 
 const defaultSettings: ReminderSettings = {
   enabled: false,
@@ -17,19 +12,6 @@ const defaultSettings: ReminderSettings = {
   endHour: 22,
   sound: true,
 };
-
-// Validation function
-function isValidReminderSettings(data: unknown): data is ReminderSettings {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d.enabled === 'boolean' &&
-    typeof d.intervalMinutes === 'number' &&
-    typeof d.startHour === 'number' &&
-    typeof d.endHour === 'number' &&
-    typeof d.sound === 'boolean'
-  );
-}
 
 // Safe loader
 function safeLoadReminderSettings(): ReminderSettings {

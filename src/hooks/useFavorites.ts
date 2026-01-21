@@ -1,26 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
+import { isValidFavoriteEntry, FavoriteEntry } from "@/lib/validation";
 
-export interface FavoriteEntry {
-  id: string;
-  timestamp: number;
-  recipe: Recipe;
-}
+export type { FavoriteEntry };
 
 const STORAGE_KEY = "favorite_recipes_data";
-
-// Validate a single favorite entry
-function isValidFavoriteEntry(entry: unknown): entry is FavoriteEntry {
-  if (!entry || typeof entry !== 'object') return false;
-  const e = entry as Record<string, unknown>;
-  return (
-    typeof e.id === 'string' &&
-    typeof e.timestamp === 'number' &&
-    e.recipe !== null &&
-    typeof e.recipe === 'object' &&
-    typeof (e.recipe as Record<string, unknown>).nama === 'string'
-  );
-}
 
 // Safe parse with validation
 function safeLoadFavorites(): FavoriteEntry[] {

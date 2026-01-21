@@ -1,27 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { RecipeResponse } from "@/types/recipe";
+import { isValidHistoryEntry, HistoryEntry } from "@/lib/validation";
 
-export interface HistoryEntry {
-  id: string;
-  timestamp: number;
-  data: RecipeResponse;
-  query?: string;
-}
+export type { HistoryEntry };
 
 const STORAGE_KEY = "recipe_history";
 const MAX_HISTORY = 20;
-
-// Validate a single history entry
-function isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
-  if (!entry || typeof entry !== 'object') return false;
-  const e = entry as Record<string, unknown>;
-  return (
-    typeof e.id === 'string' &&
-    typeof e.timestamp === 'number' &&
-    e.data !== null &&
-    typeof e.data === 'object'
-  );
-}
 
 // Safe parse with validation
 function safeLoadHistory(): HistoryEntry[] {

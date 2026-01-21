@@ -1,33 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserProfile, FamilyMember, DEFAULT_PROFILE, getKategoriUsia } from '@/types/profile';
+import { isValidFamilyMember, isValidUserProfile } from '@/lib/validation';
 
 const STORAGE_KEY = 'user_profile';
-
-// Validate a family member
-function isValidFamilyMember(member: unknown): member is FamilyMember {
-  if (!member || typeof member !== 'object') return false;
-  const m = member as Record<string, unknown>;
-  return (
-    typeof m.id === 'string' &&
-    typeof m.nama === 'string' &&
-    typeof m.hubungan === 'string' &&
-    typeof m.usia === 'number' &&
-    typeof m.kategoriUsia === 'string' &&
-    Array.isArray(m.kondisiKhusus)
-  );
-}
-
-// Validate user profile data
-function isValidUserProfile(data: unknown): data is UserProfile {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d.nama === 'string' &&
-    typeof d.usia === 'number' &&
-    typeof d.status === 'string' &&
-    Array.isArray(d.anggotaKeluarga)
-  );
-}
 
 // Safe parse with validation
 function safeLoadProfile(): UserProfile {

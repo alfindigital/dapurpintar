@@ -1,16 +1,97 @@
 /**
  * Centralized validation functions for localStorage data.
  * These functions ensure data integrity when loading from storage.
+ * 
+ * NOTE: Types are imported from their source files to ensure compatibility.
+ * This module only provides validation functions, not type definitions.
  */
 
 import type { Recipe } from '@/types/recipe';
+import type { MealSlot, MealTime, WeeklyMealPlan, MealPlanTemplate } from '@/types/mealPlan';
+import type { FamilyMember, UserProfile } from '@/types/profile';
+import type { QuickFood } from '@/lib/quickFoodsData';
 
-// ============= Favorites Validation =============
+// ============= Re-export types that don't have source files =============
+
 export interface FavoriteEntry {
   id: string;
   timestamp: number;
   recipe: Recipe;
 }
+
+import type { RecipeResponse } from '@/types/recipe';
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  data: RecipeResponse;
+  query?: string;
+}
+
+export interface CustomFood extends QuickFood {
+  isCustom: true;
+  createdAt: number;
+}
+
+export interface NutritionEntry {
+  id: string;
+  nama: string;
+  kalori: number;
+  protein: number;
+  karbohidrat: number;
+  lemak: number;
+  waktu: string;
+  timestamp: number;
+}
+
+export interface DailyNutrition {
+  date: string;
+  entries: NutritionEntry[];
+  totalKalori: number;
+  totalProtein: number;
+  totalKarbohidrat: number;
+  totalLemak: number;
+}
+
+export type FontSize = 'small' | 'normal' | 'large';
+export type ColorTheme = 'green' | 'blue' | 'orange' | 'purple';
+export type AccessibilityProfile = 'default' | 'lansia' | 'low-vision';
+
+export interface DisplaySettings {
+  fontSize: FontSize;
+  highContrast: boolean;
+  colorTheme: ColorTheme;
+  profile: AccessibilityProfile;
+}
+
+export interface WaterTrackingData {
+  date: string;
+  glasses: number;
+  timestamps: string[];
+}
+
+export interface DailyWaterRecord {
+  date: string;
+  glasses: number;
+  target: number;
+}
+
+export interface ReminderSettings {
+  enabled: boolean;
+  intervalMinutes: number;
+  startHour: number;
+  endHour: number;
+  sound: boolean;
+}
+
+export interface WeightEntry {
+  id: string;
+  date: string;
+  weight: number;
+  note?: string;
+}
+
+// ============= Favorites Validation =============
 
 export function isValidFavoriteEntry(entry: unknown): entry is FavoriteEntry {
   if (!entry || typeof entry !== 'object') return false;
@@ -25,12 +106,6 @@ export function isValidFavoriteEntry(entry: unknown): entry is FavoriteEntry {
 }
 
 // ============= History Validation =============
-export interface HistoryEntry {
-  id: string;
-  timestamp: number;
-  data: unknown;
-  query?: string;
-}
 
 export function isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
   if (!entry || typeof entry !== 'object') return false;
@@ -44,18 +119,8 @@ export function isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
 }
 
 // ============= Custom Food Validation =============
-export interface CustomFood {
-  id: string;
-  nama: string;
-  kategori: string;
-  kalori: number;
-  protein: number;
-  karbohidrat: number;
-  lemak: number;
-  porsi: string;
-  isCustom: true;
-  createdAt: number;
-}
+
+const VALID_FOOD_CATEGORIES = ['sarapan', 'lauk', 'nasi', 'mie', 'snack', 'minuman', 'buah', 'sayur'];
 
 export function isValidCustomFood(food: unknown): food is CustomFood {
   if (!food || typeof food !== 'object') return false;
@@ -64,6 +129,7 @@ export function isValidCustomFood(food: unknown): food is CustomFood {
     typeof f.id === 'string' &&
     typeof f.nama === 'string' &&
     typeof f.kategori === 'string' &&
+    VALID_FOOD_CATEGORIES.includes(f.kategori as string) &&
     typeof f.kalori === 'number' &&
     typeof f.protein === 'number' &&
     typeof f.karbohidrat === 'number' &&
@@ -75,16 +141,6 @@ export function isValidCustomFood(food: unknown): food is CustomFood {
 }
 
 // ============= Nutrition Entry Validation =============
-export interface NutritionEntry {
-  id: string;
-  nama: string;
-  kalori: number;
-  protein: number;
-  karbohidrat: number;
-  lemak: number;
-  waktu: string;
-  timestamp: number;
-}
 
 export function isValidNutritionEntry(entry: unknown): entry is NutritionEntry {
   if (!entry || typeof entry !== 'object') return false;
@@ -102,14 +158,6 @@ export function isValidNutritionEntry(entry: unknown): entry is NutritionEntry {
 }
 
 // ============= Daily Nutrition Validation =============
-export interface DailyNutrition {
-  date: string;
-  entries: NutritionEntry[];
-  totalKalori: number;
-  totalProtein: number;
-  totalKarbohidrat: number;
-  totalLemak: number;
-}
 
 export function isValidDailyNutrition(data: unknown): data is DailyNutrition {
   if (!data || typeof data !== 'object') return false;
@@ -125,14 +173,8 @@ export function isValidDailyNutrition(data: unknown): data is DailyNutrition {
 }
 
 // ============= User Profile Validation =============
-export interface FamilyMember {
-  id: string;
-  nama: string;
-  hubungan: string;
-  usia: number;
-  kategoriUsia: string;
-  kondisiKhusus: string[];
-}
+
+const VALID_KATEGORI_USIA = ['bayi', 'balita', 'anak', 'remaja', 'dewasa', 'lansia'];
 
 export function isValidFamilyMember(member: unknown): member is FamilyMember {
   if (!member || typeof member !== 'object') return false;
@@ -143,15 +185,9 @@ export function isValidFamilyMember(member: unknown): member is FamilyMember {
     typeof m.hubungan === 'string' &&
     typeof m.usia === 'number' &&
     typeof m.kategoriUsia === 'string' &&
+    VALID_KATEGORI_USIA.includes(m.kategoriUsia as string) &&
     Array.isArray(m.kondisiKhusus)
   );
-}
-
-export interface UserProfile {
-  nama: string;
-  usia: number;
-  status: string;
-  anggotaKeluarga: FamilyMember[];
 }
 
 export function isValidUserProfile(data: unknown): data is UserProfile {
@@ -166,16 +202,6 @@ export function isValidUserProfile(data: unknown): data is UserProfile {
 }
 
 // ============= Display Settings Validation =============
-export type FontSize = 'small' | 'normal' | 'large';
-export type ColorTheme = 'green' | 'blue' | 'orange' | 'purple';
-export type AccessibilityProfile = 'default' | 'lansia' | 'low-vision';
-
-export interface DisplaySettings {
-  fontSize: FontSize;
-  highContrast: boolean;
-  colorTheme: ColorTheme;
-  profile: AccessibilityProfile;
-}
 
 const VALID_FONT_SIZES: FontSize[] = ['small', 'normal', 'large'];
 const VALID_COLOR_THEMES: ColorTheme[] = ['green', 'blue', 'orange', 'purple'];
@@ -193,11 +219,6 @@ export function isValidDisplaySettings(data: unknown): data is DisplaySettings {
 }
 
 // ============= Water Tracking Validation =============
-export interface WaterTrackingData {
-  date: string;
-  glasses: number;
-  timestamps: string[];
-}
 
 export function isValidWaterTrackingData(data: unknown): data is WaterTrackingData {
   if (!data || typeof data !== 'object') return false;
@@ -208,12 +229,6 @@ export function isValidWaterTrackingData(data: unknown): data is WaterTrackingDa
     Array.isArray(d.timestamps) &&
     d.timestamps.every(t => typeof t === 'string')
   );
-}
-
-export interface DailyWaterRecord {
-  date: string;
-  glasses: number;
-  target: number;
 }
 
 export function isValidDailyWaterRecord(record: unknown): record is DailyWaterRecord {
@@ -231,13 +246,6 @@ export function isValidStringArray(arr: unknown): arr is string[] {
 }
 
 // ============= Reminder Settings Validation =============
-export interface ReminderSettings {
-  enabled: boolean;
-  intervalMinutes: number;
-  startHour: number;
-  endHour: number;
-  sound: boolean;
-}
 
 export function isValidReminderSettings(data: unknown): data is ReminderSettings {
   if (!data || typeof data !== 'object') return false;
@@ -252,12 +260,6 @@ export function isValidReminderSettings(data: unknown): data is ReminderSettings
 }
 
 // ============= Weight Entry Validation =============
-export interface WeightEntry {
-  id: string;
-  date: string;
-  weight: number;
-  note?: string;
-}
 
 export function isValidWeightEntry(entry: unknown): entry is WeightEntry {
   if (!entry || typeof entry !== 'object') return false;
@@ -271,16 +273,6 @@ export function isValidWeightEntry(entry: unknown): entry is WeightEntry {
 }
 
 // ============= Meal Plan Validation =============
-export type MealTime = 'sarapan' | 'makan_siang' | 'makan_malam';
-
-export interface MealSlot {
-  id: string;
-  dayIndex: number;
-  mealTime: MealTime;
-  recipe: unknown;
-  isLocked: boolean;
-  isSkipped: boolean;
-}
 
 const VALID_MEAL_TIMES: MealTime[] = ['sarapan', 'makan_siang', 'makan_malam'];
 
@@ -297,13 +289,6 @@ export function isValidMealSlot(slot: unknown): slot is MealSlot {
   );
 }
 
-export interface WeeklyMealPlan {
-  id: string;
-  weekStart: string;
-  slots: MealSlot[];
-  generatedAt: string;
-}
-
 export function isValidWeeklyMealPlan(data: unknown): data is WeeklyMealPlan {
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
@@ -314,14 +299,6 @@ export function isValidWeeklyMealPlan(data: unknown): data is WeeklyMealPlan {
     d.slots.every(isValidMealSlot) &&
     typeof d.generatedAt === 'string'
   );
-}
-
-export interface MealPlanTemplate {
-  id: string;
-  name: string;
-  description?: string;
-  slots: MealSlot[];
-  createdAt: string;
 }
 
 export function isValidMealPlanTemplate(template: unknown): template is MealPlanTemplate {

@@ -1,25 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { isValidWeightEntry, WeightEntry } from '@/lib/validation';
 
-export interface WeightEntry {
-  id: string;
-  date: string; // ISO date string
-  weight: number; // kg
-  note?: string;
-}
+export type { WeightEntry };
 
 const STORAGE_KEY = 'weight_tracking';
-
-// Validation function
-function isValidWeightEntry(entry: unknown): entry is WeightEntry {
-  if (!entry || typeof entry !== 'object') return false;
-  const e = entry as Record<string, unknown>;
-  return (
-    typeof e.id === 'string' &&
-    typeof e.date === 'string' &&
-    typeof e.weight === 'number' &&
-    (e.note === undefined || typeof e.note === 'string')
-  );
-}
 
 // Safe loader
 function safeLoadWeightEntries(): WeightEntry[] {
