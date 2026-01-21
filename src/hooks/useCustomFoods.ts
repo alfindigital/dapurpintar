@@ -1,30 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { QuickFood } from '@/lib/quickFoodsData';
+import { isValidCustomFood, CustomFood } from '@/lib/validation';
+
+export type { CustomFood };
 
 const STORAGE_KEY = 'custom_foods';
-
-export interface CustomFood extends QuickFood {
-  isCustom: true;
-  createdAt: number;
-}
-
-// Validate a single custom food entry
-function isValidCustomFood(food: unknown): food is CustomFood {
-  if (!food || typeof food !== 'object') return false;
-  const f = food as Record<string, unknown>;
-  return (
-    typeof f.id === 'string' &&
-    typeof f.nama === 'string' &&
-    typeof f.kategori === 'string' &&
-    typeof f.kalori === 'number' &&
-    typeof f.protein === 'number' &&
-    typeof f.karbohidrat === 'number' &&
-    typeof f.lemak === 'number' &&
-    typeof f.porsi === 'string' &&
-    f.isCustom === true &&
-    typeof f.createdAt === 'number'
-  );
-}
 
 // Safe parse with validation
 function safeLoadCustomFoods(): CustomFood[] {

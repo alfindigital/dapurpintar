@@ -1,23 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkAchievements, Achievement } from '@/lib/waterAchievements';
 import { toast } from 'sonner';
+import { 
+  isValidWaterTrackingData, 
+  isValidDailyWaterRecord, 
+  isValidStringArray,
+  WaterTrackingData,
+  DailyWaterRecord
+} from '@/lib/validation';
 
 const STORAGE_KEY = 'water_tracking';
 const HISTORY_KEY = 'water_tracking_history';
 const ACHIEVEMENTS_KEY = 'water_achievements';
 const TOTAL_GLASSES_KEY = 'water_total_glasses';
-
-interface WaterTrackingData {
-  date: string; // YYYY-MM-DD
-  glasses: number;
-  timestamps: string[]; // ISO timestamps for each glass
-}
-
-interface DailyWaterRecord {
-  date: string;
-  glasses: number;
-  target: number;
-}
 
 function getTodayDate(): string {
   return new Date().toISOString().split('T')[0];
@@ -31,32 +26,6 @@ function getLast7Days(): string[] {
     days.push(date.toISOString().split('T')[0]);
   }
   return days;
-}
-
-// Validation functions
-function isValidWaterTrackingData(data: unknown): data is WaterTrackingData {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d.date === 'string' &&
-    typeof d.glasses === 'number' &&
-    Array.isArray(d.timestamps) &&
-    d.timestamps.every(t => typeof t === 'string')
-  );
-}
-
-function isValidDailyWaterRecord(record: unknown): record is DailyWaterRecord {
-  if (!record || typeof record !== 'object') return false;
-  const r = record as Record<string, unknown>;
-  return (
-    typeof r.date === 'string' &&
-    typeof r.glasses === 'number' &&
-    typeof r.target === 'number'
-  );
-}
-
-function isValidStringArray(arr: unknown): arr is string[] {
-  return Array.isArray(arr) && arr.every(item => typeof item === 'string');
 }
 
 // Safe loaders

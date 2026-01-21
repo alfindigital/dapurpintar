@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
+import { 
+  isValidDisplaySettings, 
+  DisplaySettings, 
+  FontSize, 
+  ColorTheme, 
+  AccessibilityProfile 
+} from "@/lib/validation";
 
-export type FontSize = "small" | "normal" | "large";
-export type ColorTheme = "green" | "blue" | "orange" | "purple";
-export type AccessibilityProfile = "default" | "lansia" | "low-vision";
-
-export interface DisplaySettings {
-  fontSize: FontSize;
-  highContrast: boolean;
-  colorTheme: ColorTheme;
-  profile: AccessibilityProfile;
-}
+export type { FontSize, ColorTheme, AccessibilityProfile, DisplaySettings };
 
 const DEFAULT_SETTINGS: DisplaySettings = {
   fontSize: "normal",
@@ -38,22 +36,6 @@ const PROFILE_PRESETS: Record<AccessibilityProfile, Omit<DisplaySettings, "profi
 };
 
 const STORAGE_KEY = "display_settings";
-
-const VALID_FONT_SIZES: FontSize[] = ["small", "normal", "large"];
-const VALID_COLOR_THEMES: ColorTheme[] = ["green", "blue", "orange", "purple"];
-const VALID_PROFILES: AccessibilityProfile[] = ["default", "lansia", "low-vision"];
-
-// Validate display settings
-function isValidDisplaySettings(data: unknown): data is DisplaySettings {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    VALID_FONT_SIZES.includes(d.fontSize as FontSize) &&
-    typeof d.highContrast === 'boolean' &&
-    VALID_COLOR_THEMES.includes(d.colorTheme as ColorTheme) &&
-    VALID_PROFILES.includes(d.profile as AccessibilityProfile)
-  );
-}
 
 // Safe parse with validation
 function safeLoadDisplaySettings(): DisplaySettings {

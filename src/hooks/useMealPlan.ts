@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WeeklyMealPlan, MealSlot, MealTime, MealPlanTemplate, MEAL_TIMES } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
+import { isValidMealSlot, isValidWeeklyMealPlan, isValidMealPlanTemplate } from "@/lib/validation";
 
 const STORAGE_KEY = "weekly_meal_plan";
 const TEMPLATES_KEY = "meal_plan_templates";
@@ -36,46 +37,6 @@ const getWeekStart = (): string => {
   monday.setHours(0, 0, 0, 0);
   return monday.toISOString();
 };
-
-// Validation functions
-const VALID_MEAL_TIMES: MealTime[] = ["sarapan", "makan_siang", "makan_malam"];
-
-function isValidMealSlot(slot: unknown): slot is MealSlot {
-  if (!slot || typeof slot !== 'object') return false;
-  const s = slot as Record<string, unknown>;
-  return (
-    typeof s.id === 'string' &&
-    typeof s.dayIndex === 'number' &&
-    VALID_MEAL_TIMES.includes(s.mealTime as MealTime) &&
-    (s.recipe === null || (typeof s.recipe === 'object' && s.recipe !== null)) &&
-    typeof s.isLocked === 'boolean' &&
-    typeof s.isSkipped === 'boolean'
-  );
-}
-
-function isValidWeeklyMealPlan(data: unknown): data is WeeklyMealPlan {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  return (
-    typeof d.id === 'string' &&
-    typeof d.weekStart === 'string' &&
-    Array.isArray(d.slots) &&
-    d.slots.every(isValidMealSlot) &&
-    typeof d.generatedAt === 'string'
-  );
-}
-
-function isValidMealPlanTemplate(template: unknown): template is MealPlanTemplate {
-  if (!template || typeof template !== 'object') return false;
-  const t = template as Record<string, unknown>;
-  return (
-    typeof t.id === 'string' &&
-    typeof t.name === 'string' &&
-    Array.isArray(t.slots) &&
-    t.slots.every(isValidMealSlot) &&
-    typeof t.createdAt === 'string'
-  );
-}
 
 // Safe loaders
 function safeLoadMealPlan(): WeeklyMealPlan | null {
