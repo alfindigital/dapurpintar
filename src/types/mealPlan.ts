@@ -48,6 +48,37 @@ export interface MealPlanTemplate {
   createdAt: string;
 }
 
+// Budget tracking types
+export type KategoriBiaya = "protein" | "sayuran" | "karbohidrat" | "bumbu" | "lainnya";
+
+export interface BudgetEntry {
+  id: string;
+  weekStart: string;
+  totalEstimasi: number;
+  targetBudget?: number;
+  kategoriBiaya: Record<KategoriBiaya, number>;
+}
+
+export interface BudgetSettings {
+  budgetBulanan?: number;
+  alertThreshold: number; // percentage (e.g., 80 = alert at 80%)
+  enableAlerts: boolean;
+}
+
+export const DEFAULT_BUDGET_SETTINGS: BudgetSettings = {
+  budgetBulanan: undefined,
+  alertThreshold: 80,
+  enableAlerts: true,
+};
+
+export const BUDGET_CATEGORIES: { key: KategoriBiaya; label: string; color: string }[] = [
+  { key: "protein", label: "Protein", color: "hsl(var(--chart-1))" },
+  { key: "sayuran", label: "Sayuran", color: "hsl(var(--chart-2))" },
+  { key: "karbohidrat", label: "Karbohidrat", color: "hsl(var(--chart-3))" },
+  { key: "bumbu", label: "Bumbu", color: "hsl(var(--chart-4))" },
+  { key: "lainnya", label: "Lainnya", color: "hsl(var(--chart-5))" },
+];
+
 export const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export const MEAL_TIMES: { key: MealTime; label: string }[] = [

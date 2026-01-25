@@ -233,6 +233,21 @@ export const MealPlanCell = ({
             {slot.recipe?.waktu} • {slot.recipe?.masakan || "Indonesia"}
           </p>
         )}
+        {/* Cost badge */}
+        {slot.recipe?.estimasiBiaya && (
+          <div className="mt-auto">
+            <span className={cn(
+              "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium",
+              slot.recipe.estimasiBiaya <= 25000 
+                ? "bg-primary/10 text-primary" 
+                : slot.recipe.estimasiBiaya <= 50000 
+                  ? "bg-warning/10 text-warning" 
+                  : "bg-destructive/10 text-destructive"
+            )}>
+              ~Rp {Math.round(slot.recipe.estimasiBiaya / 1000)}k
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Actions overlay */}
