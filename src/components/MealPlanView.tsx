@@ -1,13 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useBudgetTracking } from "@/hooks/useBudgetTracking";
 import { MealPlanGrid } from "./MealPlanGrid";
 import { MealDetailSheet } from "./MealDetailSheet";
 import { GeneratePlanDialog } from "./GeneratePlanDialog";
 import { ShoppingListDialog } from "./ShoppingListDialog";
 import { TemplatesDialog } from "./TemplatesDialog";
+import { BudgetOverviewCard } from "./BudgetOverviewCard";
+import { BudgetAlertBanner } from "./BudgetAlertBanner";
+import { BudgetSettingsDialog } from "./BudgetSettingsDialog";
+import { BudgetDetailSheet } from "./BudgetDetailSheet";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
 import { toast } from "sonner";
@@ -42,12 +47,25 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     redo,
   } = useMealPlan();
   const { profile } = useUserProfile();
+  const {
+    budgetHistory,
+    settings: budgetSettings,
+    updateSettings: updateBudgetSettings,
+    calculateWeeklyBudget,
+    saveWeeklyBudget,
+    getCurrentWeekBudget,
+    monthlyTotal,
+    alertStatus,
+    categoryBreakdown,
+  } = useBudgetTracking();
 
   const [selectedSlot, setSelectedSlot] = useState<MealSlot | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [shoppingOpen, setShoppingOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [budgetSettingsOpen, setBudgetSettingsOpen] = useState(false);
+  const [budgetDetailOpen, setBudgetDetailOpen] = useState(false);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -121,6 +139,12 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
       
       const filledCount = newSlots.filter(s => s.recipe && !s.isSkipped).length;
       toast.success(`${filledCount} menu berhasil digenerate!`);
+
+      // Update budget tracking
+      if (mealPlan) {
+        const budgetEntry = calculateWeeklyBudget(newSlots, mealPlan.weekStart);
+        saveWeeklyBudget(budgetEntry);
+      }
     } catch (error) {
       console.error("Generate error:", error);
       toast.error(error instanceof Error ? error.message : "Gagal generate meal plan");
@@ -133,6 +157,18 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     clearPlan();
     toast.success("Meal plan dikosongkan (menu yang dikunci tetap ada)");
   };
+
+  // Get current and previous week budget
+  const currentWeekBudget = mealPlan ? getCurrentWeekBudget(mealPlan.weekStart) : null;
+  const previousWeekBudget = budgetHistory.length > 1 ? budgetHistory[1] : null;
+
+  // Recalculate budget when slots change
+  useEffect(() => {
+    if (mealPlan && mealPlan.slots.some(s => s.recipe && !s.isSkipped)) {
+      const budgetEntry = calculateWeeklyBudget(mealPlan.slots, mealPlan.weekStart);
+      saveWeeklyBudget(budgetEntry);
+    }
+  }, [mealPlan?.slots]);
 
   const hasLockedSlots = mealPlan?.slots.some(s => s.isLocked) || false;
   const hasAnyRecipes = mealPlan?.slots.some(s => s.recipe && !s.isSkipped) || false;
@@ -178,6 +214,16 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
 
   return (
     <div className="space-y-4">
+      {/* Budget Alert Banner */}
+      {budgetSettings.budgetBulanan && (alertStatus.isWarning || alertStatus.isOver) && (
+        <BudgetAlertBanner
+          alertStatus={alertStatus}
+          monthlyTotal={monthlyTotal}
+          budgetBulanan={budgetSettings.budgetBulanan}
+          onSettingsClick={() => setBudgetSettingsOpen(true)}
+        />
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -267,6 +313,17 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         </div>
       </div>
 
+      {/* Budget Overview Card */}
+      <BudgetOverviewCard
+        currentWeekBudget={currentWeekBudget}
+        monthlyTotal={monthlyTotal}
+        settings={budgetSettings}
+        alertStatus={alertStatus}
+        onSettingsClick={() => setBudgetSettingsOpen(true)}
+        onDetailClick={() => setBudgetDetailOpen(true)}
+        previousWeekBudget={previousWeekBudget}
+      />
+
       {/* Info banner for empty state */}
       {!hasAnyRecipes && (
         <div className="p-4 rounded-lg bg-muted/50 text-center">
@@ -322,6 +379,24 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         onDeleteTemplate={deleteTemplate}
         onRenameTemplate={renameTemplate}
         hasCurrentPlan={hasAnyRecipes}
+      />
+
+      {/* Budget Settings Dialog */}
+      <BudgetSettingsDialog
+        open={budgetSettingsOpen}
+        onOpenChange={setBudgetSettingsOpen}
+        settings={budgetSettings}
+        onSave={updateBudgetSettings}
+      />
+
+      {/* Budget Detail Sheet */}
+      <BudgetDetailSheet
+        open={budgetDetailOpen}
+        onOpenChange={setBudgetDetailOpen}
+        budgetHistory={budgetHistory}
+        categoryBreakdown={categoryBreakdown}
+        settings={budgetSettings}
+        monthlyTotal={monthlyTotal}
       />
     </div>
   );

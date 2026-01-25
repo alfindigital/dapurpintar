@@ -84,6 +84,23 @@ export const ShoppingListDialog = ({ open, onOpenChange, slots }: ShoppingListDi
     toast.success("Daftar belanja disalin!");
   };
 
+  // Calculate total cost
+  const totalCost = useMemo(() => {
+    return slots
+      .filter(slot => slot.recipe && !slot.isSkipped)
+      .reduce((sum, slot) => sum + (slot.recipe?.estimasiBiaya || 0), 0);
+  }, [slots]);
+
+  const formatRupiah = (value: number): string => {
+    if (value >= 1000000) {
+      return `Rp ${(value / 1000000).toFixed(1)} jt`;
+    }
+    if (value >= 1000) {
+      return `Rp ${Math.round(value / 1000)}k`;
+    }
+    return `Rp ${value}`;
+  };
+
   const uncheckedCount = aggregatedItems.length - checkedItems.size;
 
   return (
@@ -105,7 +122,14 @@ export const ShoppingListDialog = ({ open, onOpenChange, slots }: ShoppingListDi
         ) : (
           <>
             <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-              <span>{uncheckedCount} item belum dibeli</span>
+              <div className="flex items-center gap-2">
+                <span>{uncheckedCount} item belum dibeli</span>
+                {totalCost > 0 && (
+                  <span className="text-primary font-medium">
+                    • Est. {formatRupiah(totalCost)}
+                  </span>
+                )}
+              </div>
               <Button variant="ghost" size="sm" onClick={copyToClipboard} className="h-8 gap-1">
                 <Copy className="h-3 w-3" />
                 Salin

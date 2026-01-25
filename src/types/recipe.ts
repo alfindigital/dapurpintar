@@ -18,6 +18,7 @@ export interface Recipe {
   masakan?: string;
   tags?: string[];
   nutrisi?: Nutrition;
+  estimasiBiaya?: number; // Estimasi biaya dalam Rupiah
 }
 
 export interface Ingredient {

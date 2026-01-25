@@ -143,6 +143,7 @@ Format respons HARUS dalam JSON valid:
         "porsi": "4 porsi",
         "tingkatKesulitan": "Mudah",
         "masakan": "Indonesia",
+        "estimasiBiaya": 25000,
         "bahan": [
           {"item": "nama bahan", "jumlah": "takaran"}
         ],
@@ -162,6 +163,8 @@ Format respons HARUS dalam JSON valid:
 PENTING:
 - slot_index harus sesuai urutan yang diminta (mulai dari 0)
 - Setiap resep HARUS punya nama yang UNIK
+- estimasiBiaya adalah perkiraan total biaya bahan dalam Rupiah (berdasarkan harga pasar Indonesia)
+- Perkiraan biaya realistis: sarapan ringan ~15-25rb, makan lengkap ~25-50rb, makan mewah ~50-100rb
 - Gunakan Bahasa Indonesia
 - Bahan dan langkah singkat tapi jelas
 - HANYA kembalikan JSON tanpa markdown`;

@@ -312,3 +312,42 @@ export function isValidMealPlanTemplate(template: unknown): template is MealPlan
     typeof t.createdAt === 'string'
   );
 }
+
+// ============= Budget Tracking Validation =============
+
+import type { BudgetEntry, BudgetSettings, KategoriBiaya } from '@/types/mealPlan';
+
+const VALID_BUDGET_CATEGORIES: KategoriBiaya[] = ['protein', 'sayuran', 'karbohidrat', 'bumbu', 'lainnya'];
+
+export function isValidBudgetEntry(entry: unknown): entry is BudgetEntry {
+  if (!entry || typeof entry !== 'object') return false;
+  const e = entry as Record<string, unknown>;
+  
+  if (
+    typeof e.id !== 'string' ||
+    typeof e.weekStart !== 'string' ||
+    typeof e.totalEstimasi !== 'number'
+  ) {
+    return false;
+  }
+  
+  // Validate kategoriBiaya
+  if (!e.kategoriBiaya || typeof e.kategoriBiaya !== 'object') return false;
+  const kb = e.kategoriBiaya as Record<string, unknown>;
+  
+  for (const cat of VALID_BUDGET_CATEGORIES) {
+    if (typeof kb[cat] !== 'number') return false;
+  }
+  
+  return true;
+}
+
+export function isValidBudgetSettings(settings: unknown): settings is BudgetSettings {
+  if (!settings || typeof settings !== 'object') return false;
+  const s = settings as Record<string, unknown>;
+  return (
+    typeof s.alertThreshold === 'number' &&
+    typeof s.enableAlerts === 'boolean' &&
+    (s.budgetBulanan === undefined || typeof s.budgetBulanan === 'number')
+  );
+}
