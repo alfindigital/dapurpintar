@@ -49,13 +49,13 @@ export const BudgetOverviewCard = ({
 
   const getStatusColor = () => {
     if (alertStatus.isOver) return "text-destructive";
-    if (alertStatus.isWarning) return "text-warning";
+    if (alertStatus.isWarning) return "text-accent";
     return "text-primary";
   };
 
   const getProgressColor = () => {
     if (weeklyProgress >= 100) return "bg-destructive";
-    if (weeklyProgress >= 80) return "bg-warning";
+    if (weeklyProgress >= 80) return "bg-accent";
     return "";
   };
 
@@ -85,7 +85,7 @@ export const BudgetOverviewCard = ({
     <Card className={cn(
       "transition-colors",
       alertStatus.isOver && "border-destructive/50 bg-destructive/5",
-      alertStatus.isWarning && "border-warning/50 bg-warning/5"
+      alertStatus.isWarning && "border-accent/50 bg-accent/5"
     )}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
@@ -95,7 +95,7 @@ export const BudgetOverviewCard = ({
               <Wallet className={cn("h-4 w-4", getStatusColor())} />
               <span className="text-sm font-medium">Estimasi Minggu Ini</span>
               {alertStatus.isWarning && (
-                <AlertTriangle className="h-4 w-4 text-warning" />
+                <AlertTriangle className="h-4 w-4 text-accent" />
               )}
               {alertStatus.isOver && (
                 <AlertTriangle className="h-4 w-4 text-destructive" />

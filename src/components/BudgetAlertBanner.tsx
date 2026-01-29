@@ -39,24 +39,24 @@ export const BudgetAlertBanner = ({
         "relative rounded-lg p-3 flex items-start gap-3",
         isOver 
           ? "bg-destructive/10 border border-destructive/30" 
-          : "bg-warning/10 border border-warning/30"
+          : "bg-accent/10 border border-accent/30"
       )}
     >
       <div className={cn(
         "flex-shrink-0 p-1.5 rounded-full",
-        isOver ? "bg-destructive/20" : "bg-warning/20"
+        isOver ? "bg-destructive/20" : "bg-accent/20"
       )}>
         {isOver ? (
           <AlertTriangle className="h-4 w-4 text-destructive" />
         ) : (
-          <TrendingUp className="h-4 w-4 text-warning" />
+          <TrendingUp className="h-4 w-4 text-accent" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <p className={cn(
           "font-medium text-sm",
-          isOver ? "text-destructive" : "text-warning"
+          isOver ? "text-destructive" : "text-accent"
         )}>
           {isOver ? "Budget Bulan Ini Terlampaui!" : "Mendekati Batas Budget"}
         </p>
@@ -78,7 +78,7 @@ export const BudgetAlertBanner = ({
           size="sm"
           className={cn(
             "h-auto p-0 mt-1 text-xs",
-            isOver ? "text-destructive" : "text-warning"
+            isOver ? "text-destructive" : "text-accent"
           )}
           onClick={onSettingsClick}
         >

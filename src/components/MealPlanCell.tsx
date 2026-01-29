@@ -241,7 +241,7 @@ export const MealPlanCell = ({
               slot.recipe.estimasiBiaya <= 25000 
                 ? "bg-primary/10 text-primary" 
                 : slot.recipe.estimasiBiaya <= 50000 
-                  ? "bg-warning/10 text-warning" 
+                  ? "bg-accent/10 text-accent" 
                   : "bg-destructive/10 text-destructive"
             )}>
               ~Rp {Math.round(slot.recipe.estimasiBiaya / 1000)}k
