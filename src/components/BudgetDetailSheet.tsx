@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BudgetCategoryChart } from "./BudgetCategoryChart";
+import { BudgetReportExport } from "./BudgetReportExport";
 import { BudgetEntry, BudgetSettings, KategoriBiaya } from "@/types/mealPlan";
 import { Calendar, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
@@ -48,6 +49,14 @@ export const BudgetDetailSheet = ({
 
         <ScrollArea className="h-[calc(100vh-100px)] mt-4 pr-4">
           <div className="space-y-6">
+            {/* Export Report */}
+            <BudgetReportExport
+              budgetHistory={budgetHistory}
+              categoryBreakdown={categoryBreakdown}
+              settings={settings}
+              monthlyTotal={monthlyTotal}
+            />
+
             {/* Monthly Summary */}
             {settings.budgetBulanan && (
               <div className="p-4 rounded-lg bg-muted/50 space-y-2">
