@@ -151,6 +151,38 @@ export function ShareRecipeDropdown({ recipe, className, cardRef }: ShareRecipeD
         logging: false,
       });
       
+      // Add watermark
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const padding = 20;
+        const fontSize = 16;
+        const watermarkText = "🍳 Dapur Pintar AI";
+        
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = "right";
+        ctx.textBaseline = "bottom";
+        
+        // Draw semi-transparent background for watermark
+        const textMetrics = ctx.measureText(watermarkText);
+        const bgWidth = textMetrics.width + 24;
+        const bgHeight = fontSize + 16;
+        const bgX = canvas.width - padding - bgWidth;
+        const bgY = canvas.height - padding - bgHeight;
+        
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.beginPath();
+        ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 8);
+        ctx.fill();
+        
+        // Draw watermark text
+        ctx.fillStyle = "#16a34a"; // Green color matching the brand
+        ctx.fillText(
+          watermarkText,
+          canvas.width - padding - 12,
+          canvas.height - padding - 8
+        );
+      }
+      
       return new Promise((resolve) => {
         canvas.toBlob((blob) => {
           resolve(blob);
