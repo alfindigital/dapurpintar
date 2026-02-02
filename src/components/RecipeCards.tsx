@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Copy, ClipboardPlus } from "lucide-react";
-import { Clock, ChefHat, Heart, Share2, Printer, Check } from "lucide-react";
+import { Clock, ChefHat, Heart, Printer, Check } from "lucide-react";
+import { ShareRecipeDropdown } from "./ShareRecipeDropdown";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,20 +113,6 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
     return `${recipe.nama}\n\n${recipe.deskripsi}\n\nBahan:\n${recipe.bahan.map((b) => `• ${b.jumlah} ${b.item}${b.catatan ? ` (${b.catatan})` : ""}`).join("\n")}\n\nLangkah:\n${recipe.langkah.map((l, i) => `${i + 1}. ${l}`).join("\n")}${recipe.tips ? `\n\nTips:\n${recipe.tips}` : ""}`;
   };
 
-  const shareRecipe = async () => {
-    const text = formatRecipeText();
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: recipe.nama, text });
-        toast.success("Berhasil dibagikan!");
-      } catch {
-        copyRecipe();
-      }
-    } else {
-      copyRecipe();
-    }
-  };
-
   const copyRecipe = () => {
     navigator.clipboard.writeText(formatRecipeText());
     toast.success("Resep disalin ke clipboard!");
@@ -219,15 +206,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
             >
               <Copy className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={shareRecipe}
-              title="Bagikan resep"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <ShareRecipeDropdown recipe={recipe} />
             <Button
               variant="ghost"
               size="icon"

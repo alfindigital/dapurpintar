@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Users, ChefHat, Flame, Beef, Wheat, Droplet } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ShareRecipeDropdown } from "./ShareRecipeDropdown";
+import { Recipe } from "@/types/recipe";
 
 interface MealDetailSheetProps {
   slot: MealSlot | null;
@@ -24,10 +26,13 @@ export const MealDetailSheet = ({ slot, open, onOpenChange }: MealDetailSheetPro
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
             <SheetHeader className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="secondary">{dayLabel}</Badge>
-                <span>•</span>
-                <span>{mealTimeLabel}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Badge variant="secondary">{dayLabel}</Badge>
+                  <span>•</span>
+                  <span>{mealTimeLabel}</span>
+                </div>
+                <ShareRecipeDropdown recipe={recipe as Recipe} />
               </div>
               <SheetTitle className="text-xl leading-tight">{recipe.nama}</SheetTitle>
               <p className="text-muted-foreground text-sm">{recipe.deskripsi}</p>
