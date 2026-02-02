@@ -1,4 +1,4 @@
-import { Share2, Copy, Check, MessageCircle, Send } from "lucide-react";
+import { Share2, Copy, Check, Send, Image, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,12 +8,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, RefObject } from "react";
 import { Recipe } from "@/types/recipe";
+import html2canvas from "html2canvas";
 
 interface ShareRecipeDropdownProps {
   recipe: Recipe;
   className?: string;
+  cardRef?: RefObject<HTMLDivElement>;
 }
 
 // SVG Icons for social platforms
@@ -130,8 +132,79 @@ const formatPlainText = (recipe: Recipe): string => {
   return parts.filter(Boolean).join("\n");
 };
 
-export function ShareRecipeDropdown({ recipe, className }: ShareRecipeDropdownProps) {
+export function ShareRecipeDropdown({ recipe, className, cardRef }: ShareRecipeDropdownProps) {
   const [copied, setCopied] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const captureScreenshot = async (): Promise<Blob | null> => {
+    if (!cardRef?.current) {
+      toast.error("Tidak dapat mengambil screenshot kartu resep");
+      return null;
+    }
+
+    try {
+      setIsCapturing(true);
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, "image/png", 1.0);
+      });
+    } catch (error) {
+      console.error("Screenshot error:", error);
+      toast.error("Gagal mengambil screenshot");
+      return null;
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const downloadAsImage = async () => {
+    const blob = await captureScreenshot();
+    if (!blob) return;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `resep-${recipe.nama.toLowerCase().replace(/\s+/g, "-")}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Gambar resep berhasil diunduh!");
+  };
+
+  const shareAsImage = async () => {
+    const blob = await captureScreenshot();
+    if (!blob) return;
+
+    const file = new File([blob], `resep-${recipe.nama}.png`, { type: "image/png" });
+
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: recipe.nama,
+          text: `🍳 Cek resep ${recipe.nama} ini!`,
+          files: [file],
+        });
+        toast.success("Berhasil dibagikan!");
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          // Fallback to download if share fails
+          downloadAsImage();
+        }
+      }
+    } else {
+      // Fallback to download if Web Share API doesn't support files
+      downloadAsImage();
+    }
+  };
 
   const shareToWhatsApp = () => {
     const text = formatForWhatsApp(recipe);
@@ -201,11 +274,29 @@ export function ShareRecipeDropdown({ recipe, className }: ShareRecipeDropdownPr
           size="icon"
           className={`h-8 w-8 ${className}`}
           title="Bagikan resep"
+          disabled={isCapturing}
         >
-          <Share2 className="h-4 w-4" />
+          {isCapturing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Share2 className="h-4 w-4" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-popover">
+        {cardRef && (
+          <>
+            <DropdownMenuItem onClick={shareAsImage} className="gap-2 cursor-pointer">
+              <Image className="h-4 w-4" />
+              <span>Bagikan Gambar</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={downloadAsImage} className="gap-2 cursor-pointer">
+              <Download className="h-4 w-4" />
+              <span>Unduh Gambar</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onClick={shareToWhatsApp} className="gap-2 cursor-pointer">
           <WhatsAppIcon />
           <span>WhatsApp</span>
