@@ -40,6 +40,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
   const [showTimerSummary, setShowTimerSummary] = useState(true);
   const [voiceCommandEnabled, setVoiceCommandEnabled] = useState(false);
   const storageKey = `checklist_${recipe.id || recipe.nama}`;
+  const cardRef = useRef<HTMLDivElement>(null);
   
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(() => {
     const saved = localStorage.getItem(storageKey);
@@ -157,7 +158,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
   };
 
   return (
-    <Card className="animate-slide-up overflow-hidden">
+    <Card ref={cardRef} className="animate-slide-up overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
@@ -206,7 +207,7 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
             >
               <Copy className="h-4 w-4" />
             </Button>
-            <ShareRecipeDropdown recipe={recipe} />
+            <ShareRecipeDropdown recipe={recipe} cardRef={cardRef} />
             <Button
               variant="ghost"
               size="icon"
