@@ -14,6 +14,7 @@ interface MealPlanCellProps {
   isCopySource?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
+  onDrag?: (e: React.DragEvent) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDragLeave?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
@@ -33,6 +34,7 @@ export const MealPlanCell = ({
   isCopySource = false,
   onDragStart,
   onDragEnd,
+  onDrag,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -61,6 +63,7 @@ export const MealPlanCell = ({
         draggable={canDrag}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
+        onDrag={onDrag}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
@@ -171,6 +174,7 @@ export const MealPlanCell = ({
       draggable={canDrag}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onDrag={onDrag}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}

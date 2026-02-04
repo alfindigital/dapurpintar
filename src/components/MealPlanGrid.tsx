@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { WeeklyMealPlan, MealSlot, DAYS, MEAL_TIMES, MealTime } from "@/types/mealPlan";
 import { MealPlanCell } from "./MealPlanCell";
+import { DragPreview } from "./DragPreview";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,8 @@ export const MealPlanGrid = ({
   onRemoveRecipe,
 }: MealPlanGridProps) => {
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
+  const [draggingSlot, setDraggingSlot] = useState<MealSlot | null>(null);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
   const [copySourceSlotId, setCopySourceSlotId] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -334,20 +337,42 @@ export const MealPlanGrid = ({
 
   const handleDragStart = (e: React.DragEvent, slot: MealSlot) => {
     setDraggingSlotId(slot.id);
+    setDraggingSlot(slot);
+    setDragPosition({ x: e.clientX, y: e.clientY });
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", slot.id);
+    
+    // Create invisible drag image to use our custom preview
+    const emptyImg = document.createElement("div");
+    emptyImg.style.width = "1px";
+    emptyImg.style.height = "1px";
+    emptyImg.style.opacity = "0";
+    document.body.appendChild(emptyImg);
+    e.dataTransfer.setDragImage(emptyImg, 0, 0);
+    setTimeout(() => document.body.removeChild(emptyImg), 0);
   };
 
   const handleDragEnd = () => {
     setDraggingSlotId(null);
+    setDraggingSlot(null);
     setDragOverSlotId(null);
   };
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    if (e.clientX !== 0 || e.clientY !== 0) {
+      setDragPosition({ x: e.clientX, y: e.clientY });
+    }
+  }, []);
 
   const handleDragOver = (e: React.DragEvent, slot: MealSlot) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     if (slot.id !== draggingSlotId) {
       setDragOverSlotId(slot.id);
+    }
+    // Update position from dragover event as backup
+    if (e.clientX !== 0 || e.clientY !== 0) {
+      setDragPosition({ x: e.clientX, y: e.clientY });
     }
   };
 
@@ -365,6 +390,7 @@ export const MealPlanGrid = ({
     }
     
     setDraggingSlotId(null);
+    setDraggingSlot(null);
     setDragOverSlotId(null);
   };
 
@@ -417,6 +443,7 @@ export const MealPlanGrid = ({
           isCopySource={isCopySource || isClipboardSource}
           onDragStart={(e) => handleDragStart(e, slot)}
           onDragEnd={handleDragEnd}
+          onDrag={handleDrag}
           onDragOver={(e) => handleDragOver(e, slot)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, slot)}
@@ -430,6 +457,9 @@ export const MealPlanGrid = ({
 
   return (
     <div className="w-full relative" tabIndex={0}>
+      {/* Drag Preview */}
+      <DragPreview slot={draggingSlot} position={dragPosition} />
+      
       {/* Search/filter input */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px] max-w-xs">
