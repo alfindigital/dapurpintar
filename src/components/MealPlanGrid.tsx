@@ -47,6 +47,9 @@ export const MealPlanGrid = ({
   const [searchResultIndex, setSearchResultIndex] = useState<number>(0);
   const [mealTimeFilter, setMealTimeFilter] = useState<Set<MealTime>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<"locked" | "skipped" | "filled" | "empty">>(new Set());
+  
+  // Animation state for swapped slots
+  const [swappedSlotIds, setSwappedSlotIds] = useState<Set<string>>(new Set());
 
   // Check if slot matches filters
   const slotMatchesFilters = useCallback((slot: MealSlot): boolean => {
@@ -396,8 +399,17 @@ export const MealPlanGrid = ({
     const sourceSlotId = e.dataTransfer.getData("text/plain");
     
     if (sourceSlotId && sourceSlotId !== targetSlot.id && onSwapSlots) {
+      // Trigger swap animation
+      setSwappedSlotIds(new Set([sourceSlotId, targetSlot.id]));
+      
+      // Perform the swap
       onSwapSlots(sourceSlotId, targetSlot.id);
       toast.success("Menu berhasil ditukar posisinya");
+      
+      // Clear animation after it completes
+      setTimeout(() => {
+        setSwappedSlotIds(new Set());
+      }, 450);
     }
     
     setDraggingSlotId(null);
@@ -437,11 +449,12 @@ export const MealPlanGrid = ({
     const isClipboardSource = clipboardSlotId === slot.id;
     const isSearchMatch = matchingSlotIds.has(slot.id);
     const isDimmed = hasSearchOrFilter && !isSearchMatch;
+    const isSwapped = swappedSlotIds.has(slot.id);
     
     return (
       <div 
         onClick={() => setSelectedSlotId(slot.id)}
-        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""}`}
+        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""} ${isSwapped ? "animate-swap-bounce" : ""}`}
       >
         <MealPlanCell
           slot={slot}
