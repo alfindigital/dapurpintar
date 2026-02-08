@@ -335,6 +335,23 @@ export const MealPlanGrid = ({
     );
   };
 
+  // Use document-level mouse tracking for reliable drag preview position
+  useEffect(() => {
+    if (!draggingSlotId) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setDragPosition({ x: e.clientX, y: e.clientY });
+    };
+    
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("dragover", handleMouseMove as EventListener);
+    
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("dragover", handleMouseMove as EventListener);
+    };
+  }, [draggingSlotId]);
+
   const handleDragStart = (e: React.DragEvent, slot: MealSlot) => {
     setDraggingSlotId(slot.id);
     setDraggingSlot(slot);
@@ -343,13 +360,9 @@ export const MealPlanGrid = ({
     e.dataTransfer.setData("text/plain", slot.id);
     
     // Create invisible drag image to use our custom preview
-    const emptyImg = document.createElement("div");
-    emptyImg.style.width = "1px";
-    emptyImg.style.height = "1px";
-    emptyImg.style.opacity = "0";
-    document.body.appendChild(emptyImg);
+    const emptyImg = document.createElement("img");
+    emptyImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     e.dataTransfer.setDragImage(emptyImg, 0, 0);
-    setTimeout(() => document.body.removeChild(emptyImg), 0);
   };
 
   const handleDragEnd = () => {
@@ -358,10 +371,8 @@ export const MealPlanGrid = ({
     setDragOverSlotId(null);
   };
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    if (e.clientX !== 0 || e.clientY !== 0) {
-      setDragPosition({ x: e.clientX, y: e.clientY });
-    }
+  const handleDrag = useCallback((_e: React.DragEvent) => {
+    // Position is now tracked via document-level listener
   }, []);
 
   const handleDragOver = (e: React.DragEvent, slot: MealSlot) => {
