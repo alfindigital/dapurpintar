@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -13,6 +13,7 @@ import { BudgetOverviewCard } from "./BudgetOverviewCard";
 import { BudgetAlertBanner } from "./BudgetAlertBanner";
 import { BudgetSettingsDialog } from "./BudgetSettingsDialog";
 import { BudgetDetailSheet } from "./BudgetDetailSheet";
+import { ConfettiCelebration } from "./ConfettiCelebration";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
 import { toast } from "sonner";
@@ -66,6 +67,37 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [budgetSettingsOpen, setBudgetSettingsOpen] = useState(false);
   const [budgetDetailOpen, setBudgetDetailOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  
+  // Track if celebration has been shown for current complete state
+  const celebrationShownRef = useRef(false);
+  const prevCompletionRef = useRef(false);
+
+  // Check if meal plan is complete (all slots filled or intentionally skipped)
+  const isMealPlanComplete = useMemo(() => {
+    if (!mealPlan) return false;
+    return mealPlan.slots.every(slot => slot.recipe !== null || slot.isSkipped);
+  }, [mealPlan?.slots]);
+
+  // Trigger celebration when meal plan becomes complete
+  useEffect(() => {
+    if (isMealPlanComplete && !prevCompletionRef.current && !celebrationShownRef.current) {
+      // Meal plan just became complete
+      setShowCelebration(true);
+      celebrationShownRef.current = true;
+    }
+    
+    // Reset celebration flag when plan becomes incomplete
+    if (!isMealPlanComplete && prevCompletionRef.current) {
+      celebrationShownRef.current = false;
+    }
+    
+    prevCompletionRef.current = isMealPlanComplete;
+  }, [isMealPlanComplete]);
+
+  const handleCelebrationComplete = useCallback(() => {
+    setShowCelebration(false);
+  }, []);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -397,6 +429,12 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         categoryBreakdown={categoryBreakdown}
         settings={budgetSettings}
         monthlyTotal={monthlyTotal}
+      />
+
+      {/* Confetti Celebration */}
+      <ConfettiCelebration
+        isActive={showCelebration}
+        onComplete={handleCelebrationComplete}
       />
     </div>
   );
