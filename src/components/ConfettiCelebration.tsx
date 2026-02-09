@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useCelebrationSound } from "@/hooks/useCelebrationSound";
 
 interface Particle {
   id: number;
@@ -54,6 +55,7 @@ export const ConfettiCelebration = ({
 }: ConfettiCelebrationProps) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isVisible, setIsVisible] = useState(false);
+  const { playCelebrationSound } = useCelebrationSound();
 
   const startCelebration = useCallback(() => {
     const width = window.innerWidth;
@@ -72,6 +74,9 @@ export const ConfettiCelebration = ({
     if (isActive) {
       startCelebration();
       
+      // Play celebration sound
+      playCelebrationSound();
+      
       // Cleanup after duration
       const timeout = setTimeout(() => {
         setIsVisible(false);
@@ -81,7 +86,7 @@ export const ConfettiCelebration = ({
 
       return () => clearTimeout(timeout);
     }
-  }, [isActive, duration, onComplete, startCelebration]);
+  }, [isActive, duration, onComplete, startCelebration, playCelebrationSound]);
 
   // Animation loop
   useEffect(() => {
