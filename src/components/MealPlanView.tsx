@@ -14,6 +14,7 @@ import { BudgetAlertBanner } from "./BudgetAlertBanner";
 import { BudgetSettingsDialog } from "./BudgetSettingsDialog";
 import { BudgetDetailSheet } from "./BudgetDetailSheet";
 import { ConfettiCelebration } from "./ConfettiCelebration";
+import { ShareMealPlanDropdown } from "./ShareMealPlanDropdown";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
 import { toast } from "sonner";
@@ -309,6 +310,10 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
           </Button>
           {hasAnyRecipes && (
             <>
+              <ShareMealPlanDropdown
+                slots={mealPlan.slots}
+                weekRange={getWeekRange()}
+              />
               <Button
                 variant="outline"
                 size="sm"
