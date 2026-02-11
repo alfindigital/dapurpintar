@@ -1,80 +1,78 @@
 
-# Fitur Share Resep ke Social Media
+
+# Rombak UI/UX: Modern, Minimalis & Branding Kuat
 
 ## Ringkasan
-Menambahkan fitur berbagi resep ke platform social media tertentu (WhatsApp, Facebook, Twitter/X) dengan tombol dropdown yang menampilkan opsi berbagi spesifik.
+Merombak tampilan DapurPintar agar terasa lebih modern, bersih, dan punya identitas brand yang kuat. Fokus pada: tipografi yang lebih tegas, spacing yang lebih lega, warna yang lebih kohesif, dan elemen branding yang konsisten di seluruh aplikasi.
 
-## Fitur yang Akan Ditambahkan
+## Perubahan Utama
 
-### 1. Komponen ShareRecipeDropdown
-Dropdown menu dengan opsi berbagi ke:
-- **WhatsApp** - Buka langsung ke WhatsApp dengan teks resep terformat
-- **Twitter/X** - Share dengan ringkasan singkat + hashtag
-- **Facebook** - Share ke timeline Facebook
-- **Telegram** - Alternatif messaging populer
-- **Copy Link** - Salin teks resep ke clipboard
-- **Native Share** - Gunakan Web Share API (jika tersedia)
+### 1. Color System & CSS Variables
+- Palet warna baru yang lebih sophisticated: primary hijau teal yang lebih deep, background yang sedikit warm (bukan putih pure), border yang lebih halus
+- Menghilangkan gradien yang tidak terpakai dari CSS
+- Menambah subtle shadow system untuk depth
+- Dark mode yang lebih refined dengan warna yang tidak terlalu kontras
 
-### 2. Format Konten per Platform
-- **WhatsApp**: Teks lengkap dengan emoji dan format yang rapi
-- **Twitter/X**: Ringkasan singkat (280 karakter) + hashtag #ResepMasakan
-- **Facebook**: Deskripsi medium dengan ajakan
-- **Telegram**: Format mirip WhatsApp
+### 2. Header - Brand Identity
+- Logo lebih menonjol dengan tipografi custom: "Dapur" regular + "Pintar" bold
+- Menghilangkan emoji dari tagline, ganti dengan teks elegan: "Asisten Masak Cerdas"
+- Icon buttons lebih clean dengan hover states yang halus
+- Background header: clean white/dark tanpa tint warna, hanya border bawah tipis
 
-## Perubahan File
+### 3. Tab Navigation
+- Desain pill/segment control yang lebih modern menggantikan underline tabs
+- Background rounded pada active tab
+- Ukuran lebih compact dan proporsional
 
-### File Baru
-1. **src/components/ShareRecipeDropdown.tsx**
-   - Komponen dropdown untuk memilih platform berbagi
-   - Fungsi formatter untuk setiap platform
-   - URL builder untuk deep links social media
+### 4. Input Section
+- Card tanpa border, hanya shadow halus
+- Tab input (Kamera/Galeri/Teks) menggunakan segment control style
+- Drop zone lebih clean dengan dashed border yang lebih tipis
+- Placeholder text lebih pendek dan to-the-point
 
-### File yang Dimodifikasi
-1. **src/components/RecipeCards.tsx**
-   - Ganti tombol Share2 dengan ShareRecipeDropdown
-   - Import komponen baru
+### 5. Tombol CTA "Cari Ide Resep"
+- Lebih tinggi (h-14) dengan rounded-full untuk kesan modern
+- Subtle shadow dan hover animation
+- Teks "Cari Resep" saja (lebih singkat)
 
-2. **src/components/MealDetailSheet.tsx** (opsional)
-   - Tambahkan tombol share di detail meal plan
+### 6. Recipe Cards
+- Rounded corner lebih besar (rounded-xl)
+- Shadow lebih prominent tapi soft
+- Header card lebih clean tanpa terlalu banyak badges
+- Spacing antar elemen lebih lega
+
+### 7. Nutrisi Tab
+- Stats cards dengan desain glassmorphism ringan
+- Heatmap dan chart dengan spacing yang lebih baik
+- Progress bars yang lebih tipis dan elegan
+
+### 8. Footer
+- Lebih minimalis: hanya teks kecil tanpa sticky (fixed), warna sangat subtle
+- Padding bottom pada konten agar tidak tertutup
+
+### 9. Global Polish
+- Font weight system: lebih banyak menggunakan font-medium daripada font-bold
+- Border radius global dinaikkan ke 1rem
+- Transisi hover yang lebih smooth
+- Menghilangkan emoji dari section headers, ganti dengan icon Lucide yang konsisten
 
 ## Detail Teknis
 
-### URL Deep Links yang Digunakan
-```text
-WhatsApp:  https://wa.me/?text={encodedText}
-Twitter/X: https://twitter.com/intent/tweet?text={encodedText}
-Facebook:  https://www.facebook.com/sharer/sharer.php?quote={encodedText}
-Telegram:  https://t.me/share/url?text={encodedText}
-```
+### File yang diubah:
+1. **`src/index.css`** - Revisi CSS variables (warna, radius, shadow)
+2. **`src/components/Header.tsx`** - Redesign branding & layout
+3. **`src/components/MainTabNavigation.tsx`** - Segment control style
+4. **`src/components/InputSection.tsx`** - Cleaner input UI
+5. **`src/components/PreferencesSection.tsx`** - Refined collapsible
+6. **`src/components/RecipeCards.tsx`** - Modern card design, hapus emoji headers
+7. **`src/components/NutritionOverview.tsx`** - Refined stat cards
+8. **`src/components/CalorieHeatmap.tsx`** - Cleaner layout
+9. **`src/pages/Index.tsx`** - Footer redesign, spacing adjustments
+10. **`src/components/DailyNutritionTracker.tsx`** - Polish
+11. **`tailwind.config.ts`** - Tambah custom shadow utilities
 
-### Format Teks WhatsApp (Contoh)
-```
-🍳 *Nasi Goreng Spesial*
+### Pendekatan:
+- Perubahan incremental per-komponen, tidak menghapus fungsionalitas
+- Tetap menggunakan design tokens yang sudah ada (primary, secondary, muted, dll)
+- Semua perubahan backward-compatible dengan tema warna dan aksesibilitas yang sudah ada
 
-📝 Deskripsi singkat resep...
-
-🥗 *Bahan-bahan:*
-• 2 piring nasi putih
-• 2 butir telur
-• dst...
-
-👩‍🍳 *Langkah:*
-1. Kocok telur...
-2. Panaskan minyak...
-
-💡 Tips: ...
-
----
-Dibuat dengan Dapur Pintar AI
-```
-
-### Komponen UI
-- Menggunakan DropdownMenu dari shadcn/ui
-- Icon untuk setiap platform (lucide-react + custom SVG untuk WhatsApp)
-- Animasi hover dan feedback visual
-
-## Keunggulan
-- Satu tombol, banyak opsi berbagi
-- Format dioptimalkan per platform
-- Mendukung mobile dan desktop
-- Fallback ke clipboard jika share gagal
