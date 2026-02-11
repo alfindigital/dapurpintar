@@ -15,6 +15,7 @@ import { MonthlyNutritionReport } from "@/components/MonthlyNutritionReport";
 import { WeightProgressChart } from "@/components/WeightProgressChart";
 import { WaterTracker } from "@/components/WaterTracker";
 import { NutritionOverview } from "@/components/NutritionOverview";
+import { CalorieHeatmap } from "@/components/CalorieHeatmap";
 import { useWaterTracking } from "@/hooks/useWaterTracking";
 import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
@@ -296,6 +297,12 @@ const Index = () => {
             targetProtein={profile.targetProtein}
             targetKarbohidrat={profile.targetKarbohidrat}
             targetLemak={profile.targetLemak}
+          />
+
+          {/* Calorie Heatmap */}
+          <CalorieHeatmap
+            nutritionData={weeklyNutritionData}
+            targetKalori={profile.targetKalori || 2000}
           />
 
           {/* Weight Progress Chart */}
