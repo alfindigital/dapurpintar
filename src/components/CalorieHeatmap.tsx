@@ -93,11 +93,11 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
   }, [nutritionData, targetKalori]);
 
   return (
-    <Card>
+    <Card className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <CardTitle className="text-base">Heatmap Kalori</CardTitle>
+          <CardTitle className="text-sm font-medium">Heatmap Kalori</CardTitle>
           <HelpTooltip content="Peta warna asupan kalori 28 hari terakhir. Semakin gelap, semakin dekat dengan target." />
         </div>
       </CardHeader>

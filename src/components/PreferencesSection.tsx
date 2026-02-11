@@ -58,13 +58,13 @@ export function PreferencesSection({
   };
 
   return (
-    <Card>
+    <Card className="border-0 shadow-soft-md">
       <Collapsible open={!isAutoMode} onOpenChange={handleOpenChange}>
         <CollapsibleTrigger asChild>
-          <button className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-muted/50 transition-colors rounded-lg">
+          <button className="w-full p-4 sm:p-6 flex items-center justify-between hover:bg-muted/30 transition-colors rounded-xl">
             <div className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Pengaturan Lanjutan</span>
+              <span className="text-sm font-medium">Preferensi</span>
               <span className="text-xs text-muted-foreground">(Opsional)</span>
               <HelpTooltip content="Mode Auto: AI akan menentukan jenis masakan dan waktu memasak yang paling cocok. Klik untuk mengatur preferensi sendiri." />
             </div>
@@ -154,7 +154,7 @@ export function PreferencesSection({
             {/* Meal Goal */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">🎯 Tujuan Menu</h3>
+                <h3 className="text-sm font-medium">Tujuan Menu</h3>
                 <HelpTooltip content="Pilih tujuan memasak Anda: hemat budget, diet sehat, bulking massa otot, atau menu seimbang untuk keluarga." />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -177,7 +177,7 @@ export function PreferencesSection({
             {/* Difficulty */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">👨‍🍳 Tingkat Kesulitan</h3>
+                <h3 className="text-sm font-medium">Tingkat Kesulitan</h3>
                 <HelpTooltip content="Pilih tingkat kesulitan resep yang sesuai kemampuan Anda." />
               </div>
               <div className="flex flex-wrap gap-2">

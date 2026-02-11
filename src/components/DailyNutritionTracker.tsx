@@ -47,9 +47,9 @@ function MacroProgress({ label, current, target, unit, icon, colorClass }: Macro
           {current}/{target} {unit}
         </span>
       </div>
-      <Progress 
+          <Progress 
         value={percent} 
-        className={`h-2 ${isOver ? "[&>div]:bg-destructive" : ""}`}
+        className={`h-1.5 ${isOver ? "[&>div]:bg-destructive" : ""}`}
       />
     </div>
   );
@@ -72,11 +72,11 @@ export function DailyNutritionTracker({
   const remainingKalori = targetKalori - totalKalori;
 
   return (
-    <Card>
+    <Card className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-base">Nutrisi Hari Ini</CardTitle>
+            <CardTitle className="text-sm font-medium">Nutrisi Hari Ini</CardTitle>
             <HelpTooltip content="Tracking nutrisi harian berdasarkan resep yang dikonsumsi" />
           </div>
           <div className="flex items-center gap-2">
