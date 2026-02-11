@@ -97,12 +97,12 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
   };
 
   return (
-    <Card>
+    <Card className="border-0 shadow-soft-md">
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold">Masukkan Bahan</h2>
-            <HelpTooltip content="Pilih salah satu cara: foto langsung, pilih dari galeri, atau ketik nama bahan. AI akan menganalisis dan memberikan ide resep." />
+            <h2 className="text-sm font-medium">Masukkan Bahan</h2>
+            <HelpTooltip content="Foto, pilih galeri, atau ketik bahan. AI akan carikan resep." />
           </div>
           {hasAnyInput && (
             <Button
@@ -195,8 +195,8 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               className={cn(
-                "border-2 border-dashed rounded-xl p-6 transition-all",
-                isDragging ? "border-primary bg-primary/5" : "border-border",
+                "border border-dashed rounded-xl p-6 transition-all",
+                isDragging ? "border-primary bg-primary/5" : "border-border/60",
                 images.length > 0 ? "py-4" : "py-8"
               )}
             >

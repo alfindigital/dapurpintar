@@ -201,7 +201,7 @@ const Index = () => {
             <Button
               onClick={handleSubmit}
               disabled={!hasInput || isLoading}
-              className="w-full h-12 text-base font-medium"
+              className="w-full h-14 text-base font-medium rounded-full shadow-soft-md hover:shadow-soft-lg transition-shadow"
               size="lg"
             >
               {isLoading ? (
@@ -212,7 +212,7 @@ const Index = () => {
               ) : (
                 <>
                   <Search className="h-5 w-5 mr-2" />
-                  Cari Ide Resep
+                  Cari Resep
                 </>
               )}
             </Button>
@@ -316,23 +316,20 @@ const Index = () => {
         </main>
       )}
 
-      {/* Sticky Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background border-t py-2 text-center text-xs text-muted-foreground z-40">
+      {/* Footer */}
+      <footer className="py-6 text-center text-[11px] text-muted-foreground/60">
         <p>
           made by{" "}
           <a 
             href="https://alfindigital.com" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="font-medium hover:underline text-primary"
+            className="font-medium hover:underline hover:text-muted-foreground transition-colors"
           >
             alfindigital
           </a>
         </p>
       </footer>
-
-      {/* Add bottom padding to main content to account for sticky footer */}
-      <div className="h-10" />
 
       <SettingsDialog 
         open={settingsOpen} 

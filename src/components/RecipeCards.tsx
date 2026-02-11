@@ -158,12 +158,12 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
   };
 
   return (
-    <Card ref={cardRef} className="animate-slide-up overflow-hidden">
+    <Card ref={cardRef} className="animate-slide-up overflow-hidden border-0 shadow-soft-md rounded-xl">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-xl font-bold">{recipe.nama}</h3>
+              <h3 className="text-lg font-semibold">{recipe.nama}</h3>
               {recipe.masakan && (
                 <Badge variant="outline" className="text-xs">
                   {recipe.masakan}
@@ -240,8 +240,8 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
       <CardContent className="space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold flex items-center gap-2">
-              🥗 Bahan-bahan
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              Bahan-bahan
             </h4>
             <div className="flex items-center gap-2">
               {checkedIngredients.size > 0 && (
@@ -299,8 +299,8 @@ function RecipeCard({ recipe, onToggleFavorite, isFavorite, apiKey, onLogNutriti
         <Separator />
 
         <div>
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            👩‍🍳 Langkah Memasak
+          <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+            Langkah Memasak
           </h4>
           
           <VoiceCookingPlayer
@@ -395,7 +395,7 @@ function TipsCard({ tips }: TipsCardProps) {
   return (
     <Card>
       <CardContent className="p-4">
-        <h4 className="font-semibold mb-3">💡 Tips</h4>
+        <h4 className="font-medium text-sm mb-3">Tips</h4>
         <p className="text-sm text-muted-foreground">{tips}</p>
       </CardContent>
     </Card>
@@ -424,7 +424,7 @@ export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, api
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <h2 className="text-xl font-bold">Hasil Resep</h2>
+        <h2 className="text-lg font-semibold">Hasil Resep</h2>
         <HelpTooltip content="Resep dibuat oleh AI. Sesuaikan dengan selera dan bahan yang tersedia." />
         <Badge variant="secondary" className="ml-auto">
           {data.recipes.length} resep
@@ -447,7 +447,7 @@ export function RecipeCards({ data, isLoading, onToggleFavorite, isFavorite, api
       {data.substitusi && data.substitusi.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <h4 className="font-semibold mb-3">🔄 Saran Pengganti Bahan</h4>
+            <h4 className="font-medium text-sm mb-3">Saran Pengganti Bahan</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {data.substitusi.map((sub, idx) => (
                 <li key={idx} className="flex items-start gap-2">

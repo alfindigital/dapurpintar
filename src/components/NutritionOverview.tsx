@@ -84,9 +84,9 @@ export function NutritionOverview({
   ];
 
   return (
-    <Card>
-      <CardContent className="pt-4 pb-3">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+    <Card className="border-0 shadow-soft-md">
+      <CardContent className="pt-5 pb-4">
+        <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
           Ringkasan Mingguan
         </h3>
@@ -94,15 +94,15 @@ export function NutritionOverview({
           {stats.map((stat, index) => (
             <div 
               key={index}
-              className={`${stat.bgColor} rounded-lg p-3 flex flex-col gap-1`}
+              className="rounded-xl p-3 flex flex-col gap-1.5 bg-muted/40 backdrop-blur-sm"
             >
               <div className="flex items-center gap-1.5">
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+                <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
+                <span className="text-[11px] text-muted-foreground">{stat.label}</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
-                <span className="text-xs text-muted-foreground">{stat.unit}</span>
+                <span className={`text-xl font-semibold ${stat.color}`}>{stat.value}</span>
+                <span className="text-[11px] text-muted-foreground">{stat.unit}</span>
               </div>
             </div>
           ))}
