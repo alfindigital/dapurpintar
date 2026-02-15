@@ -187,12 +187,12 @@ export function WeeklyNutritionChart({
   const avgDaily = Math.round(totals[activeMacro] / 7);
 
   return (
-    <Card ref={chartRef}>
+    <Card ref={chartRef} className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">Statistik Mingguan</CardTitle>
+            <CardTitle className="text-base font-medium">Statistik Mingguan</CardTitle>
             <HelpTooltip content="Grafik nutrisi 7 hari terakhir" />
           </div>
           <div className="flex items-center gap-2">
@@ -392,12 +392,12 @@ export function WeeklyNutritionChart({
               <button
                 key={key}
                 onClick={() => setActiveMacro(key)}
-                className={`p-2 rounded transition-colors ${
+                className={`p-2 rounded-lg transition-all ${
                   isActive ? "bg-primary/10 ring-1 ring-primary" : "bg-muted/50 hover:bg-muted"
                 }`}
               >
                 <div className="text-xs text-muted-foreground">{config.label}</div>
-                <div className="text-sm font-semibold" style={{ color: config.color }}>
+                <div className="text-sm font-medium" style={{ color: config.color }}>
                   {totals[key]}{config.unit === "kkal" ? "" : "g"}
                 </div>
                 <div className={`text-[10px] font-medium ${

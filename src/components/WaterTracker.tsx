@@ -78,11 +78,11 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className="border-0 shadow-soft-md">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Droplets className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Droplets className="h-5 w-5 text-secondary" />
               Tracker Air Harian
             </CardTitle>
             
@@ -150,7 +150,7 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
         <CardContent className="space-y-4">
           {/* Progress Display */}
           <div className="text-center space-y-2">
-            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-4xl font-bold text-secondary">
               {glasses}
               <span className="text-lg font-normal text-muted-foreground">/{target}</span>
             </div>
@@ -159,7 +159,7 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
 
           {/* Progress Bar */}
           <div className="space-y-1">
-            <Progress value={percentage} className="h-3" />
+            <Progress value={percentage} className="h-1.5" />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{Math.round(percentage)}%</span>
               <span>{isComplete ? "✅ Tercapai!" : `${target - glasses} gelas lagi`}</span>
@@ -173,13 +173,13 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
                 key={i}
                 className={`w-6 h-8 rounded-b-lg border-2 transition-all duration-300 ${
                   i < glasses
-                    ? "bg-blue-500 border-blue-600"
+                    ? "bg-secondary border-secondary"
                     : "bg-muted/30 border-muted-foreground/20"
                 }`}
               />
             ))}
             {glasses > target && (
-              <div className="flex items-center text-xs text-blue-500 font-medium ml-1">
+              <div className="flex items-center text-xs text-secondary font-medium ml-1">
                 +{glasses - target}
               </div>
             )}
@@ -200,7 +200,7 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
             <Button
               size="lg"
               onClick={handleAddGlass}
-              className="h-12 px-6 bg-blue-500 hover:bg-blue-600 text-white"
+              className="h-12 px-6 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full"
             >
               <Plus className="h-5 w-5 mr-2" />
               Tambah Gelas
