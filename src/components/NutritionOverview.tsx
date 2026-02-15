@@ -94,7 +94,7 @@ export function NutritionOverview({
           {stats.map((stat, index) => (
             <div 
               key={index}
-              className="rounded-xl p-3 flex flex-col gap-1.5 bg-muted/40 backdrop-blur-sm"
+              className="rounded-xl p-3 flex flex-col gap-1.5 bg-muted/40 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm"
             >
               <div className="flex items-center gap-1.5">
                 <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />

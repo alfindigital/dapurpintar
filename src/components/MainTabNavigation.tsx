@@ -24,10 +24,10 @@ export const MainTabNavigation = ({ activeTab, onTabChange }: MainTabNavigationP
               key={tab.value}
               onClick={() => onTabChange(tab.value)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200",
                 activeTab === tab.value
-                  ? "bg-background text-foreground shadow-soft-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-background text-foreground shadow-soft-sm scale-[1.02]"
+                  : "text-muted-foreground hover:text-foreground active:scale-[0.97]"
               )}
             >
               <tab.icon className="h-4 w-4" />
