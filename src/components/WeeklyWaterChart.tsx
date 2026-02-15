@@ -43,7 +43,7 @@ interface WeeklyWaterChartProps {
 const chartConfig = {
   glasses: {
     label: "Gelas",
-    color: "hsl(210, 100%, 60%)",
+    color: "hsl(var(--secondary))",
   },
 } satisfies ChartConfig;
 
@@ -145,11 +145,11 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
   }, [getShareText]);
 
   return (
-    <Card ref={chartRef}>
+    <Card ref={chartRef} className="border-0 shadow-soft-md">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-secondary" />
             Statistik Mingguan Air
           </CardTitle>
           <div className="flex items-center gap-1">
@@ -207,33 +207,33 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
       <CardContent className="space-y-4">
         {/* Stats Grid */}
         <div className="grid grid-cols-4 gap-2">
-          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2 text-center">
-            <Droplets className="h-4 w-4 mx-auto text-blue-500 mb-1" />
-            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+          <div className="bg-muted/50 rounded-lg p-2 text-center">
+            <Droplets className="h-4 w-4 mx-auto text-secondary mb-1" />
+            <div className="text-lg font-medium text-secondary">
               {stats.totalGlasses}
             </div>
             <div className="text-[10px] text-muted-foreground">Total Gelas</div>
           </div>
           
-          <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-2 text-center">
-            <TrendingUp className="h-4 w-4 mx-auto text-green-500 mb-1" />
-            <div className="text-lg font-bold text-green-600 dark:text-green-400">
+          <div className="bg-muted/50 rounded-lg p-2 text-center">
+            <TrendingUp className="h-4 w-4 mx-auto text-primary mb-1" />
+            <div className="text-lg font-medium text-primary">
               {stats.avgGlasses}
             </div>
             <div className="text-[10px] text-muted-foreground">Rata-rata</div>
           </div>
           
-          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 text-center">
-            <Trophy className="h-4 w-4 mx-auto text-amber-500 mb-1" />
-            <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
+          <div className="bg-muted/50 rounded-lg p-2 text-center">
+            <Trophy className="h-4 w-4 mx-auto text-accent mb-1" />
+            <div className="text-lg font-medium text-accent">
               {stats.daysCompleted}/7
             </div>
             <div className="text-[10px] text-muted-foreground">Target</div>
           </div>
           
-          <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-2 text-center">
-            <Flame className="h-4 w-4 mx-auto text-orange-500 mb-1" />
-            <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
+          <div className="bg-muted/50 rounded-lg p-2 text-center">
+            <Flame className="h-4 w-4 mx-auto text-accent mb-1" />
+            <div className="text-lg font-medium text-accent">
               {stats.streak}
             </div>
             <div className="text-[10px] text-muted-foreground">Streak</div>
@@ -274,7 +274,7 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
                   <ChartTooltipContent
                     formatter={(value, name) => (
                       <div className="flex items-center gap-1">
-                        <Droplets className="h-3 w-3 text-blue-500" />
+                        <Droplets className="h-3 w-3 text-secondary" />
                         <span>{value} gelas</span>
                       </div>
                     )}
@@ -285,7 +285,7 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`}
-                    fill={entry.isComplete ? "hsl(142, 76%, 46%)" : "hsl(210, 100%, 60%)"}
+                    fill={entry.isComplete ? "hsl(var(--primary))" : "hsl(var(--secondary))"}
                   />
                 ))}
               </Bar>
@@ -296,11 +296,11 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
         {/* Legend */}
         <div className="flex justify-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded bg-blue-500" />
+            <div className="w-3 h-3 rounded bg-secondary" />
             <span>Belum tercapai</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded bg-green-500" />
+            <div className="w-3 h-3 rounded bg-primary" />
             <span>Target tercapai</span>
           </div>
         </div>

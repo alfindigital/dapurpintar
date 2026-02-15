@@ -47,11 +47,11 @@ export const WaterReminderSettings: React.FC = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
               {settings.enabled ? (
                 <Bell className="h-5 w-5 text-primary" />
               ) : (
