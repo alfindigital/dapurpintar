@@ -187,7 +187,7 @@ const Index = () => {
       <MainTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === "ide-resep" && (
-        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
+        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4 animate-in fade-in duration-300">
           <InputSection onInputChange={handleInputChange} isLoading={isLoading} />
 
           <PreferencesSection
@@ -235,13 +235,13 @@ const Index = () => {
       )}
 
       {activeTab === "meal-planning" && (
-        <main className="container max-w-4xl mx-auto px-4 py-4">
+        <main className="container max-w-4xl mx-auto px-4 py-4 animate-in fade-in duration-300">
           <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
         </main>
       )}
 
       {activeTab === "nutrisi" && (
-        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4">
+        <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4 animate-in fade-in duration-300">
           {/* Overview Summary */}
           <NutritionOverview
             weeklyNutrition={weeklyNutritionData}
