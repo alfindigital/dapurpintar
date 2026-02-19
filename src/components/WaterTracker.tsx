@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { WeeklyWaterChart } from "./WeeklyWaterChart";
 import { WaterAchievements } from "./WaterAchievements";
 import { WaterReminderSettings } from "./WaterReminderSettings";
+import { WaterTrackerSkeleton } from "./ChartSkeleton";
+import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 const CUSTOM_TARGET_KEY = 'water_custom_target';
 
@@ -75,6 +77,10 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
     resetToday();
     toast.success("Tracker direset");
   };
+
+  const isLoading = useSkeletonLoader(400);
+
+  if (isLoading) return <WaterTrackerSkeleton />;
 
   return (
     <div className="space-y-4">
