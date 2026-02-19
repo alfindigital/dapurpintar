@@ -181,3 +181,75 @@ export function WeightChartSkeleton() {
     </Card>
   );
 }
+
+export function NutritionOverviewSkeleton() {
+  return (
+    <Card className="border-0 shadow-soft-md">
+      <CardContent className="pt-5 pb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl p-3 bg-muted/40 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <Skeleton className="h-3.5 w-3.5 rounded" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <div className="flex items-baseline gap-1">
+                <Skeleton className="h-6 w-10" />
+                <Skeleton className="h-3 w-14" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function WaterTrackerSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Card className="border-0 shadow-soft-md">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-7 w-7 rounded-md" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Big number */}
+          <div className="text-center space-y-2">
+            <Skeleton className="h-10 w-16 mx-auto" />
+            <Skeleton className="h-3 w-24 mx-auto" />
+          </div>
+          {/* Progress bar */}
+          <Skeleton className="h-1.5 w-full rounded-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+          {/* Glass icons */}
+          <div className="flex justify-center gap-1.5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-6 rounded" style={{ animationDelay: `${i * 60}ms` }} />
+            ))}
+          </div>
+          {/* Buttons */}
+          <div className="flex items-center justify-center gap-2">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="h-9 w-32 rounded-full" />
+            <Skeleton className="h-9 w-9 rounded-full" />
+          </div>
+          {/* Achievement */}
+          <Skeleton className="h-14 w-full rounded-xl" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
