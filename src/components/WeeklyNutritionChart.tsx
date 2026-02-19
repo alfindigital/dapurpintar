@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { ChartSkeleton } from "./ChartSkeleton";
+import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;
@@ -185,6 +187,10 @@ export function WeeklyNutritionChart({
 
   const activeConfig = chartConfig[activeMacro];
   const avgDaily = Math.round(totals[activeMacro] / 7);
+
+  const isLoading = useSkeletonLoader(500);
+
+  if (isLoading) return <ChartSkeleton showToggle chartHeight="h-[180px]" />;
 
   return (
     <Card ref={chartRef} className="border-0 shadow-soft-md">

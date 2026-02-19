@@ -9,6 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { HeatmapSkeleton } from "./ChartSkeleton";
+import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface CalorieHeatmapProps {
   nutritionData: Record<string, DailyNutrition>;
@@ -91,6 +93,10 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
       stats: { daysWithData: daysWithData.length, onTargetDays, avgKalori, streak },
     };
   }, [nutritionData, targetKalori]);
+
+  const isLoading = useSkeletonLoader(400);
+
+  if (isLoading) return <HeatmapSkeleton />;
 
   return (
     <Card className="border-0 shadow-soft-md">
