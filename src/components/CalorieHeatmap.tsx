@@ -96,7 +96,7 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
     <Card className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <CalendarDays className="h-4 w-4 text-primary" />
           <CardTitle className="text-sm font-medium">Heatmap Kalori</CardTitle>
           <HelpTooltip content="Peta warna asupan kalori 28 hari terakhir. Semakin gelap, semakin dekat dengan target." />
         </div>
@@ -104,15 +104,15 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
       <CardContent className="space-y-4">
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-lg font-bold">{stats.daysWithData}</div>
             <div className="text-[10px] text-muted-foreground">Hari tercatat</div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-lg font-bold">{stats.onTargetDays}</div>
             <div className="text-[10px] text-muted-foreground">Sesuai target</div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-lg font-bold">{stats.streak}</div>
             <div className="text-[10px] text-muted-foreground">Streak hari</div>
           </div>
@@ -137,7 +137,7 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
                   <Tooltip key={day.date}>
                     <TooltipTrigger asChild>
                       <button
-                        className={`aspect-square rounded-sm transition-colors ${INTENSITY_CLASSES[day.intensity]} hover:ring-2 hover:ring-primary/40`}
+                        className={`aspect-square rounded transition-all duration-200 ${INTENSITY_CLASSES[day.intensity]} hover:ring-2 hover:ring-primary/40 hover:scale-110`}
                       />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs">

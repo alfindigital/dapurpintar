@@ -91,7 +91,7 @@ export function DailyNutritionTracker({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary */}
-        <div className="text-center p-3 bg-muted/50 rounded-lg">
+        <div className="text-center p-3 bg-muted/40 rounded-xl">
           <div className="text-3xl font-bold">{totalKalori}</div>
           <div className="text-sm text-muted-foreground">
             dari {targetKalori} kkal
@@ -149,7 +149,7 @@ export function DailyNutritionTracker({
                 {entries.map((entry) => (
                   <div 
                     key={entry.id} 
-                    className="flex items-center justify-between p-2 bg-muted/30 rounded text-sm"
+                    className="flex items-center justify-between p-2.5 bg-muted/40 rounded-xl text-sm transition-all duration-200 hover:shadow-soft-sm"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{entry.nama}</div>
