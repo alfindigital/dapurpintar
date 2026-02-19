@@ -98,10 +98,10 @@ export function WeightAchievements({
   return (
     <>
       {/* Compact Preview */}
-      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+      <div className="flex items-center justify-between p-3 bg-muted/40 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-            <Scale className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <div className="p-2 rounded-full bg-emerald-500/10">
+            <Scale className="h-5 w-5 text-emerald-500" />
           </div>
           <div>
             <div className="text-sm font-medium">Goal & Achievement</div>
@@ -171,7 +171,7 @@ export function WeightAchievements({
               
               {/* Milestones Progress */}
               {targetWeight && initialWeight && (
-                <div className="mb-4 p-3 rounded-lg bg-primary/5 border">
+                <div className="mb-4 p-3 rounded-xl bg-muted/40">
                   <div className="flex items-center gap-2 mb-3">
                     <Target className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">Milestone Menuju {targetWeight} kg</span>

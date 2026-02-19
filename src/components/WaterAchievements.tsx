@@ -25,10 +25,10 @@ export function WaterAchievements({ unlockedIds, streak, totalGlasses }: WaterAc
   return (
     <>
       {/* Compact Preview */}
-      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+      <div className="flex items-center justify-between p-3 bg-muted/40 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50">
-            <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          <div className="p-2 rounded-full bg-amber-500/10">
+            <Award className="h-5 w-5 text-amber-500" />
           </div>
           <div>
             <div className="text-sm font-medium">Achievement</div>

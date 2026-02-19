@@ -155,12 +155,12 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
   const trendColor = stats.trend === 'up' ? 'text-orange-500' : stats.trend === 'down' ? 'text-green-500' : 'text-muted-foreground';
 
   return (
-    <Card ref={chartRef}>
+    <Card ref={chartRef} className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Scale className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">Progress Berat Badan</CardTitle>
+            <Scale className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base font-medium">Progress Berat Badan</CardTitle>
             <HelpTooltip content="Tracking perubahan berat badan 30 hari terakhir" />
           </div>
           <div className="flex items-center gap-1">
@@ -311,7 +311,7 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
       <CardContent className="space-y-4">
         {/* Progress to Target */}
         {targetWeight && stats.current && (
-          <div className="p-3 rounded-lg border bg-primary/5">
+          <div className="p-3 rounded-xl bg-muted/40">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Progress Menuju Target</span>
               <Badge variant={Math.abs(stats.current - targetWeight) < 0.5 ? "default" : "secondary"} className="text-xs">
@@ -323,7 +323,7 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
                 }
               </Badge>
             </div>
-            <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+            <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
               {(() => {
                 const initial = stats.initial || stats.current;
                 const totalToLose = Math.abs(initial - targetWeight);
@@ -346,19 +346,19 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
 
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-xs text-muted-foreground">Awal</div>
             <div className="text-sm font-semibold">
               {stats.initial ? `${stats.initial} kg` : '-'}
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-xs text-muted-foreground">Saat Ini</div>
             <div className="text-sm font-semibold">
               {stats.current ? `${stats.current} kg` : '-'}
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-muted/50">
+          <div className="p-2.5 rounded-xl bg-muted/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-sm">
             <div className="text-xs text-muted-foreground">Perubahan</div>
             <div className={`text-sm font-semibold flex items-center justify-center gap-1 ${trendColor}`}>
               <TrendIcon className="h-3 w-3" />
