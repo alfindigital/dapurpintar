@@ -18,6 +18,7 @@ import {
   NutritionOverviewSkeleton,
   WaterTrackerSkeleton,
 } from "@/components/ChartSkeleton";
+import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
 
 // Lazy load heavy chart components
 const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
@@ -252,14 +253,16 @@ const Index = () => {
       {activeTab === "nutrisi" && (
         <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4 animate-in fade-in duration-300">
           {/* Overview Summary */}
-          <Suspense fallback={<NutritionOverviewSkeleton />}>
-            <NutritionOverview
-              weeklyNutrition={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              waterStats={waterStats}
-              waterTarget={waterTarget}
-            />
-          </Suspense>
+          <ChartErrorBoundary fallbackTitle="Gagal memuat ringkasan nutrisi">
+            <Suspense fallback={<NutritionOverviewSkeleton />}>
+              <NutritionOverview
+                weeklyNutrition={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                waterStats={waterStats}
+                waterTarget={waterTarget}
+              />
+            </Suspense>
+          </ChartErrorBoundary>
 
           {/* Daily Nutrition Tracker */}
           <DailyNutritionTracker
@@ -303,36 +306,44 @@ const Index = () => {
             />
           </div>
 
-          <Suspense fallback={<ChartSkeleton showStats showToggle />}>
-            <WeeklyNutritionChart
-              weeklyData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              targetProtein={profile.targetProtein}
-              targetKarbohidrat={profile.targetKarbohidrat}
-              targetLemak={profile.targetLemak}
-            />
-          </Suspense>
+          <ChartErrorBoundary fallbackTitle="Gagal memuat grafik mingguan">
+            <Suspense fallback={<ChartSkeleton showStats showToggle />}>
+              <WeeklyNutritionChart
+                weeklyData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                targetProtein={profile.targetProtein}
+                targetKarbohidrat={profile.targetKarbohidrat}
+                targetLemak={profile.targetLemak}
+              />
+            </Suspense>
+          </ChartErrorBoundary>
 
           {/* Calorie Heatmap */}
-          <Suspense fallback={<HeatmapSkeleton />}>
-            <CalorieHeatmap
-              nutritionData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-            />
-          </Suspense>
+          <ChartErrorBoundary fallbackTitle="Gagal memuat heatmap kalori">
+            <Suspense fallback={<HeatmapSkeleton />}>
+              <CalorieHeatmap
+                nutritionData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+              />
+            </Suspense>
+          </ChartErrorBoundary>
 
           {/* Weight Progress Chart */}
-          <Suspense fallback={<WeightChartSkeleton />}>
-            <WeightProgressChart targetWeight={profile.targetBeratBadan} />
-          </Suspense>
+          <ChartErrorBoundary fallbackTitle="Gagal memuat grafik berat badan">
+            <Suspense fallback={<WeightChartSkeleton />}>
+              <WeightProgressChart targetWeight={profile.targetBeratBadan} />
+            </Suspense>
+          </ChartErrorBoundary>
 
           {/* Water Tracker */}
-          <Suspense fallback={<WaterTrackerSkeleton />}>
-            <WaterTracker 
-              beratBadan={profile.beratBadan} 
-              levelAktivitas={profile.levelAktivitas} 
-            />
-          </Suspense>
+          <ChartErrorBoundary fallbackTitle="Gagal memuat pelacak air">
+            <Suspense fallback={<WaterTrackerSkeleton />}>
+              <WaterTracker 
+                beratBadan={profile.beratBadan} 
+                levelAktivitas={profile.levelAktivitas} 
+              />
+            </Suspense>
+          </ChartErrorBoundary>
         </main>
       )}
 
