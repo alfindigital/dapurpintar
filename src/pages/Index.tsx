@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { Header } from "@/components/Header";
 import { InputSection } from "@/components/InputSection";
 import { PreferencesSection } from "@/components/PreferencesSection";
@@ -9,13 +9,22 @@ import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
 import { MealPlanView } from "@/components/MealPlanView";
 import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
-import { WeeklyNutritionChart } from "@/components/WeeklyNutritionChart";
 import { WeeklyNutritionReport } from "@/components/WeeklyNutritionReport";
 import { MonthlyNutritionReport } from "@/components/MonthlyNutritionReport";
-import { WeightProgressChart } from "@/components/WeightProgressChart";
-import { WaterTracker } from "@/components/WaterTracker";
-import { NutritionOverview } from "@/components/NutritionOverview";
-import { CalorieHeatmap } from "@/components/CalorieHeatmap";
+import {
+  ChartSkeleton,
+  HeatmapSkeleton,
+  WeightChartSkeleton,
+  NutritionOverviewSkeleton,
+  WaterTrackerSkeleton,
+} from "@/components/ChartSkeleton";
+
+// Lazy load heavy chart components
+const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
+const WeightProgressChart = lazy(() => import("@/components/WeightProgressChart").then(m => ({ default: m.WeightProgressChart })));
+const WaterTracker = lazy(() => import("@/components/WaterTracker").then(m => ({ default: m.WaterTracker })));
+const NutritionOverview = lazy(() => import("@/components/NutritionOverview").then(m => ({ default: m.NutritionOverview })));
+const CalorieHeatmap = lazy(() => import("@/components/CalorieHeatmap").then(m => ({ default: m.CalorieHeatmap })));
 import { useWaterTracking } from "@/hooks/useWaterTracking";
 import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
@@ -243,12 +252,14 @@ const Index = () => {
       {activeTab === "nutrisi" && (
         <main className="container max-w-2xl mx-auto px-4 py-4 space-y-4 animate-in fade-in duration-300">
           {/* Overview Summary */}
-          <NutritionOverview
-            weeklyNutrition={weeklyNutritionData}
-            targetKalori={profile.targetKalori || 2000}
-            waterStats={waterStats}
-            waterTarget={waterTarget}
-          />
+          <Suspense fallback={<NutritionOverviewSkeleton />}>
+            <NutritionOverview
+              weeklyNutrition={weeklyNutritionData}
+              targetKalori={profile.targetKalori || 2000}
+              waterStats={waterStats}
+              waterTarget={waterTarget}
+            />
+          </Suspense>
 
           {/* Daily Nutrition Tracker */}
           <DailyNutritionTracker
@@ -291,28 +302,37 @@ const Index = () => {
               unlockedWeightAchievements={unlockedWeightAchievements}
             />
           </div>
-          <WeeklyNutritionChart
-            weeklyData={weeklyNutritionData}
-            targetKalori={profile.targetKalori || 2000}
-            targetProtein={profile.targetProtein}
-            targetKarbohidrat={profile.targetKarbohidrat}
-            targetLemak={profile.targetLemak}
-          />
+
+          <Suspense fallback={<ChartSkeleton showStats showToggle />}>
+            <WeeklyNutritionChart
+              weeklyData={weeklyNutritionData}
+              targetKalori={profile.targetKalori || 2000}
+              targetProtein={profile.targetProtein}
+              targetKarbohidrat={profile.targetKarbohidrat}
+              targetLemak={profile.targetLemak}
+            />
+          </Suspense>
 
           {/* Calorie Heatmap */}
-          <CalorieHeatmap
-            nutritionData={weeklyNutritionData}
-            targetKalori={profile.targetKalori || 2000}
-          />
+          <Suspense fallback={<HeatmapSkeleton />}>
+            <CalorieHeatmap
+              nutritionData={weeklyNutritionData}
+              targetKalori={profile.targetKalori || 2000}
+            />
+          </Suspense>
 
           {/* Weight Progress Chart */}
-          <WeightProgressChart targetWeight={profile.targetBeratBadan} />
+          <Suspense fallback={<WeightChartSkeleton />}>
+            <WeightProgressChart targetWeight={profile.targetBeratBadan} />
+          </Suspense>
 
           {/* Water Tracker */}
-          <WaterTracker 
-            beratBadan={profile.beratBadan} 
-            levelAktivitas={profile.levelAktivitas} 
-          />
+          <Suspense fallback={<WaterTrackerSkeleton />}>
+            <WaterTracker 
+              beratBadan={profile.beratBadan} 
+              levelAktivitas={profile.levelAktivitas} 
+            />
+          </Suspense>
         </main>
       )}
 
