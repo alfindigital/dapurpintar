@@ -115,39 +115,36 @@ export function ProfileTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="profile-age">Usia</Label>
+              <Label htmlFor="profile-dob">Tanggal Lahir</Label>
               <Input
-                id="profile-age"
-                type="number"
-                min="0"
-                max="120"
-                placeholder="0"
-                value={profile.usia || ''}
-                onChange={(e) => onUpdateProfile({ usia: parseInt(e.target.value, 10) || 0 })}
+                id="profile-dob"
+                type="date"
+                value={profile.tanggalLahir || ''}
+                onChange={(e) => onUpdateProfile({ tanggalLahir: e.target.value })}
               />
+              {profile.tanggalLahir && (
+                <p className="text-xs text-muted-foreground">
+                  Usia: {calculateAge(profile.tanggalLahir)} tahun
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Status</Label>
-            <RadioGroup
+            <Select
               value={profile.status}
               onValueChange={(value) => onUpdateProfile({ status: value as UserProfile['status'] })}
-              className="flex gap-4"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="single" id="status-single" />
-                <Label htmlFor="status-single" className="cursor-pointer">Single</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="menikah" id="status-menikah" />
-                <Label htmlFor="status-menikah" className="cursor-pointer">Menikah</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="berkeluarga" id="status-berkeluarga" />
-                <Label htmlFor="status-berkeluarga" className="cursor-pointer">Berkeluarga</Label>
-              </div>
-            </RadioGroup>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Single</SelectItem>
+                <SelectItem value="menikah">Menikah</SelectItem>
+                <SelectItem value="berkeluarga">Berkeluarga</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
