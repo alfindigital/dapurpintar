@@ -93,7 +93,8 @@ export function ProfileTab({
   };
 
   return (
-    <ScrollArea className="h-[60vh] pr-4">
+    <ScrollArea className="h-[60vh] px-1">
+      <div className="pr-3">
       <div className="space-y-6">
         {/* Data Pribadi */}
         <div className="space-y-4">
@@ -699,6 +700,7 @@ export function ProfileTab({
             Reset Profil
           </Button>
         </div>
+      </div>
       </div>
     </ScrollArea>
   );
