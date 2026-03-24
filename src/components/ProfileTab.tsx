@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Lightbulb, Droplets } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Droplets } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
