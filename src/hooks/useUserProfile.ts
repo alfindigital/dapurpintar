@@ -15,10 +15,14 @@ function safeLoadProfile(): UserProfile {
     
     // Validate family members
     const validMembers = parsed.anggotaKeluarga.filter(isValidFamilyMember);
+
+    // Migrate old 'usia' field to 'tanggalLahir' if needed
+    const tanggalLahir = parsed.tanggalLahir || '';
     
     return {
       ...DEFAULT_PROFILE,
       ...parsed,
+      tanggalLahir,
       anggotaKeluarga: validMembers,
     };
   } catch {
