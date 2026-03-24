@@ -466,28 +466,6 @@ export function ProfileTab({
             </div>
           )}
 
-          {/* Health Tips */}
-          {(profile.beratBadan && profile.tinggiBadan) || profile.tujuanNutrisi ? (
-            <div className="p-3 rounded-lg border bg-accent/30 space-y-2">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-accent-foreground" />
-                <span className="text-sm font-medium">Tips Kesehatan</span>
-              </div>
-              <ul className="space-y-1.5">
-                {(() => {
-                  const bmiCategory = profile.beratBadan && profile.tinggiBadan 
-                    ? getBMICategory(calculateBMI(profile.beratBadan, profile.tinggiBadan)).category 
-                    : null;
-                  const tips = getHealthTips(bmiCategory, profile.tujuanNutrisi);
-                  return tips.map((tip, index) => (
-                    <li key={index} className="text-xs text-muted-foreground leading-relaxed">
-                      {tip}
-                    </li>
-                  ));
-                })()}
-              </ul>
-            </div>
-          ) : null}
 
           {/* Daily Water Intake */}
           {profile.beratBadan && (
