@@ -93,8 +93,8 @@ export function ProfileTab({
   };
 
   return (
-    <ScrollArea className="h-[60vh] px-1">
-      <div className="pr-3">
+    <ScrollArea className="h-[60vh] px-0">
+      <div className="px-4 pr-5">
       <div className="space-y-6">
         {/* Data Pribadi */}
         <div className="space-y-4">

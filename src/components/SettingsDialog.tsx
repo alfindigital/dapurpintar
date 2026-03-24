@@ -132,7 +132,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="api" className="space-y-4 mt-4 px-1">
+          <TabsContent value="api" className="space-y-4 mt-4 px-3">
             {/* Security Warning */}
             <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -195,7 +195,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             />
           </TabsContent>
 
-          <TabsContent value="display" className="space-y-6 mt-4 px-1 max-h-[60vh] overflow-y-auto">
+          <TabsContent value="display" className="space-y-6 mt-4 px-3 max-h-[60vh] overflow-y-auto">
             {/* Accessibility Profiles */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
