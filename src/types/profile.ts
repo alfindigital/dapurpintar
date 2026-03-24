@@ -9,7 +9,7 @@ export interface FamilyMember {
 
 export interface UserProfile {
   nama: string;
-  usia: number;
+  tanggalLahir: string; // ISO date string (YYYY-MM-DD)
   status: 'single' | 'menikah' | 'berkeluarga';
   anggotaKeluarga: FamilyMember[];
   provinsi: string;
@@ -36,7 +36,7 @@ export interface UserProfile {
 
 export const DEFAULT_PROFILE: UserProfile = {
   nama: '',
-  usia: 0,
+  tanggalLahir: '',
   status: 'single',
   anggotaKeluarga: [],
   provinsi: '',
@@ -87,13 +87,25 @@ export const GOAL_ADJUSTMENTS: Record<NonNullable<UserProfile['tujuanNutrisi']>,
   naik_berat: 500, // Surplus for weight gain
 };
 
+// Calculate age from birthdate
+export function calculateAge(tanggalLahir: string): number {
+  if (!tanggalLahir) return 0;
+  const birth = new Date(tanggalLahir);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return Math.max(0, age);
+}
+
 export function calculateNutritionTargets(profile: UserProfile): {
   kalori: number;
   protein: number;
   karbohidrat: number;
   lemak: number;
 } {
-  const { jenisKelamin, beratBadan, tinggiBadan, usia, levelAktivitas, tujuanNutrisi } = profile;
+  const { jenisKelamin, beratBadan, tinggiBadan, tanggalLahir, levelAktivitas, tujuanNutrisi } = profile;
+  const usia = calculateAge(tanggalLahir);
 
   // Return defaults if not enough data
   if (!jenisKelamin || !beratBadan || !tinggiBadan || !usia || usia <= 0) {

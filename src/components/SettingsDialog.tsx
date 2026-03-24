@@ -216,7 +216,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
                     />
                     <Label
                       htmlFor={`profile-${profile.value}`}
-                      className="flex items-center gap-3 w-full cursor-pointer rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                      className="flex items-center gap-3 w-full cursor-pointer rounded-lg border border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-l-4 peer-data-[state=checked]:border-l-primary peer-data-[state=checked]:border-muted [&:has([data-state=checked])]:border-l-4 [&:has([data-state=checked])]:border-l-primary [&:has([data-state=checked])]:border-muted"
                     >
                       <span className="text-primary">{profile.icon}</span>
                       <div className="flex-1">

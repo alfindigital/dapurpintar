@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Lightbulb, Droplets } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Droplets } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, getHealthTips, calculateDailyWaterIntake } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, calculateDailyWaterIntake, calculateAge } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -59,7 +59,7 @@ export function ProfileTab({
       targetKarbohidrat: targets.karbohidrat,
       targetLemak: targets.lemak,
     });
-  }, [profile.autoCalculateTarget, profile.jenisKelamin, profile.beratBadan, profile.tinggiBadan, profile.usia, profile.levelAktivitas, profile.tujuanNutrisi, onUpdateProfile]);
+  }, [profile.autoCalculateTarget, profile.jenisKelamin, profile.beratBadan, profile.tinggiBadan, profile.tanggalLahir, profile.levelAktivitas, profile.tujuanNutrisi, onUpdateProfile]);
 
   useEffect(() => {
     handleAutoCalculate();
@@ -115,39 +115,36 @@ export function ProfileTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="profile-age">Usia</Label>
+              <Label htmlFor="profile-dob">Tanggal Lahir</Label>
               <Input
-                id="profile-age"
-                type="number"
-                min="0"
-                max="120"
-                placeholder="0"
-                value={profile.usia || ''}
-                onChange={(e) => onUpdateProfile({ usia: parseInt(e.target.value, 10) || 0 })}
+                id="profile-dob"
+                type="date"
+                value={profile.tanggalLahir || ''}
+                onChange={(e) => onUpdateProfile({ tanggalLahir: e.target.value })}
               />
+              {profile.tanggalLahir && (
+                <p className="text-xs text-muted-foreground">
+                  Usia: {calculateAge(profile.tanggalLahir)} tahun
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Status</Label>
-            <RadioGroup
+            <Select
               value={profile.status}
               onValueChange={(value) => onUpdateProfile({ status: value as UserProfile['status'] })}
-              className="flex gap-4"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="single" id="status-single" />
-                <Label htmlFor="status-single" className="cursor-pointer">Single</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="menikah" id="status-menikah" />
-                <Label htmlFor="status-menikah" className="cursor-pointer">Menikah</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="berkeluarga" id="status-berkeluarga" />
-                <Label htmlFor="status-berkeluarga" className="cursor-pointer">Berkeluarga</Label>
-              </div>
-            </RadioGroup>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Single</SelectItem>
+                <SelectItem value="menikah">Menikah</SelectItem>
+                <SelectItem value="berkeluarga">Berkeluarga</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -469,28 +466,6 @@ export function ProfileTab({
             </div>
           )}
 
-          {/* Health Tips */}
-          {(profile.beratBadan && profile.tinggiBadan) || profile.tujuanNutrisi ? (
-            <div className="p-3 rounded-lg border bg-accent/30 space-y-2">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-accent-foreground" />
-                <span className="text-sm font-medium">Tips Kesehatan</span>
-              </div>
-              <ul className="space-y-1.5">
-                {(() => {
-                  const bmiCategory = profile.beratBadan && profile.tinggiBadan 
-                    ? getBMICategory(calculateBMI(profile.beratBadan, profile.tinggiBadan)).category 
-                    : null;
-                  const tips = getHealthTips(bmiCategory, profile.tujuanNutrisi);
-                  return tips.map((tip, index) => (
-                    <li key={index} className="text-xs text-muted-foreground leading-relaxed">
-                      {tip}
-                    </li>
-                  ));
-                })()}
-              </ul>
-            </div>
-          ) : null}
 
           {/* Daily Water Intake */}
           {profile.beratBadan && (
