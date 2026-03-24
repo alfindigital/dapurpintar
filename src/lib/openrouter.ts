@@ -13,8 +13,12 @@ const createProfileContext = (profile?: UserProfile): string => {
   // Basic info
   lines.push(`Nama: ${profile.nama}`);
   if (profile.tanggalLahir) {
-    const { calculateAge } = await import('@/types/profile');
-    lines.push(`Usia: ${calculateAge(profile.tanggalLahir)} tahun`);
+    const birth = new Date(profile.tanggalLahir);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    if (age > 0) lines.push(`Usia: ${age} tahun`);
   }
   lines.push(`Status: ${profile.status}`);
 

@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, getHealthTips, calculateDailyWaterIntake } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, calculateDailyWaterIntake, calculateAge } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
