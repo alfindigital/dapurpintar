@@ -36,7 +36,7 @@ export interface UserProfile {
 
 export const DEFAULT_PROFILE: UserProfile = {
   nama: '',
-  usia: 0,
+  tanggalLahir: '',
   status: 'single',
   anggotaKeluarga: [],
   provinsi: '',
