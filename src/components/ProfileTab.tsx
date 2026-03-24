@@ -59,7 +59,7 @@ export function ProfileTab({
       targetKarbohidrat: targets.karbohidrat,
       targetLemak: targets.lemak,
     });
-  }, [profile.autoCalculateTarget, profile.jenisKelamin, profile.beratBadan, profile.tinggiBadan, profile.usia, profile.levelAktivitas, profile.tujuanNutrisi, onUpdateProfile]);
+  }, [profile.autoCalculateTarget, profile.jenisKelamin, profile.beratBadan, profile.tinggiBadan, profile.tanggalLahir, profile.levelAktivitas, profile.tujuanNutrisi, onUpdateProfile]);
 
   useEffect(() => {
     handleAutoCalculate();
