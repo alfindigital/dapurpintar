@@ -132,7 +132,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="api" className="space-y-4 mt-4 px-1">
+          <TabsContent value="api" className="space-y-4 mt-4 px-3">
             {/* Security Warning */}
             <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
