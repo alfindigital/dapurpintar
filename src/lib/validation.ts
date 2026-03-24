@@ -195,7 +195,7 @@ export function isValidUserProfile(data: unknown): data is UserProfile {
   const d = data as Record<string, unknown>;
   return (
     typeof d.nama === 'string' &&
-    typeof d.usia === 'number' &&
+    (typeof d.tanggalLahir === 'string' || typeof d.usia === 'number') &&
     typeof d.status === 'string' &&
     Array.isArray(d.anggotaKeluarga)
   );

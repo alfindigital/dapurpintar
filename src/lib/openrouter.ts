@@ -12,7 +12,10 @@ const createProfileContext = (profile?: UserProfile): string => {
 
   // Basic info
   lines.push(`Nama: ${profile.nama}`);
-  if (profile.usia) lines.push(`Usia: ${profile.usia} tahun`);
+  if (profile.tanggalLahir) {
+    const { calculateAge } = await import('@/types/profile');
+    lines.push(`Usia: ${calculateAge(profile.tanggalLahir)} tahun`);
+  }
   lines.push(`Status: ${profile.status}`);
 
   // Family members
