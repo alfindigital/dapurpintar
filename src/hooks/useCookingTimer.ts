@@ -26,7 +26,7 @@ interface UseCookingTimerReturn {
 export function useCookingTimer(): UseCookingTimerReturn {
   const [timers, setTimers] = useState<Timer[]>([]);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("default");
-  const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const intervalsRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   // Check notification support and permission
   useEffect(() => {
