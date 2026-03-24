@@ -701,6 +701,7 @@ export function ProfileTab({
           </Button>
         </div>
       </div>
+      </div>
     </ScrollArea>
   );
 }

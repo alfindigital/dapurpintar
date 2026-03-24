@@ -195,7 +195,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
             />
           </TabsContent>
 
-          <TabsContent value="display" className="space-y-6 mt-4">
+          <TabsContent value="display" className="space-y-6 mt-4 px-1 max-h-[60vh] overflow-y-auto">
             {/* Accessibility Profiles */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
