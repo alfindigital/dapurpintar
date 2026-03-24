@@ -32,7 +32,7 @@ export const useWaterReminder = () => {
   
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const [lastReminder, setLastReminder] = useState<Date | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Check notification permission
   useEffect(() => {
