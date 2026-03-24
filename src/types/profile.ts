@@ -9,7 +9,7 @@ export interface FamilyMember {
 
 export interface UserProfile {
   nama: string;
-  usia: number;
+  tanggalLahir: string; // ISO date string (YYYY-MM-DD)
   status: 'single' | 'menikah' | 'berkeluarga';
   anggotaKeluarga: FamilyMember[];
   provinsi: string;
