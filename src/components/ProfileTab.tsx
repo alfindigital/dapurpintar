@@ -1,4 +1,4 @@
-import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal, Droplets } from "lucide-react";
+import { User, MapPin, ChefHat, Clock, Wallet, Trash2, RotateCcw, Target, Calculator, Scale, Ruler, Activity, Goal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { HelpTooltip } from "./HelpTooltip";
 import { AddFamilyMemberDialog } from "./AddFamilyMemberDialog";
-import { UserProfile, FamilyMember, calculateNutritionTargets, calculateBMI, getBMICategory, calculateIdealWeightRange, calculateDailyWaterIntake, calculateAge } from "@/types/profile";
+import { UserProfile, FamilyMember, calculateNutritionTargets, calculateAge } from "@/types/profile";
 import { PROVINCES, CITIES } from "@/lib/profileConstants";
 import { toast } from "sonner";
 import { useEffect, useCallback } from "react";
@@ -397,114 +397,7 @@ export function ProfileTab({
             </div>
           </div>
 
-          {/* BMI Display */}
-          {profile.beratBadan && profile.tinggiBadan && (
-            <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Body Mass Index (BMI)</span>
-                {(() => {
-                  const bmi = calculateBMI(profile.beratBadan!, profile.tinggiBadan!);
-                  const { label, color } = getBMICategory(bmi);
-                  return (
-                    <Badge variant="outline" className={color}>
-                      {bmi.toFixed(1)} - {label}
-                    </Badge>
-                  );
-                })()}
-              </div>
-              <div className="relative h-2 bg-gradient-to-r from-blue-500 via-green-500 via-yellow-500 to-red-500 rounded-full">
-                {(() => {
-                  const bmi = calculateBMI(profile.beratBadan!, profile.tinggiBadan!);
-                  // Scale BMI 15-40 to 0-100%
-                  const position = Math.min(100, Math.max(0, ((bmi - 15) / 25) * 100));
-                  return (
-                    <div 
-                      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-background border-2 border-foreground rounded-full shadow-sm"
-                      style={{ left: `calc(${position}% - 6px)` }}
-                    />
-                  );
-                })()}
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Kurang</span>
-                <span>Normal</span>
-                <span>Lebih</span>
-                <span>Obesitas</span>
-              </div>
-            </div>
-          )}
 
-          {/* Ideal Weight Recommendation */}
-          {profile.tinggiBadan && (
-            <div className="p-3 rounded-lg border bg-primary/5 space-y-1">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Rekomendasi Berat Ideal</span>
-              </div>
-              {(() => {
-                const { min, max } = calculateIdealWeightRange(profile.tinggiBadan!);
-                const isInRange = profile.beratBadan && profile.beratBadan >= min && profile.beratBadan <= max;
-                return (
-                  <>
-                    <p className="text-sm">
-                      Untuk tinggi <span className="font-medium">{profile.tinggiBadan} cm</span>, berat ideal Anda adalah{' '}
-                      <span className="font-semibold text-primary">{min} - {max} kg</span>
-                    </p>
-                    {profile.beratBadan && (
-                      <p className="text-xs text-muted-foreground">
-                        {isInRange 
-                          ? "✅ Berat badan Anda sudah dalam rentang ideal!"
-                          : profile.beratBadan < min
-                            ? `Perlu menambah ${(min - profile.beratBadan).toFixed(1)} kg untuk mencapai batas bawah ideal`
-                            : `Perlu menurunkan ${(profile.beratBadan - max).toFixed(1)} kg untuk mencapai batas atas ideal`
-                        }
-                      </p>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
-          )}
-
-
-          {/* Daily Water Intake */}
-          {profile.beratBadan && (
-            <div className="p-3 rounded-lg border bg-blue-500/10 space-y-2">
-              <div className="flex items-center gap-2">
-                <Droplets className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium">Kebutuhan Air Harian</span>
-              </div>
-              {(() => {
-                const { liters, glasses } = calculateDailyWaterIntake(
-                  profile.beratBadan!,
-                  profile.levelAktivitas
-                );
-                return (
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                        {liters} Liter
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        ≈ {glasses} gelas (250ml)
-                      </p>
-                    </div>
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: Math.min(8, glasses) }).map((_, i) => (
-                        <div 
-                          key={i} 
-                          className="w-2 h-6 rounded-sm bg-blue-500/70"
-                        />
-                      ))}
-                      {glasses > 8 && (
-                        <span className="text-xs text-muted-foreground ml-1">+{glasses - 8}</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
