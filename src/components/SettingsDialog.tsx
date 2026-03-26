@@ -45,14 +45,8 @@ const accessibilityProfiles: { value: AccessibilityProfile; label: string; descr
   { 
     value: "lansia", 
     label: "Lansia", 
-    description: "Font besar, kontras tinggi, warna biru",
+    description: "Font besar, kontras tinggi",
     icon: <User className="h-5 w-5" />
-  },
-  { 
-    value: "low-vision", 
-    label: "Low Vision", 
-    description: "Font besar, kontras tinggi, warna oranye",
-    icon: <Eye className="h-5 w-5" />
   },
 ];
 
@@ -256,25 +250,6 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
               </p>
             </div>
 
-            {/* High Contrast */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="high-contrast">Mode Kontras Tinggi</Label>
-                    <HelpTooltip content="Meningkatkan kontras warna untuk kemudahan membaca, cocok untuk lansia" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Warna lebih jelas untuk penglihatan lebih baik
-                  </p>
-                </div>
-                <Switch
-                  id="high-contrast"
-                  checked={settings.highContrast}
-                  onCheckedChange={setHighContrast}
-                />
-              </div>
-            </div>
 
             {/* Color Theme */}
             <div className="space-y-3">
