@@ -154,7 +154,7 @@ export const GeneratePlanDialog = ({
 
           {/* Budget Harian */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">💰 Budget Harian (opsional):</Label>
+            <Label className="text-sm font-medium">Budget Harian (opsional):</Label>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Rp</span>
@@ -186,30 +186,9 @@ export const GeneratePlanDialog = ({
             </div>
           </div>
 
-          {/* Meal Goal */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">🎯 Tujuan Menu:</Label>
-            <div className="flex flex-wrap gap-2">
-              {MEAL_GOAL_OPTIONS.map((option) => (
-                <Badge
-                  key={option.id}
-                  variant={preferences.mealGoal === option.id ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer transition-all hover:scale-105",
-                    preferences.mealGoal === option.id && "bg-primary"
-                  )}
-                  onClick={() => setPreferences({ ...preferences, mealGoal: option.id as MealGoal })}
-                >
-                  {option.label}
-                  <span className="ml-1 text-xs opacity-70">({option.desc})</span>
-                </Badge>
-              ))}
-            </div>
-          </div>
-
           {/* Difficulty */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">👨‍🍳 Tingkat Kesulitan:</Label>
+            <Label className="text-sm font-medium">Tingkat Kesulitan:</Label>
             <div className="flex flex-wrap gap-2">
               {DIFFICULTY_OPTIONS.map((option) => (
                 <Badge
@@ -221,8 +200,8 @@ export const GeneratePlanDialog = ({
                   )}
                   onClick={() => setPreferences({ ...preferences, tingkatKesulitan: option.id as TingkatKesulitan })}
                 >
-                  <span className="mr-1">{option.icon}</span>
                   {option.label}
+                  <span className="ml-1 text-xs opacity-70">({option.desc})</span>
                 </Badge>
               ))}
             </div>

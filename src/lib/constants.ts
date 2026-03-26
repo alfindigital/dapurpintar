@@ -1,30 +1,30 @@
 import { CuisineType } from "@/types/recipe";
 
 export const CUISINE_OPTIONS: CuisineType[] = [
-  { id: "indonesia", label: "🇮🇩 Indonesia" },
-  { id: "western", label: "🍔 Western" },
-  { id: "chinese", label: "🇨🇳 Chinese" },
-  { id: "middle-eastern", label: "🥙 Timur Tengah" },
-  { id: "others", label: "🌍 Lainnya" },
+  { id: "indonesia", label: "Indonesia" },
+  { id: "western", label: "Western" },
+  { id: "chinese", label: "Chinese" },
+  { id: "middle-eastern", label: "Timur Tengah" },
+  { id: "others", label: "Lainnya" },
 ];
 
 export const TIME_OPTIONS = [
-  { id: "cepat", label: "Cepat", icon: "⚡", desc: "< 30 menit" },
-  { id: "sedang", label: "Sedang", icon: "🕐", desc: "30-60 menit" },
-  { id: "lama", label: "Lama", icon: "🕑", desc: "> 60 menit" },
+  { id: "cepat", label: "Cepat", icon: "", desc: "< 30 menit" },
+  { id: "sedang", label: "Sedang", icon: "", desc: "30-60 menit" },
+  { id: "lama", label: "Lama", icon: "", desc: "> 60 menit" },
 ];
 
 export const MEAL_GOAL_OPTIONS = [
-  { id: "hemat", label: "💰 Hemat", desc: "Budget minimal" },
-  { id: "diet", label: "🥗 Diet", desc: "Rendah kalori" },
-  { id: "bulking", label: "💪 Bulking", desc: "Massa otot" },
-  { id: "seimbang", label: "⚖️ Seimbang", desc: "Keluarga" },
+  { id: "hemat", label: "Hemat", desc: "Budget minimal" },
+  { id: "diet", label: "Diet", desc: "Rendah kalori" },
+  { id: "bulking", label: "Bulking", desc: "Massa otot" },
+  { id: "seimbang", label: "Seimbang", desc: "Keluarga" },
 ] as const;
 
 export const DIFFICULTY_OPTIONS = [
-  { id: "mudah", label: "Mudah", icon: "👶", desc: "Pemula" },
-  { id: "sedang", label: "Sedang", icon: "👨‍🍳", desc: "Menengah" },
-  { id: "sulit", label: "Sulit", icon: "🧑‍🍳", desc: "Mahir" },
+  { id: "mudah", label: "Mudah", icon: "", desc: "Pemula" },
+  { id: "sedang", label: "Sedang", icon: "", desc: "Menengah" },
+  { id: "sulit", label: "Sulit", icon: "", desc: "Mahir" },
 ] as const;
 
 export const BUDGET_PRESETS = [
