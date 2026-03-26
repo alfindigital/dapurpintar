@@ -143,32 +143,8 @@ export function PreferencesSection({
                     )}
                     onClick={() => setTime(option.id)}
                   >
-                    <span className="mr-1">{option.icon}</span>
                     {option.label}
                     <span className="ml-1 text-xs opacity-70">({option.desc})</span>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Meal Goal */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">Tujuan Menu</h3>
-                <HelpTooltip content="Pilih tujuan memasak Anda: hemat budget, diet sehat, bulking massa otot, atau menu seimbang untuk keluarga." />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {MEAL_GOAL_OPTIONS.map((option) => (
-                  <Badge
-                    key={option.id}
-                    variant={preferences.mealGoal === option.id ? "default" : "outline"}
-                    className={cn(
-                      "cursor-pointer transition-all hover:scale-105",
-                      preferences.mealGoal === option.id && "bg-primary"
-                    )}
-                    onClick={() => setMealGoal(option.id)}
-                  >
-                    {option.label}
                   </Badge>
                 ))}
               </div>
@@ -191,7 +167,8 @@ export function PreferencesSection({
                     )}
                     onClick={() => setDifficulty(option.id)}
                   >
-                    <span className="mr-1">{option.icon}</span>
+                    {option.label}
+                    <span className="ml-1 text-xs opacity-70">({option.desc})</span>
                     {option.label}
                   </Badge>
                 ))}
