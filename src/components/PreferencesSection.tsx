@@ -169,7 +169,6 @@ export function PreferencesSection({
                   >
                     {option.label}
                     <span className="ml-1 text-xs opacity-70">({option.desc})</span>
-                    {option.label}
                   </Badge>
                 ))}
               </div>
