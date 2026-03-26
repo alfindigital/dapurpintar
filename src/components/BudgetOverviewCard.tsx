@@ -20,13 +20,7 @@ interface BudgetOverviewCardProps {
 }
 
 const formatRupiah = (value: number): string => {
-  if (value >= 1000000) {
-    return `Rp ${(value / 1000000).toFixed(1)} jt`;
-  }
-  if (value >= 1000) {
-    return `Rp ${Math.round(value / 1000)}k`;
-  }
-  return `Rp ${value}`;
+  return `Rp ${value.toLocaleString('id-ID')}`;
 };
 
 export const BudgetOverviewCard = ({
@@ -88,92 +82,66 @@ export const BudgetOverviewCard = ({
       alertStatus.isWarning && "border-accent/50 bg-accent/5"
     )}>
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          {/* Left: Weekly estimate */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Wallet className={cn("h-4 w-4", getStatusColor())} />
-              <span className="text-sm font-medium">Estimasi Minggu Ini</span>
-              {alertStatus.isWarning && (
-                <AlertTriangle className="h-4 w-4 text-accent" />
-              )}
-              {alertStatus.isOver && (
-                <AlertTriangle className="h-4 w-4 text-destructive" />
-              )}
-            </div>
+        {/* Top row: Two summary boxes */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="rounded-lg bg-muted/40 p-3">
+            <p className="text-xs text-muted-foreground mb-1">Total Pengeluaran</p>
+            <p className={cn("text-lg font-bold whitespace-nowrap", getStatusColor())}>
+              {formatRupiah(currentWeekBudget?.totalEstimasi || 0)}
+            </p>
+          </div>
+          <div className="rounded-lg bg-muted/40 p-3">
+            <p className="text-xs text-muted-foreground mb-1">Budget Bulanan</p>
+            <p className="text-lg font-bold whitespace-nowrap">
+              {settings.budgetBulanan ? formatRupiah(settings.budgetBulanan) : "-"}
+            </p>
+          </div>
+        </div>
 
-            <div className="flex items-baseline gap-2">
-              <span className={cn("text-2xl font-bold", getStatusColor())}>
-                {formatRupiah(currentWeekBudget?.totalEstimasi || 0)}
+        {/* Progress bar */}
+        {settings.budgetBulanan && (
+          <div className="rounded-lg bg-muted/40 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground">Penggunaan Budget</span>
+              <span className={cn("text-sm font-semibold", getStatusColor())}>
+                {alertStatus.percentage}%
               </span>
-              {weeklyTarget && (
-                <span className="text-sm text-muted-foreground">
-                  / {formatRupiah(weeklyTarget)}
-                </span>
-              )}
             </div>
+            <Progress 
+              value={Math.min(100, alertStatus.percentage)} 
+              className={cn("h-2", getProgressColor())}
+            />
+            <p className="text-xs text-primary font-medium mt-2">
+              Sisa: {formatRupiah(Math.max(0, (settings.budgetBulanan || 0) - monthlyTotal))}
+            </p>
+          </div>
+        )}
 
-            {weeklyTarget && (
-              <Progress 
-                value={weeklyProgress} 
-                className={cn("h-2 mt-2", getProgressColor())}
-              />
-            )}
-
-            {weeklyDiff !== null && (
-              <div className="flex items-center gap-1 mt-2 text-xs">
-                {weeklyDiff > 0 ? (
-                  <>
-                    <TrendingUp className="h-3 w-3 text-destructive" />
-                    <span className="text-destructive">
-                      +{formatRupiah(weeklyDiff)} dari minggu lalu
-                    </span>
-                  </>
-                ) : weeklyDiff < 0 ? (
-                  <>
-                    <TrendingDown className="h-3 w-3 text-primary" />
-                    <span className="text-primary">
-                      {formatRupiah(Math.abs(weeklyDiff))} lebih hemat
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">Sama dengan minggu lalu</span>
-                )}
-              </div>
+        {/* Week comparison */}
+        {weeklyDiff !== null && (
+          <div className="flex items-center gap-1 mt-2 text-xs">
+            {weeklyDiff > 0 ? (
+              <>
+                <TrendingUp className="h-3 w-3 text-destructive" />
+                <span className="text-destructive">+{formatRupiah(weeklyDiff)} dari minggu lalu</span>
+              </>
+            ) : weeklyDiff < 0 ? (
+              <>
+                <TrendingDown className="h-3 w-3 text-primary" />
+                <span className="text-primary">{formatRupiah(Math.abs(weeklyDiff))} lebih hemat</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">Sama dengan minggu lalu</span>
             )}
           </div>
-
-          {/* Right: Monthly summary */}
-          {settings.budgetBulanan && (
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground mb-1">Bulan Ini</p>
-              <p className="text-lg font-semibold">{formatRupiah(monthlyTotal)}</p>
-              <p className="text-xs text-muted-foreground">
-                / {formatRupiah(settings.budgetBulanan)}
-              </p>
-              <p className={cn("text-xs font-medium mt-1", getStatusColor())}>
-                {alertStatus.percentage}% terpakai
-              </p>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-3 pt-3 border-t">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex-1 h-8 text-xs"
-            onClick={onDetailClick}
-          >
+          <Button variant="ghost" size="sm" className="flex-1 h-8 text-xs" onClick={onDetailClick}>
             Lihat Detail
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 p-0"
-            onClick={onSettingsClick}
-          >
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onSettingsClick}>
             <Settings2 className="h-4 w-4" />
           </Button>
         </div>
