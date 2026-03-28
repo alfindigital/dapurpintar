@@ -365,6 +365,7 @@ const Index = () => {
         open={settingsOpen} 
         onOpenChange={setSettingsOpen}
         onApiKeyChange={handleApiKeyChange}
+        onHistoryClick={() => { setSettingsOpen(false); setHistoryOpen(true); }}
       />
 
       <HistoryDialog
