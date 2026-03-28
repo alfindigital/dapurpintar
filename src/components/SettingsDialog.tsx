@@ -292,6 +292,30 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange, onHistoryCl
               </RadioGroup>
             </div>
 
+            {/* Dark Mode */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {mounted && theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <Label>Mode Gelap</Label>
+              </div>
+              <Switch
+                checked={mounted && theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+            </div>
+
+            {/* History */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                onHistoryClick?.();
+              }}
+            >
+              <History className="h-4 w-4" />
+              Riwayat Resep
+            </Button>
+
             {/* Reset Button */}
             <div className="flex justify-between items-center pt-2 border-t">
               <Button
