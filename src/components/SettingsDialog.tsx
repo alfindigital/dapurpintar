@@ -55,10 +55,15 @@ const accessibilityProfiles: { value: AccessibilityProfile; label: string; descr
 export function SettingsDialog({ open, onOpenChange, onApiKeyChange, onHistoryClick }: SettingsDialogProps) {
   const [apiKey, setApiKey] = useState("");
   const [isTesting, setIsTesting] = useState(false);
-  const [isValid, setIsValid] = useState<boolean | null>(null);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   const { settings, setFontSize, setHighContrast, setColorTheme, setProfile, resetToDefaults } = useDisplaySettings();
   const { profile, updateProfile, addFamilyMember, removeFamilyMember, resetProfile } = useUserProfile();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) {
