@@ -1,22 +1,12 @@
-import { ChefHat, Moon, Sun, Settings, History, Heart } from "lucide-react";
-import { useTheme } from "next-themes";
+import { ChefHat, Settings, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 
 interface HeaderProps {
   onSettingsClick: () => void;
-  onHistoryClick: () => void;
   onFavoritesClick: () => void;
 }
 
-export function Header({ onSettingsClick, onHistoryClick, onFavoritesClick }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
+export function Header({ onSettingsClick, onFavoritesClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
@@ -36,30 +26,10 @@ export function Header({ onSettingsClick, onHistoryClick, onFavoritesClick }: He
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => mounted && setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-8 w-8 rounded-full"
-          >
-            {mounted && theme === "dark" ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
             onClick={onFavoritesClick}
             className="h-8 w-8 rounded-full"
           >
             <Heart className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onHistoryClick}
-            className="h-8 w-8 rounded-full"
-          >
-            <History className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"

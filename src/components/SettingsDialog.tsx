@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles, UserCircle, AlertTriangle } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Sparkles, UserCircle, AlertTriangle, Moon, Sun, History } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileTab } from "./ProfileTab";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 import { useDisplaySettings, type FontSize, type ColorTheme, type AccessibilityProfile } from "@/hooks/useDisplaySettings";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
@@ -26,6 +27,7 @@ interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApiKeyChange?: (key: string) => void;
+  onHistoryClick?: () => void;
 }
 
 const colorThemes: { value: ColorTheme; label: string; color: string }[] = [
@@ -50,13 +52,19 @@ const accessibilityProfiles: { value: AccessibilityProfile; label: string; descr
   },
 ];
 
-export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsDialogProps) {
+export function SettingsDialog({ open, onOpenChange, onApiKeyChange, onHistoryClick }: SettingsDialogProps) {
   const [apiKey, setApiKey] = useState("");
   const [isTesting, setIsTesting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | null>(null);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   const { settings, setFontSize, setHighContrast, setColorTheme, setProfile, resetToDefaults } = useDisplaySettings();
   const { profile, updateProfile, addFamilyMember, removeFamilyMember, resetProfile } = useUserProfile();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -283,6 +291,30 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange }: SettingsD
                 ))}
               </RadioGroup>
             </div>
+
+            {/* Dark Mode */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {mounted && theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <Label>Mode Gelap</Label>
+              </div>
+              <Switch
+                checked={mounted && theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+            </div>
+
+            {/* History */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                onHistoryClick?.();
+              }}
+            >
+              <History className="h-4 w-4" />
+              Riwayat Resep
+            </Button>
 
             {/* Reset Button */}
             <div className="flex justify-between items-center pt-2 border-t">

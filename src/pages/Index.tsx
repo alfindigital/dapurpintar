@@ -190,7 +190,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header 
         onSettingsClick={() => setSettingsOpen(true)} 
-        onHistoryClick={() => setHistoryOpen(true)}
         onFavoritesClick={() => setFavoritesOpen(true)}
       />
 
@@ -366,6 +365,7 @@ const Index = () => {
         open={settingsOpen} 
         onOpenChange={setSettingsOpen}
         onApiKeyChange={handleApiKeyChange}
+        onHistoryClick={() => { setSettingsOpen(false); setHistoryOpen(true); }}
       />
 
       <HistoryDialog
