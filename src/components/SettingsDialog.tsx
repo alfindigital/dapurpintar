@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Eye, Sparkles, UserCircle, AlertTriangle } from "lucide-react";
+import { Key, ExternalLink, CheckCircle2, Loader2, Palette, RotateCcw, User, Sparkles, UserCircle, AlertTriangle, Moon, Sun, History } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileTab } from "./ProfileTab";
 import { testApiConnection } from "@/lib/openrouter";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 import { useDisplaySettings, type FontSize, type ColorTheme, type AccessibilityProfile } from "@/hooks/useDisplaySettings";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
@@ -26,6 +27,7 @@ interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApiKeyChange?: (key: string) => void;
+  onHistoryClick?: () => void;
 }
 
 const colorThemes: { value: ColorTheme; label: string; color: string }[] = [
