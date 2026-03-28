@@ -58,7 +58,6 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange, onHistoryCl
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const { settings, setFontSize, setHighContrast, setColorTheme, setProfile, resetToDefaults } = useDisplaySettings();
   const { profile, updateProfile, addFamilyMember, removeFamilyMember, resetProfile } = useUserProfile();
