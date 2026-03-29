@@ -56,7 +56,7 @@ export const MealPlanCell = ({
           "relative rounded-lg border-2 border-dashed border-muted bg-muted/30 flex items-center justify-center",
           baseTransition,
           dragTransition,
-          compact ? "h-16" : "h-24 md:h-28",
+          compact ? "h-14" : "h-24 md:h-28",
           isDragging && "opacity-40 scale-90 rotate-2 shadow-lg border-primary/50",
           isDragOver && "border-primary bg-primary/10 scale-105 shadow-md"
         )}
@@ -97,7 +97,7 @@ export const MealPlanCell = ({
           "relative rounded-lg border-2 border-dashed border-muted hover:border-primary/50 flex flex-col items-center justify-center gap-1 cursor-pointer group",
           baseTransition,
           dragTransition,
-          compact ? "h-16" : "h-24 md:h-28",
+          compact ? "h-14" : "h-24 md:h-28",
           isDragOver && "border-primary bg-primary/10 scale-105 shadow-md border-solid",
           isCopySource && "border-primary/30 bg-primary/5"
         )}
@@ -166,7 +166,7 @@ export const MealPlanCell = ({
         baseTransition,
         dragTransition,
         slot.isLocked && "ring-2 ring-primary/50",
-        compact ? "h-16" : "h-24 md:h-28",
+        compact ? "h-14" : "h-24 md:h-28",
         isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-2 ring-primary z-50",
         isDragOver && "ring-2 ring-primary bg-primary/10 scale-105 shadow-lg",
         isCopySource && "ring-2 ring-primary/50 bg-primary/5"

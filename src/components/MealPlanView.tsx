@@ -258,95 +258,65 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Meal Plan Minggu Ini</h2>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{getWeekRange()}</span>
-            {formattedLastSaved && (
-              <>
-                <span className="text-muted-foreground/50">•</span>
-                <span className="flex items-center gap-1">
-                  <Save className="h-3 w-3" />
-                  {formattedLastSaved}
-                </span>
-              </>
-            )}
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold truncate">Meal Plan Minggu Ini</h2>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span>{getWeekRange()}</span>
+              {formattedLastSaved && (
+                <>
+                  <span className="text-muted-foreground/50">•</span>
+                  <span className="flex items-center gap-1">
+                    <Save className="h-3 w-3" />
+                    {formattedLastSaved}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Undo/Redo buttons */}
-          <div className="flex items-center border rounded-md">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleUndo}
-              disabled={!canUndo}
-              className="h-8 px-2 rounded-r-none border-r"
-              title="Undo (Ctrl+Z)"
-            >
-              <Undo2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRedo}
-              disabled={!canRedo}
-              className="h-8 px-2 rounded-l-none"
-              title="Redo (Ctrl+Shift+Z)"
-            >
-              <Redo2 className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setTemplatesOpen(true)}
-            className="gap-1.5"
-          >
-            <BookmarkPlus className="h-4 w-4" />
-            <span className="hidden sm:inline">Template</span>
-          </Button>
-          {hasAnyRecipes && (
-            <>
-              <ShareMealPlanDropdown
-                slots={mealPlan.slots}
-                weekRange={getWeekRange()}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShoppingOpen(true)}
-                className="gap-1.5"
-              >
-                <ShoppingCart className="h-4 w-4" />
-                <span className="hidden sm:inline">Belanja</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClear}
-                className="gap-1.5"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Reset</span>
-              </Button>
-            </>
-          )}
           <Button
             onClick={() => setGenerateOpen(true)}
             disabled={isLoading}
             size="sm"
-            className="gap-1.5"
+            className="gap-1.5 shrink-0"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            Generate
+            <span className="hidden sm:inline">Generate</span>
           </Button>
+        </div>
+        
+        {/* Action buttons row */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center border rounded-md">
+            <Button variant="ghost" size="sm" onClick={handleUndo} disabled={!canUndo} className="h-8 px-2 rounded-r-none border-r" title="Undo">
+              <Undo2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleRedo} disabled={!canRedo} className="h-8 px-2 rounded-l-none" title="Redo">
+              <Redo2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setTemplatesOpen(true)} className="h-8 gap-1 px-2.5">
+            <BookmarkPlus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline text-xs">Template</span>
+          </Button>
+          {hasAnyRecipes && (
+            <>
+              <ShareMealPlanDropdown slots={mealPlan.slots} weekRange={getWeekRange()} />
+              <Button variant="outline" size="sm" onClick={() => setShoppingOpen(true)} className="h-8 gap-1 px-2.5">
+                <ShoppingCart className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline text-xs">Belanja</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleClear} className="h-8 gap-1 px-2.5">
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline text-xs">Reset</span>
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
