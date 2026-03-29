@@ -1,4 +1,4 @@
-import { ChefHat, Settings, Heart } from "lucide-react";
+import { Flame, Settings, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
@@ -12,8 +12,7 @@ export function Header({ onSettingsClick, onFavoritesClick }: HeaderProps) {
       <div className="container flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-            <ChefHat className="h-4 w-4" />
-          </div>
+            <Flame className="h-4 w-4" />
           <div className="flex flex-col">
             <h1 className="text-base font-semibold text-foreground leading-tight tracking-tight">
               <span className="font-normal">Dapur</span>Pintar
