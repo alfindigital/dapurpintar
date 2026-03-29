@@ -1,4 +1,4 @@
-import { ChefHat, CalendarDays, Activity } from "lucide-react";
+import { Flame, CalendarDays, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type MainTab = "ide-resep" | "meal-planning" | "nutrisi";
@@ -9,7 +9,7 @@ interface MainTabNavigationProps {
 }
 
 const tabs = [
-  { value: "ide-resep" as MainTab, icon: ChefHat, label: "Ide Resep", shortLabel: "Resep" },
+  { value: "ide-resep" as MainTab, icon: Flame, label: "Ide Resep", shortLabel: "Resep" },
   { value: "meal-planning" as MainTab, icon: CalendarDays, label: "Meal Plan", shortLabel: "Plan" },
   { value: "nutrisi" as MainTab, icon: Activity, label: "Nutrisi", shortLabel: "Nutrisi" },
 ];

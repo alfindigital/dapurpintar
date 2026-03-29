@@ -13,6 +13,7 @@ export function Header({ onSettingsClick, onFavoritesClick }: HeaderProps) {
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
             <Flame className="h-4 w-4" />
+          </div>
           <div className="flex flex-col">
             <h1 className="text-base font-semibold text-foreground leading-tight tracking-tight">
               <span className="font-normal">Dapur</span>Pintar
