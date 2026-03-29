@@ -54,7 +54,7 @@ export interface DailyNutrition {
 }
 
 export type FontSize = 'small' | 'normal' | 'large';
-export type ColorTheme = 'green' | 'blue' | 'orange' | 'purple';
+export type ColorTheme = 'orange' | 'warm' | 'amber' | 'coral';
 export type AccessibilityProfile = 'default' | 'lansia' | 'low-vision';
 
 export interface DisplaySettings {
@@ -204,7 +204,7 @@ export function isValidUserProfile(data: unknown): data is UserProfile {
 // ============= Display Settings Validation =============
 
 const VALID_FONT_SIZES: FontSize[] = ['small', 'normal', 'large'];
-const VALID_COLOR_THEMES: ColorTheme[] = ['green', 'blue', 'orange', 'purple'];
+const VALID_COLOR_THEMES: ColorTheme[] = ['orange', 'warm', 'amber', 'coral'];
 const VALID_PROFILES: AccessibilityProfile[] = ['default', 'lansia', 'low-vision'];
 
 export function isValidDisplaySettings(data: unknown): data is DisplaySettings {

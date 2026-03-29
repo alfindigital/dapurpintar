@@ -12,7 +12,7 @@ export type { FontSize, ColorTheme, AccessibilityProfile, DisplaySettings };
 const DEFAULT_SETTINGS: DisplaySettings = {
   fontSize: "normal",
   highContrast: false,
-  colorTheme: "green",
+  colorTheme: "orange",
   profile: "default",
 };
 
@@ -21,12 +21,12 @@ const PROFILE_PRESETS: Record<AccessibilityProfile, Omit<DisplaySettings, "profi
   default: {
     fontSize: "normal",
     highContrast: false,
-    colorTheme: "green",
+    colorTheme: "orange",
   },
   lansia: {
     fontSize: "large",
     highContrast: true,
-    colorTheme: "blue",
+    colorTheme: "warm",
   },
   "low-vision": {
     fontSize: "large",
@@ -71,7 +71,7 @@ export function useDisplaySettings() {
     }
 
     // Remove all theme classes and add current
-    html.classList.remove("theme-green", "theme-blue", "theme-orange", "theme-purple");
+    html.classList.remove("theme-orange", "theme-warm", "theme-amber", "theme-coral");
     html.classList.add(`theme-${s.colorTheme}`);
   }, []);
 
