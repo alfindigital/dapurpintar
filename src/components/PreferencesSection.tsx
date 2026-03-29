@@ -106,7 +106,7 @@ export function PreferencesSection({
             {/* Cuisine Preferences */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">Jenis Masakan</h3>
+                <h3 className="text-sm font-medium">Jenis</h3>
                 <HelpTooltip content="Pilih jenis masakan yang Anda inginkan. Bisa pilih lebih dari satu." />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -129,7 +129,7 @@ export function PreferencesSection({
             {/* Time Preferences */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">Waktu Memasak</h3>
+                <h3 className="text-sm font-medium">Waktu</h3>
                 <HelpTooltip content="Berapa lama waktu yang Anda punya untuk memasak?" />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -144,7 +144,6 @@ export function PreferencesSection({
                     onClick={() => setTime(option.id)}
                   >
                     {option.label}
-                    <span className="ml-1 text-xs opacity-70">({option.desc})</span>
                   </Badge>
                 ))}
               </div>
@@ -153,7 +152,7 @@ export function PreferencesSection({
             {/* Difficulty */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-sm font-medium">Tingkat Kesulitan</h3>
+                <h3 className="text-sm font-medium">Kesulitan</h3>
                 <HelpTooltip content="Pilih tingkat kesulitan resep yang sesuai kemampuan Anda." />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -168,7 +167,6 @@ export function PreferencesSection({
                     onClick={() => setDifficulty(option.id)}
                   >
                     {option.label}
-                    <span className="ml-1 text-xs opacity-70">({option.desc})</span>
                   </Badge>
                 ))}
               </div>

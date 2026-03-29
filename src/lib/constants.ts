@@ -9,9 +9,8 @@ export const CUISINE_OPTIONS: CuisineType[] = [
 ];
 
 export const TIME_OPTIONS = [
-  { id: "cepat", label: "Cepat", icon: "", desc: "< 30 menit" },
-  { id: "sedang", label: "Sedang", icon: "", desc: "30-60 menit" },
-  { id: "lama", label: "Lama", icon: "", desc: "> 60 menit" },
+  { id: "cepat", label: "<30 min", icon: "", desc: "" },
+  { id: "lama", label: ">30 min", icon: "", desc: "" },
 ];
 
 export const MEAL_GOAL_OPTIONS = [
@@ -22,9 +21,9 @@ export const MEAL_GOAL_OPTIONS = [
 ] as const;
 
 export const DIFFICULTY_OPTIONS = [
-  { id: "mudah", label: "Mudah", icon: "", desc: "Pemula" },
-  { id: "sedang", label: "Sedang", icon: "", desc: "Menengah" },
-  { id: "sulit", label: "Sulit", icon: "", desc: "Mahir" },
+  { id: "mudah", label: "Mudah", icon: "", desc: "" },
+  { id: "sedang", label: "Sedang", icon: "", desc: "" },
+  { id: "sulit", label: "Sulit", icon: "", desc: "" },
 ] as const;
 
 export const BUDGET_PRESETS = [
