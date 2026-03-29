@@ -485,15 +485,15 @@ export const MealPlanGrid = ({
       <DragPreview slot={draggingSlot} position={dragPosition} />
       
       {/* Search/filter input */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
+      <div className="mb-3 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Cari resep dalam meal plan..."
+            placeholder="Cari resep..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9 h-9 w-full"
           />
           {searchQuery && (
             <Button
@@ -757,34 +757,41 @@ export const MealPlanGrid = ({
         </div>
       </div>
 
-      {/* Mobile Horizontal Scroll View */}
-      <div className="md:hidden">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-3 pb-4">
-            {DAYS.map((day, dayIndex) => (
-              <div key={day} className="flex-shrink-0 w-[280px]">
-                <div className="mb-2 text-center">
-                  <div className="text-sm font-medium">{day}</div>
-                  <div className="text-xs text-muted-foreground">
+      {/* Mobile Vertical Card View */}
+      <div className="md:hidden space-y-3">
+        {DAYS.map((day, dayIndex) => {
+          const daySlots = MEAL_TIMES.map(({ key }) => getSlot(dayIndex, key)).filter(Boolean);
+          const filledCount = daySlots.filter(s => s?.recipe && !s.isSkipped).length;
+          
+          return (
+            <div key={day} className="rounded-xl border bg-card overflow-hidden">
+              {/* Day header */}
+              <div className="flex items-center justify-between px-3 py-2.5 bg-muted/40 border-b">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">{day}</span>
+                  <span className="text-xs text-muted-foreground">
                     {getFormattedDate(mealPlan.weekStart, dayIndex)}
-                  </div>
+                  </span>
                 </div>
-                <div className="space-y-2">
-                  {MEAL_TIMES.map(({ key, label }) => {
-                    const slot = getSlot(dayIndex, key);
-                    return (
-                      <div key={key}>
-                        <div className="text-xs text-muted-foreground mb-1">{label}</div>
-                        {renderCell(slot, true)}
-                      </div>
-                    );
-                  })}
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  {filledCount}/3 menu
+                </span>
               </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+              {/* Meals */}
+              <div className="divide-y">
+                {MEAL_TIMES.map(({ key, label }) => {
+                  const slot = getSlot(dayIndex, key);
+                  return (
+                    <div key={key} className="px-3 py-2">
+                      <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{label}</div>
+                      {renderCell(slot, true)}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
