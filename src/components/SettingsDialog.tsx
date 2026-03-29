@@ -31,10 +31,10 @@ interface SettingsDialogProps {
 }
 
 const colorThemes: { value: ColorTheme; label: string; color: string }[] = [
-  { value: "green", label: "Hijau", color: "hsl(160 84% 39%)" },
-  { value: "blue", label: "Biru", color: "hsl(217 91% 50%)" },
-  { value: "orange", label: "Oranye", color: "hsl(25 95% 53%)" },
-  { value: "purple", label: "Ungu", color: "hsl(270 70% 55%)" },
+  { value: "orange", label: "Oranye", color: "hsl(24 85% 50%)" },
+  { value: "warm", label: "Hangat", color: "hsl(15 80% 45%)" },
+  { value: "amber", label: "Amber", color: "hsl(36 100% 45%)" },
+  { value: "coral", label: "Coral", color: "hsl(6 78% 57%)" },
 ];
 
 const accessibilityProfiles: { value: AccessibilityProfile; label: string; description: string; icon: React.ReactNode }[] = [
