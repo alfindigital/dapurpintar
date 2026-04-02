@@ -17,6 +17,7 @@ import { ConfettiCelebration } from "./ConfettiCelebration";
 import { ShareMealPlanDropdown } from "./ShareMealPlanDropdown";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
+import { generateMockMealPlan } from "@/lib/mockMealPlanData";
 import { toast } from "sonner";
 
 interface MealPlanViewProps {
