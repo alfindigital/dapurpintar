@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet, Play } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBudgetTracking } from "@/hooks/useBudgetTracking";
@@ -17,6 +17,7 @@ import { ConfettiCelebration } from "./ConfettiCelebration";
 import { ShareMealPlanDropdown } from "./ShareMealPlanDropdown";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
+import { generateMockMealPlan } from "@/lib/mockMealPlanData";
 import { toast } from "sonner";
 
 interface MealPlanViewProps {
@@ -186,6 +187,15 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     }
   };
 
+  const handleLoadDemo = () => {
+    if (!mealPlan) return;
+    const mockSlots = generateMockMealPlan(mealPlan.slots);
+    setSlots(mockSlots);
+    const budgetEntry = calculateWeeklyBudget(mockSlots, mealPlan.weekStart);
+    saveWeeklyBudget(budgetEntry);
+    toast.success("Demo meal plan berhasil dimuat! 🎉");
+  };
+
   const handleClear = () => {
     clearPlan();
     toast.success("Meal plan dikosongkan (menu yang dikunci tetap ada)");
@@ -337,8 +347,12 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
           <Sparkles className="h-8 w-8 mx-auto mb-2 text-primary/60" />
           <p className="font-medium">Belum ada meal plan</p>
           <p className="text-sm text-muted-foreground mb-3">
-            Klik "Generate" untuk membuat menu mingguan otomatis
+            Klik "Generate" untuk membuat menu otomatis, atau coba Demo
           </p>
+          <Button variant="outline" size="sm" onClick={handleLoadDemo} className="gap-1.5">
+            <Play className="h-4 w-4" />
+            Coba Demo
+          </Button>
         </div>
       )}
 
