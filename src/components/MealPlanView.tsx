@@ -187,6 +187,15 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
     }
   };
 
+  const handleLoadDemo = () => {
+    if (!mealPlan) return;
+    const mockSlots = generateMockMealPlan(mealPlan.slots);
+    setSlots(mockSlots);
+    const budgetEntry = calculateWeeklyBudget(mockSlots, mealPlan.weekStart);
+    saveWeeklyBudget(budgetEntry);
+    toast.success("Demo meal plan berhasil dimuat! 🎉");
+  };
+
   const handleClear = () => {
     clearPlan();
     toast.success("Meal plan dikosongkan (menu yang dikunci tetap ada)");
