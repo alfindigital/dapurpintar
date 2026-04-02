@@ -201,7 +201,6 @@ export const GeneratePlanDialog = ({
                   onClick={() => setPreferences({ ...preferences, tingkatKesulitan: option.id as TingkatKesulitan })}
                 >
                   {option.label}
-                  <span className="ml-1 text-xs opacity-70">({option.desc})</span>
                 </Badge>
               ))}
             </div>
