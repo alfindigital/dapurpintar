@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet } from "lucide-react";
+import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet, Play } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBudgetTracking } from "@/hooks/useBudgetTracking";
