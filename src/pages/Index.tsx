@@ -7,10 +7,6 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { HistoryDialog } from "@/components/HistoryDialog";
 import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
-import { MealPlanView } from "@/components/MealPlanView";
-import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
-import { WeeklyNutritionReport } from "@/components/WeeklyNutritionReport";
-import { MonthlyNutritionReport } from "@/components/MonthlyNutritionReport";
 import {
   ChartSkeleton,
   HeatmapSkeleton,
@@ -19,6 +15,18 @@ import {
   WaterTrackerSkeleton,
 } from "@/components/ChartSkeleton";
 import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
+import { Loader2 } from "lucide-react";
+
+// Lazy load tab content and heavy chart components
+const MealPlanView = lazy(() => import("@/components/MealPlanView").then(m => ({ default: m.MealPlanView })));
+const DailyNutritionTracker = lazy(() => import("@/components/DailyNutritionTracker").then(m => ({ default: m.DailyNutritionTracker })));
+const WeeklyNutritionReport = lazy(() => import("@/components/WeeklyNutritionReport").then(m => ({ default: m.WeeklyNutritionReport })));
+const MonthlyNutritionReport = lazy(() => import("@/components/MonthlyNutritionReport").then(m => ({ default: m.MonthlyNutritionReport })));
+const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
+const WeightProgressChart = lazy(() => import("@/components/WeightProgressChart").then(m => ({ default: m.WeightProgressChart })));
+const WaterTracker = lazy(() => import("@/components/WaterTracker").then(m => ({ default: m.WaterTracker })));
+const NutritionOverview = lazy(() => import("@/components/NutritionOverview").then(m => ({ default: m.NutritionOverview })));
+const CalorieHeatmap = lazy(() => import("@/components/CalorieHeatmap").then(m => ({ default: m.CalorieHeatmap })));
 
 // Lazy load heavy chart components
 const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
