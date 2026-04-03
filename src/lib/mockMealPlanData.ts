@@ -241,21 +241,35 @@ const mockRecipes: Recipe[] = [
   },
 ];
 
-export function generateMockMealPlan(currentSlots: MealSlot[]): MealSlot[] {
-  const sarapanRecipes = mockRecipes.slice(0, 7);
-  const siangRecipes = mockRecipes.slice(7, 14);
-  const malamRecipes = mockRecipes.slice(14, 21);
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
-  return currentSlots.map((slot, _idx) => {
+export function generateMockMealPlan(currentSlots: MealSlot[]): MealSlot[] {
+  const allSarapan = shuffle(mockRecipes.filter(r =>
+    ["mock-1","mock-2","mock-3","mock-4","mock-5","mock-6","mock-7","mock-22","mock-23","mock-24","mock-25"].includes(r.id)
+  ));
+  const allSiang = shuffle(mockRecipes.filter(r =>
+    ["mock-8","mock-9","mock-10","mock-11","mock-12","mock-13","mock-14","mock-26","mock-27","mock-28","mock-29"].includes(r.id)
+  ));
+  const allMalam = shuffle(mockRecipes.filter(r =>
+    ["mock-15","mock-16","mock-17","mock-18","mock-19","mock-20","mock-21","mock-30","mock-31","mock-32","mock-33"].includes(r.id)
+  ));
+
+  return currentSlots.map((slot) => {
     if (slot.isLocked || slot.isSkipped) return slot;
 
     let pool: Recipe[];
-    if (slot.mealTime === "sarapan") pool = sarapanRecipes;
-    else if (slot.mealTime === "makan_siang") pool = siangRecipes;
-    else pool = malamRecipes;
+    if (slot.mealTime === "sarapan") pool = allSarapan;
+    else if (slot.mealTime === "makan_siang") pool = allSiang;
+    else pool = allMalam;
 
     const recipe = pool[slot.dayIndex % pool.length];
-
     return { ...slot, recipe: { ...recipe, id: `mock-${slot.id}` } };
   });
 }
