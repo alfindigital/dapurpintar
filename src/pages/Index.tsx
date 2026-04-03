@@ -28,12 +28,6 @@ const WaterTracker = lazy(() => import("@/components/WaterTracker").then(m => ({
 const NutritionOverview = lazy(() => import("@/components/NutritionOverview").then(m => ({ default: m.NutritionOverview })));
 const CalorieHeatmap = lazy(() => import("@/components/CalorieHeatmap").then(m => ({ default: m.CalorieHeatmap })));
 
-// Lazy load heavy chart components
-const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
-const WeightProgressChart = lazy(() => import("@/components/WeightProgressChart").then(m => ({ default: m.WeightProgressChart })));
-const WaterTracker = lazy(() => import("@/components/WaterTracker").then(m => ({ default: m.WaterTracker })));
-const NutritionOverview = lazy(() => import("@/components/NutritionOverview").then(m => ({ default: m.NutritionOverview })));
-const CalorieHeatmap = lazy(() => import("@/components/CalorieHeatmap").then(m => ({ default: m.CalorieHeatmap })));
 import { useWaterTracking } from "@/hooks/useWaterTracking";
 import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
