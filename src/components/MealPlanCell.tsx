@@ -24,7 +24,7 @@ interface MealPlanCellProps {
   onRemove?: () => void;
 }
 
-export const MealPlanCell = ({
+export const MealPlanCell = memo(({
   slot,
   onToggleLock,
   onToggleSkip,
