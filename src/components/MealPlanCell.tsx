@@ -319,4 +319,6 @@ export const MealPlanCell = memo(({
       )} />
     </div>
   );
-};
+});
+
+MealPlanCell.displayName = "MealPlanCell";
