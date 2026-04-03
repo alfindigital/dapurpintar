@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MealSlot } from "@/types/mealPlan";
 import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight, Copy, ClipboardPaste, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
