@@ -369,64 +369,74 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         onRemoveRecipe={(slotId) => updateSlot(slotId, null)}
       />
 
-      {/* Detail Sheet */}
-      <MealDetailSheet
-        slot={selectedSlot}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      {/* Lazy-loaded dialogs - only mount when opened */}
+      <Suspense fallback={null}>
+        {detailOpen && (
+          <MealDetailSheet
+            slot={selectedSlot}
+            open={detailOpen}
+            onOpenChange={setDetailOpen}
+          />
+        )}
 
-      {/* Generate Dialog */}
-      <GeneratePlanDialog
-        open={generateOpen}
-        onOpenChange={setGenerateOpen}
-        onGenerate={handleGenerate}
-        isGenerating={isLoading}
-        hasLockedSlots={hasLockedSlots}
-      />
+        {generateOpen && (
+          <GeneratePlanDialog
+            open={generateOpen}
+            onOpenChange={setGenerateOpen}
+            onGenerate={handleGenerate}
+            isGenerating={isLoading}
+            hasLockedSlots={hasLockedSlots}
+          />
+        )}
 
-      {/* Shopping List Dialog */}
-      <ShoppingListDialog
-        open={shoppingOpen}
-        onOpenChange={setShoppingOpen}
-        slots={mealPlan.slots}
-      />
+        {shoppingOpen && (
+          <ShoppingListDialog
+            open={shoppingOpen}
+            onOpenChange={setShoppingOpen}
+            slots={mealPlan.slots}
+          />
+        )}
 
-      {/* Templates Dialog */}
-      <TemplatesDialog
-        open={templatesOpen}
-        onOpenChange={setTemplatesOpen}
-        templates={templates}
-        onSaveTemplate={saveAsTemplate}
-        onApplyTemplate={applyTemplate}
-        onDeleteTemplate={deleteTemplate}
-        onRenameTemplate={renameTemplate}
-        hasCurrentPlan={hasAnyRecipes}
-      />
+        {templatesOpen && (
+          <TemplatesDialog
+            open={templatesOpen}
+            onOpenChange={setTemplatesOpen}
+            templates={templates}
+            onSaveTemplate={saveAsTemplate}
+            onApplyTemplate={applyTemplate}
+            onDeleteTemplate={deleteTemplate}
+            onRenameTemplate={renameTemplate}
+            hasCurrentPlan={hasAnyRecipes}
+          />
+        )}
 
-      {/* Budget Settings Dialog */}
-      <BudgetSettingsDialog
-        open={budgetSettingsOpen}
-        onOpenChange={setBudgetSettingsOpen}
-        settings={budgetSettings}
-        onSave={updateBudgetSettings}
-      />
+        {budgetSettingsOpen && (
+          <BudgetSettingsDialog
+            open={budgetSettingsOpen}
+            onOpenChange={setBudgetSettingsOpen}
+            settings={budgetSettings}
+            onSave={updateBudgetSettings}
+          />
+        )}
 
-      {/* Budget Detail Sheet */}
-      <BudgetDetailSheet
-        open={budgetDetailOpen}
-        onOpenChange={setBudgetDetailOpen}
-        budgetHistory={budgetHistory}
-        categoryBreakdown={categoryBreakdown}
-        settings={budgetSettings}
-        monthlyTotal={monthlyTotal}
-      />
+        {budgetDetailOpen && (
+          <BudgetDetailSheet
+            open={budgetDetailOpen}
+            onOpenChange={setBudgetDetailOpen}
+            budgetHistory={budgetHistory}
+            categoryBreakdown={categoryBreakdown}
+            settings={budgetSettings}
+            monthlyTotal={monthlyTotal}
+          />
+        )}
 
-      {/* Confetti Celebration */}
-      <ConfettiCelebration
-        isActive={showCelebration}
-        onComplete={handleCelebrationComplete}
-      />
+        {showCelebration && (
+          <ConfettiCelebration
+            isActive={showCelebration}
+            onComplete={handleCelebrationComplete}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };
