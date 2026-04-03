@@ -1,24 +1,26 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ShoppingCart, Trash2, Loader2, BookmarkPlus, Undo2, Redo2, Save, Wallet, Play } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBudgetTracking } from "@/hooks/useBudgetTracking";
 import { MealPlanGrid } from "./MealPlanGrid";
-import { MealDetailSheet } from "./MealDetailSheet";
-import { GeneratePlanDialog } from "./GeneratePlanDialog";
-import { ShoppingListDialog } from "./ShoppingListDialog";
-import { TemplatesDialog } from "./TemplatesDialog";
 import { BudgetOverviewCard } from "./BudgetOverviewCard";
 import { BudgetAlertBanner } from "./BudgetAlertBanner";
-import { BudgetSettingsDialog } from "./BudgetSettingsDialog";
-import { BudgetDetailSheet } from "./BudgetDetailSheet";
-import { ConfettiCelebration } from "./ConfettiCelebration";
 import { ShareMealPlanDropdown } from "./ShareMealPlanDropdown";
 import { MealSlot, MealPlanPreferences } from "@/types/mealPlan";
 import { generateMealPlan } from "@/lib/mealPlanGenerator";
 import { generateMockMealPlan } from "@/lib/mockMealPlanData";
 import { toast } from "sonner";
+
+// Lazy load dialogs - only loaded when opened
+const MealDetailSheet = lazy(() => import("./MealDetailSheet").then(m => ({ default: m.MealDetailSheet })));
+const GeneratePlanDialog = lazy(() => import("./GeneratePlanDialog").then(m => ({ default: m.GeneratePlanDialog })));
+const ShoppingListDialog = lazy(() => import("./ShoppingListDialog").then(m => ({ default: m.ShoppingListDialog })));
+const TemplatesDialog = lazy(() => import("./TemplatesDialog").then(m => ({ default: m.TemplatesDialog })));
+const BudgetSettingsDialog = lazy(() => import("./BudgetSettingsDialog").then(m => ({ default: m.BudgetSettingsDialog })));
+const BudgetDetailSheet = lazy(() => import("./BudgetDetailSheet").then(m => ({ default: m.BudgetDetailSheet })));
+const ConfettiCelebration = lazy(() => import("./ConfettiCelebration").then(m => ({ default: m.ConfettiCelebration })));
 
 interface MealPlanViewProps {
   apiKey: string;
@@ -367,64 +369,74 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
         onRemoveRecipe={(slotId) => updateSlot(slotId, null)}
       />
 
-      {/* Detail Sheet */}
-      <MealDetailSheet
-        slot={selectedSlot}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      {/* Lazy-loaded dialogs - only mount when opened */}
+      <Suspense fallback={null}>
+        {detailOpen && (
+          <MealDetailSheet
+            slot={selectedSlot}
+            open={detailOpen}
+            onOpenChange={setDetailOpen}
+          />
+        )}
 
-      {/* Generate Dialog */}
-      <GeneratePlanDialog
-        open={generateOpen}
-        onOpenChange={setGenerateOpen}
-        onGenerate={handleGenerate}
-        isGenerating={isLoading}
-        hasLockedSlots={hasLockedSlots}
-      />
+        {generateOpen && (
+          <GeneratePlanDialog
+            open={generateOpen}
+            onOpenChange={setGenerateOpen}
+            onGenerate={handleGenerate}
+            isGenerating={isLoading}
+            hasLockedSlots={hasLockedSlots}
+          />
+        )}
 
-      {/* Shopping List Dialog */}
-      <ShoppingListDialog
-        open={shoppingOpen}
-        onOpenChange={setShoppingOpen}
-        slots={mealPlan.slots}
-      />
+        {shoppingOpen && (
+          <ShoppingListDialog
+            open={shoppingOpen}
+            onOpenChange={setShoppingOpen}
+            slots={mealPlan.slots}
+          />
+        )}
 
-      {/* Templates Dialog */}
-      <TemplatesDialog
-        open={templatesOpen}
-        onOpenChange={setTemplatesOpen}
-        templates={templates}
-        onSaveTemplate={saveAsTemplate}
-        onApplyTemplate={applyTemplate}
-        onDeleteTemplate={deleteTemplate}
-        onRenameTemplate={renameTemplate}
-        hasCurrentPlan={hasAnyRecipes}
-      />
+        {templatesOpen && (
+          <TemplatesDialog
+            open={templatesOpen}
+            onOpenChange={setTemplatesOpen}
+            templates={templates}
+            onSaveTemplate={saveAsTemplate}
+            onApplyTemplate={applyTemplate}
+            onDeleteTemplate={deleteTemplate}
+            onRenameTemplate={renameTemplate}
+            hasCurrentPlan={hasAnyRecipes}
+          />
+        )}
 
-      {/* Budget Settings Dialog */}
-      <BudgetSettingsDialog
-        open={budgetSettingsOpen}
-        onOpenChange={setBudgetSettingsOpen}
-        settings={budgetSettings}
-        onSave={updateBudgetSettings}
-      />
+        {budgetSettingsOpen && (
+          <BudgetSettingsDialog
+            open={budgetSettingsOpen}
+            onOpenChange={setBudgetSettingsOpen}
+            settings={budgetSettings}
+            onSave={updateBudgetSettings}
+          />
+        )}
 
-      {/* Budget Detail Sheet */}
-      <BudgetDetailSheet
-        open={budgetDetailOpen}
-        onOpenChange={setBudgetDetailOpen}
-        budgetHistory={budgetHistory}
-        categoryBreakdown={categoryBreakdown}
-        settings={budgetSettings}
-        monthlyTotal={monthlyTotal}
-      />
+        {budgetDetailOpen && (
+          <BudgetDetailSheet
+            open={budgetDetailOpen}
+            onOpenChange={setBudgetDetailOpen}
+            budgetHistory={budgetHistory}
+            categoryBreakdown={categoryBreakdown}
+            settings={budgetSettings}
+            monthlyTotal={monthlyTotal}
+          />
+        )}
 
-      {/* Confetti Celebration */}
-      <ConfettiCelebration
-        isActive={showCelebration}
-        onComplete={handleCelebrationComplete}
-      />
+        {showCelebration && (
+          <ConfettiCelebration
+            isActive={showCelebration}
+            onComplete={handleCelebrationComplete}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

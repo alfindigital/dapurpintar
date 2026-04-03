@@ -7,10 +7,6 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import { HistoryDialog } from "@/components/HistoryDialog";
 import { FavoritesDialog } from "@/components/FavoritesDialog";
 import { MainTabNavigation, MainTab } from "@/components/MainTabNavigation";
-import { MealPlanView } from "@/components/MealPlanView";
-import { DailyNutritionTracker } from "@/components/DailyNutritionTracker";
-import { WeeklyNutritionReport } from "@/components/WeeklyNutritionReport";
-import { MonthlyNutritionReport } from "@/components/MonthlyNutritionReport";
 import {
   ChartSkeleton,
   HeatmapSkeleton,
@@ -20,12 +16,18 @@ import {
 } from "@/components/ChartSkeleton";
 import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
 
-// Lazy load heavy chart components
+
+// Lazy load tab content and heavy chart components
+const MealPlanView = lazy(() => import("@/components/MealPlanView").then(m => ({ default: m.MealPlanView })));
+const DailyNutritionTracker = lazy(() => import("@/components/DailyNutritionTracker").then(m => ({ default: m.DailyNutritionTracker })));
+const WeeklyNutritionReport = lazy(() => import("@/components/WeeklyNutritionReport").then(m => ({ default: m.WeeklyNutritionReport })));
+const MonthlyNutritionReport = lazy(() => import("@/components/MonthlyNutritionReport").then(m => ({ default: m.MonthlyNutritionReport })));
 const WeeklyNutritionChart = lazy(() => import("@/components/WeeklyNutritionChart").then(m => ({ default: m.WeeklyNutritionChart })));
 const WeightProgressChart = lazy(() => import("@/components/WeightProgressChart").then(m => ({ default: m.WeightProgressChart })));
 const WaterTracker = lazy(() => import("@/components/WaterTracker").then(m => ({ default: m.WaterTracker })));
 const NutritionOverview = lazy(() => import("@/components/NutritionOverview").then(m => ({ default: m.NutritionOverview })));
 const CalorieHeatmap = lazy(() => import("@/components/CalorieHeatmap").then(m => ({ default: m.CalorieHeatmap })));
+
 import { useWaterTracking } from "@/hooks/useWaterTracking";
 import { useWeightTracking } from "@/hooks/useWeightTracking";
 import { calculateDailyWaterIntake } from "@/types/profile";
@@ -245,7 +247,9 @@ const Index = () => {
 
       {activeTab === "meal-planning" && (
         <main className="container max-w-4xl mx-auto px-4 py-4 animate-in fade-in duration-300">
-          <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+          </Suspense>
         </main>
       )}
 
@@ -264,46 +268,50 @@ const Index = () => {
           </ChartErrorBoundary>
 
           {/* Daily Nutrition Tracker */}
-          <DailyNutritionTracker
-            entries={dailyData.entries}
-            totalKalori={dailyData.totalKalori}
-            totalProtein={dailyData.totalProtein}
-            totalKarbohidrat={dailyData.totalKarbohidrat}
-            totalLemak={dailyData.totalLemak}
-            targetKalori={profile.targetKalori || 2000}
-            targetProtein={profile.targetProtein || 50}
-            targetKarbohidrat={profile.targetKarbohidrat || 250}
-            targetLemak={profile.targetLemak || 65}
-            onRemoveEntry={removeEntry}
-            onClearAll={clearToday}
-            onAddEntry={addEntry}
-          />
+          <Suspense fallback={<ChartSkeleton />}>
+            <DailyNutritionTracker
+              entries={dailyData.entries}
+              totalKalori={dailyData.totalKalori}
+              totalProtein={dailyData.totalProtein}
+              totalKarbohidrat={dailyData.totalKarbohidrat}
+              totalLemak={dailyData.totalLemak}
+              targetKalori={profile.targetKalori || 2000}
+              targetProtein={profile.targetProtein || 50}
+              targetKarbohidrat={profile.targetKarbohidrat || 250}
+              targetLemak={profile.targetLemak || 65}
+              onRemoveEntry={removeEntry}
+              onClearAll={clearToday}
+              onAddEntry={addEntry}
+            />
+          </Suspense>
 
           {/* Weekly & Monthly Reports */}
-          <div className="flex justify-end gap-2 flex-wrap">
-            <WeeklyNutritionReport
-              weeklyData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              targetProtein={profile.targetProtein}
-              targetKarbohidrat={profile.targetKarbohidrat}
-              targetLemak={profile.targetLemak}
-              waterStats={waterStats}
-              waterTarget={waterTarget}
-            />
-            <MonthlyNutritionReport
-              monthlyData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              targetProtein={profile.targetProtein}
-              targetKarbohidrat={profile.targetKarbohidrat}
-              targetLemak={profile.targetLemak}
-              weightEntries={weightEntries}
-              targetWeight={profile.targetBeratBadan}
-              waterStats={waterStats}
-              waterTarget={waterTarget}
-              unlockedWaterAchievements={unlockedWaterAchievements}
-              unlockedWeightAchievements={unlockedWeightAchievements}
-            />
-          </div>
+          <Suspense fallback={null}>
+            <div className="flex justify-end gap-2 flex-wrap">
+              <WeeklyNutritionReport
+                weeklyData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                targetProtein={profile.targetProtein}
+                targetKarbohidrat={profile.targetKarbohidrat}
+                targetLemak={profile.targetLemak}
+                waterStats={waterStats}
+                waterTarget={waterTarget}
+              />
+              <MonthlyNutritionReport
+                monthlyData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                targetProtein={profile.targetProtein}
+                targetKarbohidrat={profile.targetKarbohidrat}
+                targetLemak={profile.targetLemak}
+                weightEntries={weightEntries}
+                targetWeight={profile.targetBeratBadan}
+                waterStats={waterStats}
+                waterTarget={waterTarget}
+                unlockedWaterAchievements={unlockedWaterAchievements}
+                unlockedWeightAchievements={unlockedWeightAchievements}
+              />
+            </div>
+          </Suspense>
 
           <ChartErrorBoundary fallbackTitle="Gagal memuat grafik mingguan">
             <Suspense fallback={<ChartSkeleton showStats showToggle />}>

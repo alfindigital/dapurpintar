@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MealSlot } from "@/types/mealPlan";
 import { Lock, LockOpen, SkipForward, Plus, ChevronRight, GripVertical, ArrowLeftRight, Copy, ClipboardPaste, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ interface MealPlanCellProps {
   onRemove?: () => void;
 }
 
-export const MealPlanCell = ({
+export const MealPlanCell = memo(({
   slot,
   onToggleLock,
   onToggleSkip,
@@ -318,4 +319,6 @@ export const MealPlanCell = ({
       )} />
     </div>
   );
-};
+});
+
+MealPlanCell.displayName = "MealPlanCell";
