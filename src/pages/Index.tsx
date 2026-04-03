@@ -15,7 +15,7 @@ import {
   WaterTrackerSkeleton,
 } from "@/components/ChartSkeleton";
 import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
-import { Loader2 } from "lucide-react";
+
 
 // Lazy load tab content and heavy chart components
 const MealPlanView = lazy(() => import("@/components/MealPlanView").then(m => ({ default: m.MealPlanView })));
