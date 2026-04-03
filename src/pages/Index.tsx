@@ -268,46 +268,50 @@ const Index = () => {
           </ChartErrorBoundary>
 
           {/* Daily Nutrition Tracker */}
-          <DailyNutritionTracker
-            entries={dailyData.entries}
-            totalKalori={dailyData.totalKalori}
-            totalProtein={dailyData.totalProtein}
-            totalKarbohidrat={dailyData.totalKarbohidrat}
-            totalLemak={dailyData.totalLemak}
-            targetKalori={profile.targetKalori || 2000}
-            targetProtein={profile.targetProtein || 50}
-            targetKarbohidrat={profile.targetKarbohidrat || 250}
-            targetLemak={profile.targetLemak || 65}
-            onRemoveEntry={removeEntry}
-            onClearAll={clearToday}
-            onAddEntry={addEntry}
-          />
+          <Suspense fallback={<ChartSkeleton />}>
+            <DailyNutritionTracker
+              entries={dailyData.entries}
+              totalKalori={dailyData.totalKalori}
+              totalProtein={dailyData.totalProtein}
+              totalKarbohidrat={dailyData.totalKarbohidrat}
+              totalLemak={dailyData.totalLemak}
+              targetKalori={profile.targetKalori || 2000}
+              targetProtein={profile.targetProtein || 50}
+              targetKarbohidrat={profile.targetKarbohidrat || 250}
+              targetLemak={profile.targetLemak || 65}
+              onRemoveEntry={removeEntry}
+              onClearAll={clearToday}
+              onAddEntry={addEntry}
+            />
+          </Suspense>
 
           {/* Weekly & Monthly Reports */}
-          <div className="flex justify-end gap-2 flex-wrap">
-            <WeeklyNutritionReport
-              weeklyData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              targetProtein={profile.targetProtein}
-              targetKarbohidrat={profile.targetKarbohidrat}
-              targetLemak={profile.targetLemak}
-              waterStats={waterStats}
-              waterTarget={waterTarget}
-            />
-            <MonthlyNutritionReport
-              monthlyData={weeklyNutritionData}
-              targetKalori={profile.targetKalori || 2000}
-              targetProtein={profile.targetProtein}
-              targetKarbohidrat={profile.targetKarbohidrat}
-              targetLemak={profile.targetLemak}
-              weightEntries={weightEntries}
-              targetWeight={profile.targetBeratBadan}
-              waterStats={waterStats}
-              waterTarget={waterTarget}
-              unlockedWaterAchievements={unlockedWaterAchievements}
-              unlockedWeightAchievements={unlockedWeightAchievements}
-            />
-          </div>
+          <Suspense fallback={null}>
+            <div className="flex justify-end gap-2 flex-wrap">
+              <WeeklyNutritionReport
+                weeklyData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                targetProtein={profile.targetProtein}
+                targetKarbohidrat={profile.targetKarbohidrat}
+                targetLemak={profile.targetLemak}
+                waterStats={waterStats}
+                waterTarget={waterTarget}
+              />
+              <MonthlyNutritionReport
+                monthlyData={weeklyNutritionData}
+                targetKalori={profile.targetKalori || 2000}
+                targetProtein={profile.targetProtein}
+                targetKarbohidrat={profile.targetKarbohidrat}
+                targetLemak={profile.targetLemak}
+                weightEntries={weightEntries}
+                targetWeight={profile.targetBeratBadan}
+                waterStats={waterStats}
+                waterTarget={waterTarget}
+                unlockedWaterAchievements={unlockedWaterAchievements}
+                unlockedWeightAchievements={unlockedWeightAchievements}
+              />
+            </div>
+          </Suspense>
 
           <ChartErrorBoundary fallbackTitle="Gagal memuat grafik mingguan">
             <Suspense fallback={<ChartSkeleton showStats showToggle />}>
