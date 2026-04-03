@@ -247,7 +247,9 @@ const Index = () => {
 
       {activeTab === "meal-planning" && (
         <main className="container max-w-4xl mx-auto px-4 py-4 animate-in fade-in duration-300">
-          <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+          <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <MealPlanView apiKey={apiKey} onSettingsClick={() => setSettingsOpen(true)} />
+          </Suspense>
         </main>
       )}
 
