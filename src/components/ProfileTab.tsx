@@ -428,8 +428,8 @@ export function ProfileTab({
             <RadioGroup
               value={profile.tujuanNutrisi || 'jaga_berat'}
               onValueChange={(value) => onUpdateProfile({ tujuanNutrisi: value as UserProfile['tujuanNutrisi'] })}
-              className="flex gap-4"
-            >
+               className="flex flex-wrap gap-3"
+             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="turun_berat" id="goal-turun" />
                 <Label htmlFor="goal-turun" className="cursor-pointer text-sm">Turun Berat</Label>
