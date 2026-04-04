@@ -354,20 +354,6 @@ const Index = () => {
         </main>
       )}
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-[11px] text-muted-foreground/60">
-        <p>
-          made by{" "}
-          <a 
-            href="https://alfindigital.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="font-medium hover:underline hover:text-muted-foreground transition-colors"
-          >
-            alfindigital
-          </a>
-        </p>
-      </footer>
 
       <SettingsDialog 
         open={settingsOpen} 
