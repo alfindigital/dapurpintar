@@ -107,7 +107,7 @@ export function SettingsDialog({ open, onOpenChange, onApiKeyChange, onHistoryCl
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden w-[calc(100vw-2rem)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />

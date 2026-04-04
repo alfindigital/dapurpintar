@@ -104,7 +104,7 @@ export function ProfileTab({
             <HelpTooltip content="Data ini digunakan AI untuk mempersonalisasi resep" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="profile-name">Nama</Label>
               <Input
@@ -211,7 +211,7 @@ export function ProfileTab({
             <HelpTooltip content="Untuk memprioritaskan masakan daerah Anda" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Provinsi</Label>
               <Select value={profile.provinsi} onValueChange={handleProvinsiChange}>
@@ -264,7 +264,7 @@ export function ProfileTab({
               <RadioGroup
                 value={profile.kemampuanMasak}
                 onValueChange={(value) => onUpdateProfile({ kemampuanMasak: value as UserProfile['kemampuanMasak'] })}
-                className="flex gap-4"
+                className="flex flex-wrap gap-3"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="pemula" id="skill-pemula" />
@@ -281,7 +281,7 @@ export function ProfileTab({
               </RadioGroup>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -349,7 +349,7 @@ export function ProfileTab({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Jenis Kelamin</Label>
               <Select 
@@ -399,7 +399,7 @@ export function ProfileTab({
 
 
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <div className="flex items-center gap-1">
                 <Activity className="h-3 w-3 text-muted-foreground" />
@@ -428,8 +428,8 @@ export function ProfileTab({
             <RadioGroup
               value={profile.tujuanNutrisi || 'jaga_berat'}
               onValueChange={(value) => onUpdateProfile({ tujuanNutrisi: value as UserProfile['tujuanNutrisi'] })}
-              className="flex gap-4"
-            >
+               className="flex flex-wrap gap-3"
+             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="turun_berat" id="goal-turun" />
                 <Label htmlFor="goal-turun" className="cursor-pointer text-sm">Turun Berat</Label>
@@ -486,7 +486,7 @@ export function ProfileTab({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="target-kalori">Target Kalori (kkal)</Label>
               <Input
