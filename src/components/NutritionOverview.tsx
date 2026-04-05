@@ -1,8 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Flame, Droplets, TrendingUp, Target, Zap, Trophy } from "lucide-react";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
-import { NutritionOverviewSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface NutritionOverviewProps {
   weeklyNutrition: Record<string, DailyNutrition>;
