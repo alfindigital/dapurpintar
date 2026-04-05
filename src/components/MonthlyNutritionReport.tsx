@@ -12,8 +12,6 @@ import {
   Calendar, BarChart3, PieChart, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { DailyNutrition } from '@/hooks/useDailyNutrition';
 import { WeightEntry } from '@/hooks/useWeightTracking';
 import { 
@@ -176,6 +174,8 @@ export function MonthlyNutritionReport({
 
     setIsExporting(true);
     try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();

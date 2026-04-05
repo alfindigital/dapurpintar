@@ -9,8 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BudgetEntry, BudgetSettings, KategoriBiaya, BUDGET_CATEGORIES } from "@/types/mealPlan";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 interface BudgetReportExportProps {
@@ -61,6 +59,7 @@ export const BudgetReportExport = ({
     if (!reportRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -81,6 +80,8 @@ export const BudgetReportExport = ({
     if (!reportRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,

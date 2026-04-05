@@ -23,8 +23,6 @@ import {
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 interface WeeklyNutritionReportProps {
@@ -134,6 +132,8 @@ export function WeeklyNutritionReport({
     setIsExporting(true);
     
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,

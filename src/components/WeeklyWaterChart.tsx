@@ -20,8 +20,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 interface DailyWaterRecord {
   date: string;
@@ -71,6 +69,7 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: null,
         scale: 2,
@@ -91,6 +90,8 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,

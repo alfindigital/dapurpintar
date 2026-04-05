@@ -25,10 +25,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { WeightAchievements } from "./WeightAchievements";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { WeightChartSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface WeightProgressChartProps {
   targetWeight?: number;
@@ -98,6 +94,7 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: null,
         scale: 2,
@@ -118,6 +115,8 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -155,10 +154,6 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
 
   const TrendIcon = stats.trend === 'up' ? TrendingUp : stats.trend === 'down' ? TrendingDown : Minus;
   const trendColor = stats.trend === 'up' ? 'text-orange-500' : stats.trend === 'down' ? 'text-green-500' : 'text-muted-foreground';
-
-  const isLoading = useSkeletonLoader(450);
-
-  if (isLoading) return <WeightChartSkeleton />;
 
   return (
     <Card ref={chartRef} className="border-0 shadow-soft-md">

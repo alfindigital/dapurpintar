@@ -9,10 +9,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { ChartSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;
@@ -77,6 +73,7 @@ export function WeeklyNutritionChart({
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: null,
         scale: 2,
@@ -97,6 +94,8 @@ export function WeeklyNutritionChart({
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
@@ -187,10 +186,6 @@ export function WeeklyNutritionChart({
 
   const activeConfig = chartConfig[activeMacro];
   const avgDaily = Math.round(totals[activeMacro] / 7);
-
-  const isLoading = useSkeletonLoader(500);
-
-  if (isLoading) return <ChartSkeleton showToggle chartHeight="h-[180px]" />;
 
   return (
     <Card ref={chartRef} className="border-0 shadow-soft-md">

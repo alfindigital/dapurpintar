@@ -1,8 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Flame, Droplets, TrendingUp, Target, Zap, Trophy } from "lucide-react";
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
-import { NutritionOverviewSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface NutritionOverviewProps {
   weeklyNutrition: Record<string, DailyNutrition>;
@@ -84,10 +82,6 @@ export function NutritionOverview({
       bgColor: "bg-amber-500/10"
     }
   ];
-
-  const isLoading = useSkeletonLoader(350);
-
-  if (isLoading) return <NutritionOverviewSkeleton />;
 
   return (
     <Card className="border-0 shadow-soft-md">

@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { useState, RefObject } from "react";
 import { Recipe } from "@/types/recipe";
-import html2canvas from "html2canvas";
+
 
 interface ShareRecipeDropdownProps {
   recipe: Recipe;
@@ -144,6 +144,7 @@ export function ShareRecipeDropdown({ recipe, className, cardRef }: ShareRecipeD
 
     try {
       setIsCapturing(true);
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: null,
         scale: 2,
