@@ -9,8 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HeatmapSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface CalorieHeatmapProps {
   nutritionData: Record<string, DailyNutrition>;

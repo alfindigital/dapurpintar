@@ -13,8 +13,6 @@ import { toast } from "sonner";
 import { WeeklyWaterChart } from "./WeeklyWaterChart";
 import { WaterAchievements } from "./WaterAchievements";
 import { WaterReminderSettings } from "./WaterReminderSettings";
-import { WaterTrackerSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 const CUSTOM_TARGET_KEY = 'water_custom_target';
 

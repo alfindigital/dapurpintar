@@ -9,10 +9,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { ChartSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface WeeklyNutritionChartProps {
   weeklyData: Record<string, DailyNutrition>;

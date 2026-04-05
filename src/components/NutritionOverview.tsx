@@ -83,10 +83,6 @@ export function NutritionOverview({
     }
   ];
 
-  const isLoading = useSkeletonLoader(350);
-
-  if (isLoading) return <NutritionOverviewSkeleton />;
-
   return (
     <Card className="border-0 shadow-soft-md">
       <CardContent className="pt-5 pb-4">

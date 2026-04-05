@@ -25,10 +25,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { WeightAchievements } from "./WeightAchievements";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { WeightChartSkeleton } from "./ChartSkeleton";
-import { useSkeletonLoader } from "@/hooks/useSkeletonLoader";
 
 interface WeightProgressChartProps {
   targetWeight?: number;
