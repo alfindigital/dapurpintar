@@ -80,6 +80,8 @@ export const BudgetReportExport = ({
     if (!reportRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,

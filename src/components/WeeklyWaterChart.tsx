@@ -90,6 +90,8 @@ export function WeeklyWaterChart({ weeklyData, stats, target }: WeeklyWaterChart
     if (!chartRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff",
         scale: 2,
