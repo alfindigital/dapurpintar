@@ -92,10 +92,6 @@ export function CalorieHeatmap({ nutritionData, targetKalori }: CalorieHeatmapPr
     };
   }, [nutritionData, targetKalori]);
 
-  const isLoading = useSkeletonLoader(400);
-
-  if (isLoading) return <HeatmapSkeleton />;
-
   return (
     <Card className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">

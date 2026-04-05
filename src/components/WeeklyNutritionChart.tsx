@@ -187,10 +187,6 @@ export function WeeklyNutritionChart({
   const activeConfig = chartConfig[activeMacro];
   const avgDaily = Math.round(totals[activeMacro] / 7);
 
-  const isLoading = useSkeletonLoader(500);
-
-  if (isLoading) return <ChartSkeleton showToggle chartHeight="h-[180px]" />;
-
   return (
     <Card ref={chartRef} className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">

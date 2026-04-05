@@ -76,10 +76,6 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
     toast.success("Tracker direset");
   };
 
-  const isLoading = useSkeletonLoader(400);
-
-  if (isLoading) return <WaterTrackerSkeleton />;
-
   return (
     <div className="space-y-4">
       <Card className="border-0 shadow-soft-md">

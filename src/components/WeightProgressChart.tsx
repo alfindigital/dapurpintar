@@ -155,10 +155,6 @@ export function WeightProgressChart({ targetWeight }: WeightProgressChartProps) 
   const TrendIcon = stats.trend === 'up' ? TrendingUp : stats.trend === 'down' ? TrendingDown : Minus;
   const trendColor = stats.trend === 'up' ? 'text-orange-500' : stats.trend === 'down' ? 'text-green-500' : 'text-muted-foreground';
 
-  const isLoading = useSkeletonLoader(450);
-
-  if (isLoading) return <WeightChartSkeleton />;
-
   return (
     <Card ref={chartRef} className="border-0 shadow-soft-md">
       <CardHeader className="pb-3">
