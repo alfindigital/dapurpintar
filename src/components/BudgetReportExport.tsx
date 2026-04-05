@@ -9,8 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BudgetEntry, BudgetSettings, KategoriBiaya, BUDGET_CATEGORIES } from "@/types/mealPlan";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 interface BudgetReportExportProps {

@@ -12,8 +12,6 @@ import {
   Calendar, BarChart3, PieChart, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { DailyNutrition } from '@/hooks/useDailyNutrition';
 import { WeightEntry } from '@/hooks/useWeightTracking';
 import { 

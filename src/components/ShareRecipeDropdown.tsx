@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { useState, RefObject } from "react";
 import { Recipe } from "@/types/recipe";
-import html2canvas from "html2canvas";
+
 
 interface ShareRecipeDropdownProps {
   recipe: Recipe;

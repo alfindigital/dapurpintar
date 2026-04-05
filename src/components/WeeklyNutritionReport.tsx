@@ -23,8 +23,6 @@ import {
 import { DailyNutrition } from "@/hooks/useDailyNutrition";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 interface WeeklyNutritionReportProps {
