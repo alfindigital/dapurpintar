@@ -47,7 +47,7 @@ export function RecipeResult({ recipe, isLoading }: RecipeResultProps) {
             <CardTitle className="text-xl">{recipe.nama}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{recipe.deskripsi}</p>
           </div>
-          <HelpTooltip content="Resep ini dibuat oleh AI berdasarkan bahan yang Anda masukkan. Sesuaikan dengan selera Anda." />
+          <HelpTooltip content="Resep AI dari bahan Anda. Sesuaikan sesuai selera." />
         </div>
         
         <div className="flex flex-wrap gap-2 mt-3">
@@ -70,7 +70,7 @@ export function RecipeResult({ recipe, isLoading }: RecipeResultProps) {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h3 className="font-medium">Bahan-bahan</h3>
-            <HelpTooltip content="Takaran bisa disesuaikan dengan kebutuhan dan selera Anda." />
+            <HelpTooltip content="Takaran bisa disesuaikan." />
           </div>
           <ul className="space-y-2">
             {recipe.bahan.map((item, index) => (
@@ -85,7 +85,7 @@ export function RecipeResult({ recipe, isLoading }: RecipeResultProps) {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <h3 className="font-medium">Langkah-langkah</h3>
-            <HelpTooltip content="Ikuti langkah secara berurutan untuk hasil terbaik." />
+            <HelpTooltip content="Ikuti langkah berurutan." />
           </div>
           <ol className="space-y-3">
             {recipe.langkah.map((step, index) => (

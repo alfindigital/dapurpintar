@@ -97,9 +97,7 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">Target Harian</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Atur target minum air harian Anda
-                    </p>
+                    <p className="text-xs text-muted-foreground">Atur target air harian</p>
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -135,7 +133,7 @@ export function WaterTracker({ beratBadan, levelAktivitas }: WaterTrackerProps) 
                   ) : (
                     <div className="p-3 bg-muted/50 rounded-lg">
                       <p className="text-xs text-muted-foreground">
-                        Target otomatis berdasarkan berat badan & aktivitas:
+                        Auto (berat & aktivitas):
                       </p>
                       <p className="text-lg font-semibold text-primary mt-1">
                         {autoTarget} gelas ({autoTarget * 250}ml)

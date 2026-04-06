@@ -62,7 +62,7 @@ export const BudgetOverviewCard = ({
             <div>
               <p className="text-sm font-medium">Budget Tracker</p>
               <p className="text-xs text-muted-foreground">
-                Atur budget bulanan untuk tracking pengeluaran
+                Atur budget bulanan Anda
               </p>
             </div>
           </div>
@@ -85,13 +85,13 @@ export const BudgetOverviewCard = ({
         {/* Top row: Two summary boxes */}
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xs text-muted-foreground mb-1">Total Pengeluaran</p>
+            <p className="text-xs text-muted-foreground mb-1">Pengeluaran</p>
             <p className={cn("text-lg font-bold whitespace-nowrap", getStatusColor())}>
               {formatRupiah(currentWeekBudget?.totalEstimasi || 0)}
             </p>
           </div>
           <div className="rounded-lg bg-muted/40 p-3">
-            <p className="text-xs text-muted-foreground mb-1">Budget Bulanan</p>
+            <p className="text-xs text-muted-foreground mb-1">Budget/bln</p>
             <p className="text-lg font-bold whitespace-nowrap">
               {settings.budgetBulanan ? formatRupiah(settings.budgetBulanan) : "-"}
             </p>
@@ -102,7 +102,7 @@ export const BudgetOverviewCard = ({
         {settings.budgetBulanan && (
           <div className="rounded-lg bg-muted/40 p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground">Penggunaan Budget</span>
+              <span className="text-xs text-muted-foreground">Terpakai</span>
               <span className={cn("text-sm font-semibold", getStatusColor())}>
                 {alertStatus.percentage}%
               </span>

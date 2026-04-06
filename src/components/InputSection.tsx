@@ -102,7 +102,7 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-medium">Masukkan Bahan</h2>
-            <HelpTooltip content="Foto, pilih galeri, atau ketik bahan. AI akan carikan resep." />
+            <HelpTooltip content="Foto/ketik bahan, AI carikan resep." />
           </div>
           {hasAnyInput && (
             <Button
@@ -236,8 +236,8 @@ export function InputSection({ onInputChange, isLoading }: InputSectionProps) {
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <Upload className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="font-medium mb-1">Drag & drop foto di sini</p>
-                  <p className="text-sm text-muted-foreground mb-4">atau klik tombol di bawah</p>
+                  <p className="font-medium mb-1">Drop foto di sini</p>
+                  <p className="text-sm text-muted-foreground mb-4">atau tap tombol di bawah</p>
                   <input
                     ref={fileInputRef}
                     type="file"

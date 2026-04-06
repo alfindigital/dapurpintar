@@ -200,7 +200,7 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
 
   const handleClear = () => {
     clearPlan();
-    toast.success("Meal plan dikosongkan (menu yang dikunci tetap ada)");
+    toast.success("Meal plan direset (yang dikunci tetap ada)");
   };
 
   // Get current and previous week budget
@@ -347,9 +347,9 @@ export const MealPlanView = ({ apiKey, onSettingsClick }: MealPlanViewProps) => 
       {!hasAnyRecipes && (
         <div className="p-4 rounded-lg bg-muted/50 text-center">
           <Sparkles className="h-8 w-8 mx-auto mb-2 text-primary/60" />
-          <p className="font-medium">Belum ada meal plan</p>
+          <p className="font-medium">Belum ada menu</p>
           <p className="text-sm text-muted-foreground mb-3">
-            Klik "Generate" untuk membuat menu otomatis, atau coba Demo
+            Tap "Generate" atau coba Demo
           </p>
           <Button variant="outline" size="sm" onClick={handleLoadDemo} className="gap-1.5">
             <Play className="h-4 w-4" />

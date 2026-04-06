@@ -58,19 +58,13 @@ export const BudgetAlertBanner = ({
           "font-medium text-sm",
           isOver ? "text-destructive" : "text-accent"
         )}>
-          {isOver ? "Budget Bulan Ini Terlampaui!" : "Mendekati Batas Budget"}
+          {isOver ? "Budget Terlampaui!" : "Hampir Batas Budget"}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {isOver ? (
-            <>
-              Pengeluaran melebihi Rp {formatRupiah(budgetBulanan)} 
-              sebesar Rp {formatRupiah(Math.abs(remaining))}
-            </>
+            <>Lebih Rp {formatRupiah(Math.abs(remaining))} dari budget</>
           ) : (
-            <>
-              {alertStatus.percentage}% budget terpakai. 
-              Sisa Rp {formatRupiah(remaining)} untuk bulan ini.
-            </>
+            <>{alertStatus.percentage}% terpakai · Sisa Rp {formatRupiah(remaining)}</>
           )}
         </p>
         <Button
