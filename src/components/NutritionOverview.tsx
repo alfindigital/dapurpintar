@@ -35,25 +35,25 @@ export function NutritionOverview({
   const stats = [
     {
       icon: Flame,
-      label: "Rata-rata Kalori",
+      label: "Avg Kalori",
       value: `${avgKalori.toLocaleString('id-ID')}`,
-      unit: "kcal/hari",
+      unit: "kcal/hr",
       color: "text-orange-500",
       bgColor: "bg-orange-500/10"
     },
     {
       icon: Zap,
-      label: "Rata-rata Protein",
+      label: "Avg Protein",
       value: `${avgProtein}`,
-      unit: "g/hari",
+      unit: "g/hr",
       color: "text-blue-500",
       bgColor: "bg-blue-500/10"
     },
     {
       icon: Target,
-      label: "Hari Sesuai Target",
+      label: "On Target",
       value: `${daysOnTarget}`,
-      unit: `dari ${nutritionDays.length} hari`,
+      unit: `/${nutritionDays.length} hari`,
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10"
     },
@@ -61,21 +61,21 @@ export function NutritionOverview({
       icon: Droplets,
       label: "Streak Air",
       value: `${waterStats.streak}`,
-      unit: "hari berturut",
+      unit: "hari",
       color: "text-cyan-500",
       bgColor: "bg-cyan-500/10"
     },
     {
       icon: TrendingUp,
-      label: "Rata-rata Air",
+      label: "Avg Air",
       value: `${waterStats.avgGlasses.toFixed(1)}`,
-      unit: `dari ${waterTarget} gelas`,
+      unit: `/${waterTarget} gelas`,
       color: "text-sky-500",
       bgColor: "bg-sky-500/10"
     },
     {
       icon: Trophy,
-      label: "Target Tercapai",
+      label: "Tercapai",
       value: `${waterStats.daysCompleted}`,
       unit: "hari",
       color: "text-amber-500",

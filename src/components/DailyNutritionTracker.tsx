@@ -76,8 +76,8 @@ export function DailyNutritionTracker({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-medium">Nutrisi Hari Ini</CardTitle>
-            <HelpTooltip content="Tracking nutrisi harian berdasarkan resep yang dikonsumsi" />
+            <CardTitle className="text-sm font-medium">Nutrisi Harian</CardTitle>
+            <HelpTooltip content="Tracking nutrisi harian Anda" />
           </div>
           <div className="flex items-center gap-2">
             <QuickAddFoodsDialog onAddFood={onAddEntry} />
@@ -175,9 +175,7 @@ export function DailyNutritionTracker({
         {entries.length === 0 && (
           <div className="text-center py-4 text-sm text-muted-foreground">
             <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            Belum ada makanan tercatat hari ini.
-            <br />
-            Gunakan "Quick Add" atau klik "Catat" pada resep.
+            Belum ada data. Tap "Quick Add" untuk mulai.
           </div>
         )}
       </CardContent>
