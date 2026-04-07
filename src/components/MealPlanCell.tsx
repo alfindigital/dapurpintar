@@ -163,7 +163,7 @@ export const MealPlanCell = memo(({
   return (
     <div 
       className={cn(
-        "relative rounded-lg border border-gray-200 dark:border-gray-700 bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
+        "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
         dragTransition,
         slot.isLocked && "ring-1 ring-border",
