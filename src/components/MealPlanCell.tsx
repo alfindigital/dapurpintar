@@ -162,6 +162,7 @@ export const MealPlanCell = memo(({
 
   return (
     <div 
+      style={{ borderColor: '#e5e7eb' }}
       className={cn(
         "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
