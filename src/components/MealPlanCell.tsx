@@ -54,7 +54,7 @@ export const MealPlanCell = memo(({
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 bg-muted/30 flex items-center justify-center",
+          "relative rounded-lg border-0 shadow-sm bg-muted/30 flex items-center justify-center",
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
@@ -95,7 +95,7 @@ export const MealPlanCell = memo(({
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 flex flex-col items-center justify-center gap-1 cursor-pointer group",
+          "relative rounded-lg border-0 shadow-sm bg-muted/20 hover:bg-muted/40 flex flex-col items-center justify-center gap-1 cursor-pointer group",
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
@@ -162,9 +162,8 @@ export const MealPlanCell = memo(({
 
   return (
     <div 
-      style={{ borderColor: '#e5e7eb' }}
       className={cn(
-        "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
+        "relative rounded-lg border-0 shadow-sm bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
         dragTransition,
         slot.isLocked && "ring-1 ring-border",
