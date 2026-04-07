@@ -166,11 +166,11 @@ export const MealPlanCell = memo(({
         "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
         dragTransition,
-        slot.isLocked && "ring-1 ring-muted-foreground/20",
+        slot.isLocked && "ring-1 ring-border",
         compact ? "h-14" : "h-24 md:h-28",
-        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-2 ring-primary z-50",
-        isDragOver && "ring-2 ring-primary bg-primary/10 scale-105 shadow-lg",
-        isCopySource && "ring-2 ring-primary/50 bg-primary/5"
+        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-1 ring-border z-50",
+        isDragOver && "ring-1 ring-border bg-muted/50 scale-105 shadow-lg",
+        isCopySource && "ring-1 ring-border bg-muted/30"
       )}
       draggable={canDrag}
       onDragStart={onDragStart}
