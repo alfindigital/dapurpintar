@@ -454,7 +454,7 @@ export const MealPlanGrid = ({
     return (
       <div 
         onClick={() => setSelectedSlotId(slot.id)}
-        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-primary ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""} ${isSwapped ? "animate-swap-bounce" : ""}`}
+        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-muted-foreground/30 ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-muted-foreground/40 ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""} ${isSwapped ? "animate-swap-bounce" : ""}`}
       >
         <MealPlanCell
           slot={slot}
@@ -700,14 +700,14 @@ export const MealPlanGrid = ({
       
       {/* Copy mode indicator */}
       {copySourceSlotId && (
-        <div className="mb-3 p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between animate-fade-in">
-          <span className="text-sm text-primary">
+        <div className="mb-3 p-2 rounded-lg bg-muted/50 border border-border flex items-center justify-between animate-fade-in">
+          <span className="text-sm text-muted-foreground">
             Mode copy aktif - klik slot tujuan untuk menempel resep
           </span>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-primary"
+            className="h-6 px-2 text-muted-foreground"
             onClick={() => {
               setCopySourceSlotId(null);
               toast.info("Mode copy dibatalkan");

@@ -54,12 +54,12 @@ export const MealPlanCell = memo(({
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-muted bg-muted/30 flex items-center justify-center",
+          "relative rounded-lg border-0 shadow-sm bg-muted/30 flex items-center justify-center",
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
-          isDragging && "opacity-40 scale-90 rotate-2 shadow-lg border-border",
-          isDragOver && "border-border bg-muted/50 scale-105 shadow-md"
+          isDragging && "opacity-40 scale-90 rotate-2 shadow-lg",
+          isDragOver && "bg-muted/50 scale-105 shadow-md"
         )}
         draggable={canDrag}
         onDragStart={onDragStart}
@@ -71,8 +71,8 @@ export const MealPlanCell = memo(({
       >
         {/* Drop indicator overlay */}
         {isDragOver && (
-          <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-lg animate-fade-in">
-            <ArrowLeftRight className="h-5 w-5 text-primary animate-pulse" />
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/30 rounded-lg animate-fade-in">
+            <ArrowLeftRight className="h-5 w-5 text-muted-foreground animate-pulse" />
           </div>
         )}
         <Button
@@ -95,12 +95,12 @@ export const MealPlanCell = memo(({
     return (
       <div 
         className={cn(
-          "relative rounded-lg border-2 border-dashed border-muted hover:border-primary/50 flex flex-col items-center justify-center gap-1 cursor-pointer group",
+          "relative rounded-lg border-0 shadow-sm bg-muted/20 hover:bg-muted/40 flex flex-col items-center justify-center gap-1 cursor-pointer group",
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
-          isDragOver && "border-border bg-muted/50 scale-105 shadow-md border-solid",
-          isCopySource && "border-border bg-muted/30"
+          isDragOver && "bg-muted/50 scale-105 shadow-md",
+          isCopySource && "bg-muted/30"
         )}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -110,8 +110,8 @@ export const MealPlanCell = memo(({
         {isDragOver && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg animate-fade-in">
             <div className="flex flex-col items-center gap-1">
-              <ArrowLeftRight className="h-6 w-6 text-primary animate-pulse" />
-              <span className="text-xs font-medium text-primary">Lepas di sini</span>
+              <ArrowLeftRight className="h-6 w-6 text-muted-foreground animate-pulse" />
+              <span className="text-xs font-medium text-muted-foreground">Lepas di sini</span>
             </div>
           </div>
         )}
@@ -122,7 +122,7 @@ export const MealPlanCell = memo(({
             <Button
               variant="ghost"
               size="sm"
-              className="text-primary text-xs gap-1"
+              className="text-muted-foreground text-xs gap-1"
               onClick={(e) => {
                 e.stopPropagation();
                 onPaste?.();
@@ -135,7 +135,7 @@ export const MealPlanCell = memo(({
         )}
         
         <Plus className={cn(
-          "h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200",
+          "h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors duration-200",
           (isDragOver || isCopySource) && "opacity-0"
         )} />
         <span className={cn(
@@ -163,14 +163,14 @@ export const MealPlanCell = memo(({
   return (
     <div 
       className={cn(
-        "relative rounded-lg border bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
+        "relative rounded-lg border-0 shadow-sm bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
         dragTransition,
-        slot.isLocked && "ring-1 ring-border",
+        slot.isLocked && "ring-1 ring-muted-foreground/20",
         compact ? "h-14" : "h-24 md:h-28",
-        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-1 ring-border z-50",
-        isDragOver && "ring-1 ring-border bg-muted/50 scale-105 shadow-lg",
-        isCopySource && "ring-1 ring-border bg-muted/30"
+        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl z-50",
+        isDragOver && "bg-muted/50 scale-105 shadow-lg",
+        isCopySource && "bg-muted/30"
       )}
       draggable={canDrag}
       onDragStart={onDragStart}
@@ -183,21 +183,21 @@ export const MealPlanCell = memo(({
     >
       {/* Drop indicator overlay */}
       {isDragOver && (
-        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 z-10 animate-fade-in">
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/30 z-10 animate-fade-in">
           <div className="flex flex-col items-center gap-1">
-            <ArrowLeftRight className="h-5 w-5 text-primary animate-pulse" />
-            <span className="text-xs font-medium text-primary">Tukar</span>
+            <ArrowLeftRight className="h-5 w-5 text-muted-foreground animate-pulse" />
+            <span className="text-xs font-medium text-muted-foreground">Tukar</span>
           </div>
         </div>
       )}
 
       {/* Paste indicator when copy mode active */}
       {isCopySource && !isDragOver && (
-        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 z-10 animate-fade-in">
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/30 z-10 animate-fade-in">
           <Button
             variant="ghost"
             size="sm"
-            className="text-primary text-xs gap-1"
+            className="text-muted-foreground text-xs gap-1"
             onClick={(e) => {
               e.stopPropagation();
               onPaste?.();
@@ -244,7 +244,7 @@ export const MealPlanCell = memo(({
             <span className={cn(
               "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium",
               slot.recipe.estimasiBiaya <= 25000 
-                ? "bg-primary/10 text-primary" 
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
                 : slot.recipe.estimasiBiaya <= 50000 
                   ? "bg-accent/10 text-accent" 
                   : "bg-destructive/10 text-destructive"
@@ -283,7 +283,7 @@ export const MealPlanCell = memo(({
           title={slot.isLocked ? "Buka kunci" : "Kunci resep"}
         >
           {slot.isLocked ? (
-            <Lock className="h-3 w-3 text-primary" />
+            <Lock className="h-3 w-3 text-muted-foreground" />
           ) : (
             <LockOpen className="h-3 w-3" />
           )}
@@ -308,7 +308,7 @@ export const MealPlanCell = memo(({
           "absolute bottom-1 left-1 transition-opacity duration-200",
           (isDragOver || isCopySource) && "opacity-30"
         )}>
-          <Lock className="h-3 w-3 text-primary" />
+          <Lock className="h-3 w-3 text-muted-foreground" />
         </div>
       )}
 
