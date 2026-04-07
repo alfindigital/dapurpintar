@@ -454,7 +454,7 @@ export const MealPlanGrid = ({
     return (
       <div 
         onClick={() => setSelectedSlotId(slot.id)}
-        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-muted-foreground/30 ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-accent ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""} ${isSwapped ? "animate-swap-bounce" : ""}`}
+        className={`transition-all duration-200 ${isSelected ? "ring-2 ring-muted-foreground/30 ring-offset-1 rounded-lg" : ""} ${isSearchMatch ? "ring-2 ring-muted-foreground/40 ring-offset-1 rounded-lg" : ""} ${isDimmed ? "opacity-30" : ""} ${isSwapped ? "animate-swap-bounce" : ""}`}
       >
         <MealPlanCell
           slot={slot}

@@ -58,8 +58,8 @@ export const MealPlanCell = memo(({
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
-          isDragging && "opacity-40 scale-90 rotate-2 shadow-lg border-border",
-          isDragOver && "border-border bg-muted/50 scale-105 shadow-md"
+          isDragging && "opacity-40 scale-90 rotate-2 shadow-lg",
+          isDragOver && "bg-muted/50 scale-105 shadow-md"
         )}
         draggable={canDrag}
         onDragStart={onDragStart}
@@ -99,8 +99,8 @@ export const MealPlanCell = memo(({
           baseTransition,
           dragTransition,
           compact ? "h-14" : "h-24 md:h-28",
-          isDragOver && "border-border bg-muted/50 scale-105 shadow-md border-solid",
-          isCopySource && "border-border bg-muted/30"
+          isDragOver && "bg-muted/50 scale-105 shadow-md",
+          isCopySource && "bg-muted/30"
         )}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -166,11 +166,11 @@ export const MealPlanCell = memo(({
         "relative rounded-lg border-0 shadow-sm bg-card hover:bg-accent/50 cursor-pointer group overflow-hidden",
         baseTransition,
         dragTransition,
-        slot.isLocked && "ring-1 ring-border",
+        slot.isLocked && "ring-1 ring-muted-foreground/20",
         compact ? "h-14" : "h-24 md:h-28",
-        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl ring-1 ring-border z-50",
-        isDragOver && "ring-1 ring-border bg-muted/50 scale-105 shadow-lg",
-        isCopySource && "ring-1 ring-border bg-muted/30"
+        isDragging && "opacity-40 scale-90 rotate-1 shadow-xl z-50",
+        isDragOver && "bg-muted/50 scale-105 shadow-lg",
+        isCopySource && "bg-muted/30"
       )}
       draggable={canDrag}
       onDragStart={onDragStart}
