@@ -1,6 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
-  "private": true,
+  "name": "dapurpintar",
+  "private": false,
+  "license": "MIT",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -87,3 +88,4 @@
     "vite": "^5.4.19"
   }
 }
+
